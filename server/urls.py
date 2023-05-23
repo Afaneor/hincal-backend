@@ -14,13 +14,19 @@ from django.contrib import admin
 from django.urls import include, path
 from health_check import urls as health_urls
 
-from server.apps.services.drf_nova_router.api_router import router
+from server.apps.hincal.api.routers import router as hincal_router
+from server.apps.services.custom_router.api_router import router
+from server.apps.user.api.routers import router as user_router
 from server.url_components import (
     admin_urlpatterns,
     docs_urlpatterns,
     jwt_urlpatterns,
     seo_urlpatterns,
 )
+
+# Регистрируем routers приложений.
+router.register('hincal', cicada_router, 'hincal')
+router.register('user', user_router, 'user')
 
 api_url = [
     path('api/', include((router.urls, 'api'))),

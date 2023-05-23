@@ -21,6 +21,9 @@ ENV \
   PIP_INDEX_URL=https://pypi.letsnova.ru/simple/ \
   # dockerize:
   USE_DOCKER=1 \
+  DOCKERIZE_VERSION=v0.6.1 \
+  # tini:
+  TINI_VERSION=v0.19.0 \
   # poetry:
   POETRY_VERSION=1.2.2 \
   POETRY_NO_INTERACTION=1 \

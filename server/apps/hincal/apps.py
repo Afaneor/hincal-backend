@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 class HincalConfig(AppConfig):
     """Конфиг приложения "Russian name project"."""
 
-    name = 'server.appshincal'
+    name = 'server.apps.hincal'
     verbose_name = _('Russian name project')
 
     def ready(self) -> None:

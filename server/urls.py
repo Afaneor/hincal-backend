@@ -11,10 +11,20 @@ files serving technique in development.
 
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.admindocs import urls as admindocs_urls
 from django.urls import include, path
-from django.views.generic import TemplateView
 from health_check import urls as health_urls
+
+from server.apps.services.drf_nova_router.api_router import router
+from server.url_components import (
+    admin_urlpatterns,
+    docs_urlpatterns,
+    jwt_urlpatterns,
+    seo_urlpatterns,
+)
+
+api_url = [
+    path('api/', include((router.urls, 'api'))),
+]
 
 admin.autodiscover()
 
@@ -22,13 +32,7 @@ urlpatterns = [
     # Health checks:
     path('health/', include(health_urls)),  # noqa: DJ05
     path('api-auth/', include('rest_framework.urls')),
-    re_path(
-        '^accounts/password/reset/key/(?P<uidb36>[0-9A-Za-z]+)-(?P<key>.+)/$',
-        CustomPasswordResetFromKeyView.as_view(),
-        name='account_reset_password_from_key',
-    ),
-    # include main:
-    path('', include(main_urls, namespace='main')),
+    path('', include(api_url)),
 
     *admin_urlpatterns,
     *docs_urlpatterns,

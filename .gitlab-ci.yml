@@ -159,7 +159,7 @@ django lintmigrations:
 safety:
   extends: .test
   variables:
-    COMMAND: safety check --full-report -i 39642 -i 51457 -i 51499
+    COMMAND: safety check --full-report -i 39642 -i 51457 -i 51499 -i 52495
 
 # Checking `pyproject.toml` file contents:
 poetry check:

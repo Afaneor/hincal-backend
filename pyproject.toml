@@ -23,7 +23,7 @@ redis = "^4.4"  # https://github.com/redis/redis-py
 django = "^4"  # https://www.djangoproject.com/
 # replaced by decouple due inactivity of authors
 # django-environ = "^0.4.5"  # https://github.com/joke2k/django-environ
-django-allauth = "^0.51"  # https://github.com/pennersr/django-allauth
+django-allauth = "^0.54"  # https://github.com/pennersr/django-allauth
 django-celery-beat = "^2.4"  # https://github.com/celery/django-celery-beat
 django-dbbackup = "^4.0.2"  # https://github.com/django-dbbackup/django-dbbackup/
 django-extensions = "^3.2.1"  # https://github.com/django-extensions/django-extensions
@@ -66,6 +66,8 @@ flake8-nova-formatter = "*"  # https://gitlab.letsnova.com/Nova/styleguide/flake
 pytest-factoryboy = "^2.5.1"  # https://pypi.org/project/pytest-factoryboy/
 drf-nova-router = "*"  # https://gitlab.letsnova.com/Nova/django/drf-nova-router
 djangorestframework-simplejwt = "^5.2.2"  # https://github.com/jazzband/djangorestframework-simplejwt
+reportlab = "3.6.12"  # https://pypi.org/project/reportlab/
+requests-cache = "0.9.8"  # https://pypi.org/project/requests-cache/
 
 [tool.poetry.dev-dependencies]
 django-coverage-plugin = "^3.0"  # https://github.com/nedbat/django_coverage_plugin

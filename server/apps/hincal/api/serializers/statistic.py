@@ -1,5 +1,3 @@
-from rest_framework import serializers
-
 from server.apps.hincal.models import Statistic
 from server.apps.services.serializers import ModelSerializerWithPermission
 from server.apps.user.api.serializers import BaseInfoUserSerializer

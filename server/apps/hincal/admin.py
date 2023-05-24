@@ -1,5 +1,34 @@
 from django.contrib import admin
-from server.apps.hincal.models import Business, Statistic, Indicator, Report
+from server.apps.hincal.models import (
+    Archive,
+    Business,
+    Statistic,
+    Indicator,
+    Report,
+)
+
+
+@admin.register(Archive)
+class ArchiveAdmin(admin.ModelAdmin[Archive]):
+    """Архив данных."""
+
+    list_display = (
+        'id',
+        'year',
+        'is_actual',
+    )
+    list_filter = (
+        'year',
+        'is_actual',
+    )
+    search_fields = (
+        'year',
+        'is_actual',
+    )
+    ordering = (
+        'year',
+        'is_actual',
+    )
 
 
 @admin.register(Business)

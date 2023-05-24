@@ -78,7 +78,7 @@ class TerritorialLocation(models.TextChoices):
     SAO = 'sao', _('САО')
     SWAO = 'swao', _('СВАО')
     SZAO = 'szao', _('СЗАО')
-    Tao = 'tao', _('ТАО')
+    TAO = 'tao', _('ТАО')
     CAO = 'cao', _('ЦАО')
     YUAO = 'yuao', _('ЮАО')
     YUWAO = 'yuwao', _('ЮВАО')

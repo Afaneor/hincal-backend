@@ -2,9 +2,12 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from server.apps.hincal.models import Report
-from server.apps.hincal.services.enums import BusinessSector, BusinessSubSector, \
-    TerritorialLocation
+from server.apps.hincal.models import Report, Equipment
+from server.apps.hincal.services.enums import (
+    BusinessSector,
+    BusinessSubSector,
+    TerritorialLocation,
+)
 from server.apps.services.serializers import ModelSerializerWithPermission
 
 
@@ -43,8 +46,9 @@ class CreateReportSerializer(serializers.Serializer):
     to_land_area = serializers.IntegerField()
     from_property_area = serializers.IntegerField()
     to_property_area = serializers.IntegerField()
-    equipment = serializers.ListField(
-        child=serializers.CharField(),
+    equipment = serializers.PrimaryKeyRelatedField(
+        queryset=Equipment.objects.all(),
+        many=True,
     )
     is_accounting = serializers.BooleanField()
     is_patent = serializers.BooleanField()

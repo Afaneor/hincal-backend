@@ -78,7 +78,7 @@ class Indicator(AbstractBaseModel):
         verbose_name_plural = _('Индикаторы бизнесов')
         constraints = [
             models.UniqueConstraint(
-                name='unique_yer_for_business',
+                name='unique_year_for_business',
                 fields=('year', 'business'),
             ),
         ]

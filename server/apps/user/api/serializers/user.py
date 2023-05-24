@@ -35,6 +35,7 @@ class BaseInfoUserWithProfileSerializer(serializers.ModelSerializer):
             'username',
             'first_name',
             'last_name',
+            'middle_name',
             'avatar',
         )
 
@@ -56,6 +57,7 @@ class BaseInfoUserSerializer(serializers.ModelSerializer):
             'username',
             'first_name',
             'last_name',
+            'middle_name',
         )
 
 
@@ -70,6 +72,7 @@ class UserSerializer(ModelSerializerWithPermission):
             'email',
             'first_name',
             'last_name',
+            'middle_name',
             'is_active',
             'permission_rules',
         )

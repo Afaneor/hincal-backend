@@ -2,12 +2,12 @@ from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 
 
-class HincalConfig(AppConfig):
-    """Конфиг приложения "Russian name project"."""
+class BlogConfig(AppConfig):
+    """Конфигурация приложения."""
 
-    name = 'server.apps.hincal'
-    label = 'hincal'
-    verbose_name = _('Инвестиционный калькулятор')
+    name = 'server.apps.blog'
+    label = 'blog'
+    verbose_name = _('Блог')
 
     def ready(self) -> None:
         """Подключение прав происходит при подключении app."""

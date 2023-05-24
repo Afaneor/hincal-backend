@@ -1221,6 +1221,22 @@ url = "https://pypi.letsnova.ru/simple"
 reference = "nova"
 
 [[package]]
+name = "django-taggit"
+version = "4.0.0"
+description = "django-taggit is a reusable Django application for simple tagging."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+Django = ">=3.2"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.letsnova.ru/simple"
+reference = "nova"
+
+[[package]]
 name = "django-test-migrations"
 version = "1.3.0"
 description = "Test django schema and data migrations, including ordering"
@@ -1936,6 +1952,23 @@ python-versions = "*"
 [package.dependencies]
 orderedmultidict = ">=1.0.1"
 six = ">=1.8.0"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.letsnova.ru/simple"
+reference = "nova"
+
+[[package]]
+name = "gdrfile"
+version = "0.0.1"
+description = "Generate file for django rest framework."
+category = "main"
+optional = false
+python-versions = ">=3.7,<4"
+
+[package.dependencies]
+poetry-core = ">=1.0.8,<2.0.0"
+python-dotenv = ">=0.20.0,<0.21.0"
 
 [package.source]
 type = "legacy"
@@ -2774,6 +2807,19 @@ url = "https://pypi.letsnova.ru/simple"
 reference = "nova"
 
 [[package]]
+name = "poetry-core"
+version = "1.6.0"
+description = "Poetry PEP 517 Build Backend"
+category = "main"
+optional = false
+python-versions = ">=3.7,<4.0"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.letsnova.ru/simple"
+reference = "nova"
+
+[[package]]
 name = "polib"
 version = "1.2.0"
 description = "A library to manipulate gettext files (po and mo files)."
@@ -3169,6 +3215,22 @@ description = "Strict separation of settings from code."
 category = "main"
 optional = false
 python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.letsnova.ru/simple"
+reference = "nova"
+
+[[package]]
+name = "python-dotenv"
+version = "0.20.0"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.extras]
+cli = ["click (>=5.0)"]
 
 [package.source]
 type = "legacy"
@@ -4259,7 +4321,7 @@ sendgrid = ["django-anymail"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<4"
-content-hash = "b9671833acf908d8c7d8de534ab897f40610201264411b6857c726341039f925"
+content-hash = "962c0fc6370ae98bee96af5240b1513a5b4534943f533a1d824e8f57dc2b56e6"
 
 [metadata.files]
 alabaster = [
@@ -4748,6 +4810,7 @@ django-stubs-ext = [
     {file = "django-stubs-ext-4.2.0.tar.gz", hash = "sha256:7789f0caeca7152fef07ad6b94dec7310a05d0b8dab77f7979e19db0037b5127"},
     {file = "django_stubs_ext-4.2.0-py3-none-any.whl", hash = "sha256:55b2e3077f883e0131a7596f8ff8b19f8fc3ca325a3318ccacf5331acb2601e4"},
 ]
+django-taggit = []
 django-test-migrations = [
     {file = "django_test_migrations-1.3.0-py3-none-any.whl", hash = "sha256:b52b29475f9a1bcaa4512f2ec8fad08b5f470cf1cf522e86b7d950252fb6fbf1"},
     {file = "django_test_migrations-1.3.0.tar.gz", hash = "sha256:b42edb1af481e08c9d91c95aa9b373e76e905a931bc19c086ec00a6cb936876e"},
@@ -4906,6 +4969,10 @@ flatten-dict = [
 furl = [
     {file = "furl-2.1.3-py2.py3-none-any.whl", hash = "sha256:9ab425062c4217f9802508e45feb4a83e54324273ac4b202f1850363309666c0"},
     {file = "furl-2.1.3.tar.gz", hash = "sha256:5a6188fe2666c484a12159c18be97a1977a71d632ef5bb867ef15f54af39cc4e"},
+]
+gdrfile = [
+    {file = "gdrfile-0.0.1-py3-none-any.whl", hash = "sha256:765d853e985b08432161a336b92bdc44f9d5466f106afc5489d9f058d7eba593"},
+    {file = "gdrfile-0.0.1.tar.gz", hash = "sha256:e05e6dd9682d73e826a0533e44edc64f5b9d5ccf59ba8f9af00c3c30ba5916f2"},
 ]
 gitdb = [
     {file = "gitdb-4.0.10-py3-none-any.whl", hash = "sha256:c286cf298426064079ed96a9e4a9d39e7f3e9bf15ba60701e95f5492f28415c7"},
@@ -5268,6 +5335,7 @@ ply = [
     {file = "ply-3.11-py2.py3-none-any.whl", hash = "sha256:096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce"},
     {file = "ply-3.11.tar.gz", hash = "sha256:00c7c1aaa88358b9c765b6d3000c6eec0ba42abca5351b095321aef446081da3"},
 ]
+poetry-core = []
 polib = [
     {file = "polib-1.2.0-py2.py3-none-any.whl", hash = "sha256:1c77ee1b81feb31df9bca258cbc58db1bbb32d10214b173882452c73af06d62d"},
     {file = "polib-1.2.0.tar.gz", hash = "sha256:f3ef94aefed6e183e342a8a269ae1fc4742ba193186ad76f175938621dbfc26b"},
@@ -5420,6 +5488,10 @@ python-dateutil = [
 python-decouple = [
     {file = "python-decouple-3.8.tar.gz", hash = "sha256:ba6e2657d4f376ecc46f77a3a615e058d93ba5e465c01bbe57289bfb7cce680f"},
     {file = "python_decouple-3.8-py3-none-any.whl", hash = "sha256:d0d45340815b25f4de59c974b855bb38d03151d81b037d9e3f463b0c9f8cbd66"},
+]
+python-dotenv = [
+    {file = "python-dotenv-0.20.0.tar.gz", hash = "sha256:b7e3b04a59693c42c36f9ab1cc2acc46fa5df8c78e178fc33a8d4cd05c8d498f"},
+    {file = "python_dotenv-0.20.0-py3-none-any.whl", hash = "sha256:d92a187be61fe482e4fd675b6d52200e7be63a12b724abbf931a40ce4fa92938"},
 ]
 python-slugify = [
     {file = "python-slugify-7.0.0.tar.gz", hash = "sha256:7a0f21a39fa6c1c4bf2e5984c9b9ae944483fd10b54804cb0e23a3ccd4954f0b"},

@@ -33,6 +33,7 @@ class UserFilter(django_filters.FilterSet):
             'username',
             'first_name',
             'last_name',
+            'middle_name',
             'email',
             'is_active',
         )

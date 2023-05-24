@@ -1,76 +1,87 @@
-from tortoise import models, fields
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+from server.apps.services.base_model import AbstractBaseModel
 
 
-class Indicator(models.Model):
-    """Экономические показатели ИП или компании."""
+class Indicator(AbstractBaseModel):
+    """Экономические показатели ИП, физического лица или компании."""
 
-    id = fields.IntField(pk=True)
-    business = fields.ForeignKeyField(
-        'models.Business',
-        null=True,
+    business = models.ForeignKey(
+        'hincal.Business',
+        on_delete=models.CASCADE,
+        verbose_name=_('Бизнес'),
         related_name='indicators',
+        db_index=True,
+        null=True,
     )
-    year = fields.IntField(
-        description='Год, к которому относятся показатели',
+    year = models.IntegerField(
+        _('Год, к которому относятся показатели'),
     )
-    average_number_of_employees = fields.DecimalField(
+    average_number_of_employees = models.DecimalField(
+        _('Среднесписочная численность персонала'),
         max_digits=20,
         decimal_places=3,
         null=True,
-        description='Среднесписочная численность персонала',
     )
-    average_salary_of_employees = fields.DecimalField(
+    average_salary_of_employees = models.DecimalField(
+        _('Средняя заработная плата сотрудника'),
         max_digits=20,
         decimal_places=3,
         null=True,
-        description='Средняя заработная плата сотрудника',
     )
-    taxes_to_the_budget = fields.DecimalField(
+    taxes_to_the_budget = models.DecimalField(
+        _('Налоги, уплаченные в бюджет Москвы'),
         max_digits=20,
         decimal_places=3,
         null=True,
-        description='Налоги, уплаченные в бюджет Москвы',
     )
-    income_tax = fields.DecimalField(
+    income_tax = models.DecimalField(
+        _('Налог на прибыль'),
         max_digits=20,
         decimal_places=3,
         null=True,
-        description='Налог на прибыль',
     )
-    property_tax = fields.DecimalField(
+    property_tax = models.DecimalField(
+        _('Налог на имущество'),
         max_digits=20,
         decimal_places=3,
         null=True,
-        description='Налог на имущество',
     )
-    land_tax = fields.DecimalField(
+    land_tax = models.DecimalField(
+        _('Налог на землю'),
         max_digits=20,
         decimal_places=3,
         null=True,
-        description='Налог на землю',
     )
-    personal_income_tax = fields.DecimalField(
+    personal_income_tax = models.DecimalField(
+        _('НДФЛ'),
         max_digits=20,
         decimal_places=3,
         null=True,
-        description='НДФЛ',
     )
-    transport_tax = fields.DecimalField(
+    transport_tax = models.DecimalField(
+        _('Транспортный налог'),
         max_digits=20,
         decimal_places=3,
         null=True,
-        description='Транспортный налог',
     )
-    other_taxes = fields.DecimalField(
+    other_taxes = models.DecimalField(
+        _('Прочие налоги'),
         max_digits=20,
         decimal_places=3,
         null=True,
-        description='Прочие налоги',
     )
-    created = fields.DatetimeField(
-        auto_now_add=True,
-        description='Дата создания бизнеса в БД',
-    )
+    
+    class Meta(AbstractBaseModel.Meta):
+        verbose_name = _('Индикатор бизнеса')
+        verbose_name_plural = _('Индикаторы бизнесов')
+        constraints = [
+            models.UniqueConstraint(
+                name='unique_yer_for_business',
+                fields=('year', 'business'),
+            ),
+        ]
 
     def __str__(self):
         return f'{self.business}. Год - {self.year}'

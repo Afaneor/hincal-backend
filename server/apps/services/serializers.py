@@ -1,11 +1,8 @@
 from typing import Dict
 
-from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 
-from server.apps.cicada.models import Company
 
 
 class ModelSerializerWithPermission(serializers.ModelSerializer):
@@ -40,23 +37,3 @@ class ModelSerializerWithPermission(serializers.ModelSerializer):
             }
 
         return None
-
-
-class ValidateCompanyMixin:  # noqa: WPS306
-    """Миксин для проверки компании.
-
-    Проверяется, что пользователь сделавший запрос, принадлежит выбранной
-    компании.
-    """
-
-    def validate_company(self, company: Company) -> Company:
-        """Проверка того, что пользователь принадлежит компании."""
-        user = self.context.get('request').user  # type: ignore
-        if company in user.companies.all():
-            return company
-        raise ValidationError(
-            [_(
-                'Вы можете создать сущность, только в рамках ' +
-                'компаний, за которыми закреплены',
-            )],
-        )

@@ -1,170 +1,182 @@
-from enum import Enum
+from django.conf import settings
+from django.db import models
+from django.utils.translation import gettext_lazy as _
 
-from tortoise import models, fields
-
-from app import config
-
-
-class TypeBusiness(str, Enum):
-    """Тип бизнеса: ИП или компания."""
-
-    LEGAL = 'legal'
-    INDIVIDUAL = 'individual'
-    PHYSICAL = 'physical'
+from server.apps.hincal.services.enums import (
+    BusinessSector,
+    BusinessSubSector,
+    TerritorialLocation,
+    TypeBusiness,
+)
+from server.apps.services.base_model import AbstractBaseModel
 
 
-class SectorBusiness(str, Enum):
-    """Отрасль хозяйственной деятельности"""
-
-    LEGAL = 'legal'
-    INDIVIDUAL = 'individual'
-
-
-class Business(models.Model):
+class Business(AbstractBaseModel):
     """Бизнес.
 
     Компании и ИП получаются из DaData.
     Физическое лицо заполняет данные руками.
     """
-
-    id = fields.IntField(pk=True)
-    account = fields.ForeignKeyField(
-        'models.User',
-        null=True,
+    
+    user = models.ForeignKey(
+        'user.User',
+        on_delete=models.CASCADE,
+        verbose_name=_('Пользователь'),
         related_name='businesses',
-    )
-    sector = fields.CharEnumField(
-        enum_type=SectorBusiness,
+        db_index=True,
         null=True,
-        description='Отрасль хозяйственной деятельности',
     )
-    sub_sector = fields.CharEnumField(
-        enum_type=SectorBusiness,
-        null=True,
-        description='Подотрасль хозяйственной деятельности',
-    )
-    inn = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=False,
-        description='ИНН физического лица, ИП или компания',
-    )
-    position = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Должность пользователя в бизнесе',
-    )
-    type = fields.CharEnumField(
-        enum_type=TypeBusiness,
-        null=True,
-        description='Тип бизнеса: физическое лицо, ИП или компания.',
-    )
-    hid = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Уникальный id контрагента в dadata',
-    )
+    position = models.CharField(
+        _('Должность пользователя в бизнесе'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
 
+    )
+    type = models.CharField(
+        _('Тип бизнеса'),
+        max_length=settings.MAX_STRING_LENGTH,
+        choices=TypeBusiness.choices,
+    )
+    inn = models.CharField(
+        _('ИНН физического лица, ИП или компания'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=False,
+    )
+    sector = models.CharField(
+        _('Отрасль хозяйственной деятельности'),
+        max_length=settings.MAX_STRING_LENGTH,
+        choices=BusinessSector.choices,
+    )
+    sub_sector = models.CharField(
+        _('Подотрасль хозяйственной деятельности'),
+        max_length=settings.MAX_STRING_LENGTH,
+        choices=BusinessSubSector.choices,
+    )
+    territorial_location = models.CharField(
+        _('Территориальное положение бизнеса'),
+        max_length=settings.MAX_STRING_LENGTH,
+        choices=TerritorialLocation.choices,
+    )
     # Основная информация по бизнесу.
-    short_business_name = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Короткое название ИП или компании',
-    )
-    full_business_name = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Полное название ИП или компании',
-    )
-    management_name = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='ФИО руководителя, только для компании',
-    )
-    management_position = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Должность руководителя, только для компании',
-    )
-    full_opf = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Полное наименование правовой формы',
-    )
-    short_opf = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Короткое наименование правовой формы',
-    )
-    okved = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='ОКВЕД',
-    )
+    hid = models.CharField(
+        _('Уникальный id контрагента в dadata'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
 
+    )
+    short_business_name = models.CharField(
+        _('Короткое название ИП или компании'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
+    )
+    full_business_name = models.CharField(
+        _('Полное название ИП или компании'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
+    )
+    management_name = models.CharField(
+        _('ФИО руководителя, только для компании'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
+    )
+    management_position = models.CharField(
+        _('Должность руководителя, только для компании'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
+    )
+    full_opf = models.CharField(
+        _('Полное наименование правовой формы'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
+    )
+    short_opf = models.CharField(
+        _('Короткое наименование правовой формы'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
+    )
+    okved = models.CharField(
+        _('ОКВЕД'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
+    )
     # Если ИП, то будет ФИО
-    first_name = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Имя',
+    first_name = models.CharField(
+        _('Имя'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
     )
-    last_name = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Фамилия',
+    last_name = models.CharField(
+        _('Фамилия'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
     )
-    middle_name = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Отчество',
+    middle_name = models.CharField(
+        _('Отчество'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
     )
-
     # Данные по адресу.
-    address = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Полный адрес',
+    address = models.CharField(
+        _('Полный адрес'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
     )
-    country = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Страна',
+    country = models.CharField(
+        _('Страна'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
     )
-    region = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Город',
+    region = models.CharField(
+        _('Город'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
     )
-    city_area = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Область, округ',
+    city_area = models.CharField(
+        _('Область, округ'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
     )
-    city_district = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Район',
+    city_district = models.CharField(
+        _('Район'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
+    )
+    # Контактная информация.
+    phone = models.CharField(
+        _('Телефон, относящийся к бизнесу'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
+    )
+    email = models.CharField(
+        _('Email, относящийся к бизнесу'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
+    )
+    site = models.CharField(
+        _('Сайт, относящийся к бизнесу'),
+        max_length=settings.MAX_STRING_LENGTH,
+        blank=True,
     )
 
-    # Контактная информация.
-    phone = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Телефон, относящийся к бизнесу',
-    )
-    email = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Email, относящийся к бизнесу',
-    )
-    site = fields.CharField(
-        max_length=config.MAX_STRING_LENGTH,
-        null=True,
-        description='Сайт, относящийся к бизнесу',
-    )
-    created = fields.DatetimeField(
-        auto_now_add=True,
-        description='Дата создания бизнеса в БД',
-    )
+    class Meta(AbstractBaseModel.Meta):
+        verbose_name = _('Бизнес')
+        verbose_name_plural = _('Бизнесы')
+        constraints = [
+            models.CheckConstraint(
+                name='sector_valid',
+                check=models.Q(sector__in=BusinessSector.values),
+            ),
+            models.CheckConstraint(
+                name='sub_sector_valid',
+                check=models.Q(sub_sector__in=BusinessSubSector.values),
+            ),
+            models.CheckConstraint(
+                name='territorial_location_valid',
+                check=models.Q(
+                    territorial_location__in=TerritorialLocation.values,
+                ),
+            ),
+        ]
 
     def __str__(self):
-        return f'{self.type}. ИНН - {self.inn}'
+        return f'{self.type} - {self.user}. ИНН - {self.inn}'

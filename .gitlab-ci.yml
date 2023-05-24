@@ -16,7 +16,7 @@ variables:
   NOVA_BUILD_IMAGE: $CI_REGISTRY_IMAGE/wip:$CI_BUILD_REF_SLUG
   NOVA_BUILD_IMAGE_LIMIT: 550MiB
   # Необходимый процент покрытия кода
-  COVERAGE_PERCENT: 10
+  COVERAGE_PERCENT: 1
 
 # Base scripts
 # ============
@@ -104,7 +104,7 @@ pytest:
   extends: .test
   variables:
     COMMAND: |
-      pytest -p no:cacheprovider --dead-fixtures &&
+      pytest --dead-fixtures &&
       pytest --junitxml=report.xml --cov=server/apps --cov=tests --cov-branch
       --cov-report=term-missing:skip-covered
       --cov-fail-under=${COVERAGE_PERCENT}

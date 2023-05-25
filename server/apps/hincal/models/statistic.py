@@ -22,16 +22,12 @@ class Statistic(AbstractBaseModel):
         max_length=settings.MAX_STRING_LENGTH,
         blank=True,
     )
-    average_investment_amount = models.DecimalField(
+    average_investment_amount = models.FloatField(
         _('Средняя сумма инвестирования'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
-    total_investment_amount = models.DecimalField(
+    total_investment_amount = models.FloatField(
         _('Общая сумма инвестирования'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
     amount_of_use_of_the_calculator = models.PositiveIntegerField(

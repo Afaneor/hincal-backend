@@ -76,7 +76,6 @@ class User(  # type: ignore
     class Meta(object):
         verbose_name = _('Пользователь')
         verbose_name_plural = _('Пользователи')
-        ordering = ['-id']
 
     def __str__(self):
         return self.email

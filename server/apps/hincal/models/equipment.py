@@ -11,10 +11,8 @@ class Equipment(AbstractBaseModel):
         _('Название оборудования'),
         unique=True,
     )
-    cost = models.DecimalField(
+    cost = models.FloatField(
         _('Стоимость оборудования'),
-        max_digits=10,
-        decimal_places=3,
     )
 
     class Meta(AbstractBaseModel.Meta):

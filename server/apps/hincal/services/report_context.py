@@ -1,8 +1,7 @@
 import datetime
 from dataclasses import dataclass, field
-from decimal import Decimal
 
-from server.apps.hincal.models import Business, Archive
+from server.apps.hincal.models import Archive
 
 
 @dataclass()
@@ -26,52 +25,52 @@ class ReportContextDataClass:
     chat_gpt_page_8: str = ''
 
     # Итоговые возможные расходы по всему.
-    all_possible_costs: Decimal = field(init=False)
+    all_possible_costs: float = field(init=False)
     # Общие расходны на сотрудников.
-    all_staff_costs: Decimal = field(init=False)
+    all_staff_costs: float = field(init=False)
     # Общие расходны на аренду земли и объектов недвижимости.
-    all_lp_lease_costs: Decimal = field(init=False)
+    all_lp_lease_costs: float = field(init=False)
     # Общие расходны на покупку земли и объектов недвижимости.
-    all_lp_purchase_costs: Decimal = field(init=False)
+    all_lp_purchase_costs: float = field(init=False)
     # Общие расходны на налоги по земле и объектам недвижимости.
-    all_lp_tax_costs: Decimal = field(init=False)
+    all_lp_tax_costs: float = field(init=False)
     # Общие налоги на сотрудников, землю и объекты недвижимости.
-    all_tax_costs: Decimal = field(init=False)
+    all_tax_costs: float = field(init=False)
     # Общие расходы на услуги.
-    all_services_costs: Decimal = field(init=False)
+    all_services_costs: float = field(init=False)
 
     # Средние показатели расходов.
     # Расходы по персоналу.
-    avg_number_of_staff: Decimal = Decimal(0)
-    avg_salary_of_staff: Decimal = Decimal(0)
-    avg_taxes_to_the_budget: Decimal = Decimal(0)
-    avg_income_tax: Decimal = Decimal(0)
-    avg_property_tax: Decimal = Decimal(0)
-    avg_land_tax: Decimal = Decimal(0)
-    avg_personal_income_tax: Decimal = Decimal(0)
-    avg_transport_tax: Decimal = Decimal(0)
-    avg_other_taxes: Decimal = Decimal(0)
+    avg_number_of_staff: float = 0
+    avg_salary_of_staff: float = 0
+    avg_taxes_to_the_budget: float = 0
+    avg_income_tax: float = 0
+    avg_property_tax: float = 0
+    avg_land_tax: float = 0
+    avg_personal_income_tax: float = 0
+    avg_transport_tax: float = 0
+    avg_other_taxes: float = 0
 
     # Расходы на оборудование.
-    equipment_costs: Decimal = Decimal(0)
+    equipment_costs: float = 0
     # Расходы на бухгалтерские услуги.
-    accounting_costs: Decimal = Decimal(0)
+    accounting_costs: float = 0
     # Расходы на регистрацию.
-    registration_costs: Decimal = Decimal(0)
+    registration_costs: float = 0
 
     # Расходы на з.п./налоги/взносы персонала.'
-    avg_staff_tax_costs: Decimal = field(init=False)
-    avg_staff_pension_contributions_costs: Decimal = field(init=False)
-    avg_staff_medical_contributions_costs: Decimal = field(init=False)
+    avg_staff_tax_costs: float = field(init=False)
+    avg_staff_pension_contributions_costs: float = field(init=False)
+    avg_staff_medical_contributions_costs: float = field(init=False)
 
     # Расходы аренды/покупки земли.
-    avg_land_lease_costs: Decimal = field(init=False)
-    avg_land_purchase_costs: Decimal = field(init=False)
+    avg_land_lease_costs: float = field(init=False)
+    avg_land_purchase_costs: float = field(init=False)
 
     # Расходы аренды/покупки/ремонта на объекты недвижимости.
-    building_lease_costs: Decimal = field(init=False)
-    building_purchase_costs: Decimal = field(init=False)
-    building_repair_costs: Decimal = field(init=False)
+    building_lease_costs: float = field(init=False)
+    building_purchase_costs: float = field(init=False)
+    building_repair_costs: float = field(init=False)
 
     archive: Archive = None
 

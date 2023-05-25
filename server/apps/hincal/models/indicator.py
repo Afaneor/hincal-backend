@@ -18,58 +18,40 @@ class Indicator(AbstractBaseModel):
     year = models.IntegerField(
         _('Год, к которому относятся показатели'),
     )
-    average_number_of_staff = models.DecimalField(
+    average_number_of_staff = models.FloatField(
         _('Среднесписочная численность сотрудников'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
-    average_salary_of_staff = models.DecimalField(
+    average_salary_of_staff = models.FloatField(
         _('Средняя заработная плата сотрудника'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
-    taxes_to_the_budget = models.DecimalField(
+    taxes_to_the_budget = models.FloatField(
         _('Налоги, уплаченные в бюджет Москвы'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
-    income_tax = models.DecimalField(
+    income_tax = models.FloatField(
         _('Налог на прибыль'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
-    property_tax = models.DecimalField(
+    property_tax = models.FloatField(
         _('Налог на имущество'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
-    land_tax = models.DecimalField(
+    land_tax = models.FloatField(
         _('Налог на землю'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
-    personal_income_tax = models.DecimalField(
+    personal_income_tax = models.FloatField(
         _('НДФЛ'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
-    transport_tax = models.DecimalField(
+    transport_tax = models.FloatField(
         _('Транспортный налог'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
-    other_taxes = models.DecimalField(
+    other_taxes = models.FloatField(
         _('Прочие налоги'),
-        max_digits=20,
-        decimal_places=3,
         null=True,
     )
     

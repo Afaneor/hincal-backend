@@ -26,6 +26,8 @@ SITE_ID = 1
 INSTALLED_APPS: Tuple[str, ...] = (
     # Your apps go here:
     'server.apps.hincal',
+    'server.apps.blog',
+    'server.apps.user',
 
     # Default django apps:
     'django.contrib.auth',
@@ -42,6 +44,10 @@ INSTALLED_APPS: Tuple[str, ...] = (
     # django rest framework
     'rest_framework',
     'django_filters',
+    'allauth',
+    'allauth.account',
+    'rules',
+    'taggit',
 
     # Health checks:
     # You may want to enable other checks as well,
@@ -202,6 +208,8 @@ EMAIL_TIMEOUT = 5
 # Детекция запущено ли сейчас тестирование
 TESTING = 'test' in sys.argv
 TESTING = TESTING or 'test_coverage' in sys.argv or 'pytest' in sys.modules
+
+AUTH_USER_MODEL = 'user.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',

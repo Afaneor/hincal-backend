@@ -7,16 +7,12 @@ from server.apps.user.api.serializers.password import (
 
 from server.apps.user.api.serializers.user import (  # noqa: WPS235
     BaseInfoUserSerializer,
-    BaseInfoUserWithProfileSerializer,
-    CreateUserSerializer,
     UserSerializer,
 )
 
 __all__ = [
     'LoginSerializer',
     'BaseInfoUserSerializer',
-    'BaseInfoUserWithProfileSerializer',
-    'CreateUserSerializer',
     'ChangePasswordSerializer',
     'ResetPasswordRequestSerializer',
     'ResetPasswordConfirmSerializer',

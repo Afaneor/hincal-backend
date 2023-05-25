@@ -52,7 +52,7 @@ class BusinessAdmin(admin.ModelAdmin[Business]):
         'id',
         'type',
         'sector',
-        'sub_ector',
+        'sub_sector',
     )
     search_fields = (
         'user__email',
@@ -75,9 +75,9 @@ class BusinessAdmin(admin.ModelAdmin[Business]):
     )
     ordering = (
         'id',
-        'name',
-        'company',
-        'current_stage',
+        'type',
+        'sector',
+        'sub_sector',
     )
 
 

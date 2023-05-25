@@ -1,4 +1,3 @@
-from decimal import Decimal
 from typing import Optional
 
 from django.contrib.auth.models import AnonymousUser
@@ -13,8 +12,9 @@ from server.apps.hincal.services.enums import (
     BusinessSubSector,
     TerritorialLocation,
 )
-from server.apps.hincal.services.report_context import ReportContextDataClass, \
-    BusinessContextForReport
+from server.apps.hincal.services.report_context import (
+    ReportContextDataClass,
+)
 from server.apps.user.models import User
 
 
@@ -208,16 +208,16 @@ class ReportContext(object):
             return self.get_value_by_need_patent(
                 property_name='possible_income_from_patent',
             ) * self.archive.patent_tax_rate
-        return Decimal(0)
+        return 0
 
     def get_registration_costs(self):
         """Получить расходны на регистрации."""
         if self.data.get('need_registration'):
             return self.archive.registration_costs.get(
                 self.data.get('type_business', 'other'),
-                Decimal(0),
+                0,
             )
-        return Decimal(0)
+        return 0
 
     def get_accounting_costs(self):
         """Получить расходны на ведение бухгалтерского учета."""
@@ -229,7 +229,7 @@ class ReportContext(object):
             return accounting_costs.get(
                 self.data.get('type_tx_system', 'other'),
             )
-        return Decimal(0)
+        return 0
 
     def get_equipment_costs(self):
         """Получение стоимости оборудования."""
@@ -238,8 +238,8 @@ class ReportContext(object):
         ).aggregate(
             equipment_costs=models.Sum('cost')
         ).get('equipment_costs'):
-            return Decimal(equipment)
-        return Decimal(0)
+            return equipment
+        return 0
 
     def formation_context(self):
         """Формирование контекста."""
@@ -249,16 +249,16 @@ class ReportContext(object):
             business=BusinessForReportSerializer(business).data,
             initial_data=self.data,
 
-            avg_number_of_staff=Decimal(avg_indicators.get('avg_number_of_staff')),
-            avg_salary_of_staff=Decimal(avg_indicators.get('avg_salary_of_staff')),
-            avg_taxes_to_the_budget=Decimal(avg_indicators.get('avg_taxes_to_the_budget')),
-            avg_income_tax=Decimal(avg_indicators.get('avg_income_tax')),
+            avg_number_of_staff=avg_indicators.get('avg_number_of_staff'),
+            avg_salary_of_staff=avg_indicators.get('avg_salary_of_staff'),
+            avg_taxes_to_the_budget=avg_indicators.get('avg_taxes_to_the_budget'),
+            avg_income_tax=avg_indicators.get('avg_income_tax'),
 
-            avg_property_tax=Decimal(avg_indicators.get('avg_property_tax')),
-            avg_land_tax=Decimal(avg_indicators.get('avg_land_tax')),
-            avg_personal_income_tax=Decimal(avg_indicators.get('avg_personal_income_tax')),
-            avg_transport_tax=Decimal(avg_indicators.get('avg_transport_tax')),
-            avg_other_taxes=Decimal(avg_indicators.get('avg_other_taxes')),
+            avg_property_tax=avg_indicators.get('avg_property_tax'),
+            avg_land_tax=avg_indicators.get('avg_land_tax'),
+            avg_personal_income_tax=avg_indicators.get('avg_personal_income_tax'),
+            avg_transport_tax=avg_indicators.get('avg_transport_tax'),
+            avg_other_taxes=avg_indicators.get('avg_other_taxes'),
 
             equipment_costs=self.get_equipment_costs(),
             accounting_costs=self.get_accounting_costs(),

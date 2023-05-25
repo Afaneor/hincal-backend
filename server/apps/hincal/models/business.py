@@ -36,12 +36,12 @@ class Business(AbstractBaseModel):
         _('Тип бизнеса'),
         max_length=settings.MAX_STRING_LENGTH,
         choices=TypeBusiness.choices,
-        null=True,
+        blank=True,
     )
     inn = models.CharField(
         _('ИНН физического лица, ИП или компания'),
         max_length=settings.MAX_STRING_LENGTH,
-        blank=False,
+        blank=True,
     )
     sector = models.CharField(
         _('Отрасль хозяйственной деятельности'),
@@ -57,13 +57,13 @@ class Business(AbstractBaseModel):
         _('Территориальное положение бизнеса'),
         max_length=settings.MAX_STRING_LENGTH,
         choices=TerritorialLocation.choices,
+        blank=True,
     )
     # Основная информация по бизнесу.
     hid = models.CharField(
         _('Уникальный id контрагента в dadata'),
         max_length=settings.MAX_STRING_LENGTH,
         blank=True,
-
     )
     short_business_name = models.CharField(
         _('Короткое название ИП или компании'),
@@ -164,6 +164,10 @@ class Business(AbstractBaseModel):
         verbose_name_plural = _('Бизнесы')
         constraints = [
             models.CheckConstraint(
+                name='type_valid',
+                check=models.Q(type__in=[*TypeBusiness.values, '']),
+            ),
+            models.CheckConstraint(
                 name='sector_valid',
                 check=models.Q(sector__in=BusinessSector.values),
             ),
@@ -174,7 +178,7 @@ class Business(AbstractBaseModel):
             models.CheckConstraint(
                 name='territorial_location_valid',
                 check=models.Q(
-                    territorial_location__in=TerritorialLocation.values,
+                    territorial_location__in=[*TerritorialLocation.values, '']
                 ),
             ),
         ]

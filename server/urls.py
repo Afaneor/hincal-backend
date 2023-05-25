@@ -14,6 +14,7 @@ from django.contrib import admin
 from django.urls import include, path
 from health_check import urls as health_urls
 
+from server.apps.blog.api.routers import router as blog_router
 from server.apps.hincal.api.routers import router as hincal_router
 from server.apps.services.custom_router.api_router import router
 from server.apps.user.api.routers import router as user_router
@@ -25,7 +26,8 @@ from server.url_components import (
 )
 
 # Регистрируем routers приложений.
-router.register('hincal', cicada_router, 'hincal')
+router.register('blog', blog_router, 'blog')
+router.register('hincal', hincal_router, 'hincal')
 router.register('user', user_router, 'user')
 
 api_url = [

@@ -5,22 +5,20 @@ from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from server.apps.services.views import RetrieveListCreateViewSet
+from server.apps.services.views import RetrieveListCreateUpdateViewSet
 from server.apps.user.api.serializers import (
     ChangePasswordSerializer,
-    CreateUserSerializer,
     LoginSerializer,
     ResetPasswordConfirmSerializer,
     ResetPasswordRequestSerializer,
     UserSerializer,
 )
+from server.apps.user.models import User
 from server.apps.user.services.serializers.password import (
     get_user_reset_password_process,
     send_email_with_reset_password,
     set_new_password,
 )
-
-User = get_user_model()
 
 
 class UserFilter(django_filters.FilterSet):
@@ -39,8 +37,8 @@ class UserFilter(django_filters.FilterSet):
         )
 
 
-class UserViewSet(RetrieveListCreateViewSet):
-    """Пользователь. Просмотр/создание.
+class UserViewSet(RetrieveListCreateUpdateViewSet):
+    """Пользователь. Просмотр/создание/изменение.
 
     Описание: Админы платформы могут добавить пользователя в систему, а сами
     пользователи могут только просматривать информацию.
@@ -51,12 +49,11 @@ class UserViewSet(RetrieveListCreateViewSet):
     """
 
     serializer_class = UserSerializer
-    create_serializer_class = CreateUserSerializer
     queryset = User.objects.select_related('profile')
     filterset_class = UserFilter
     ordering_fields = '__all__'
     permission_type_map = {
-        **RetrieveListCreateViewSet.permission_type_map,
+        **RetrieveListCreateUpdateViewSet.permission_type_map,
         'logout': 'action_is_authenticated',
         'login': None,
         'reset_password_request': None,

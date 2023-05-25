@@ -3,7 +3,6 @@ from django.utils.translation import gettext_lazy as _
 
 from server.apps.hincal.services.archive import (
     get_cost_accounting,
-    get_cost_capital_construction,
     get_land_cadastral_value,
     get_property_cadastral_value, get_possible_income_from_patent,
     get_registration_costs,
@@ -17,52 +16,37 @@ class Archive(AbstractBaseModel):
     year = models.PositiveIntegerField(
         _('Год, к которому относятся данные')
     )
-    land_tax_rate = models.DecimalField(
+    land_tax_rate = models.FloatField(
         _('Размер налоговой ставки на землю'),
-        max_digits=5,
-        decimal_places=3,
         default=0.015,
     )
-    property_tax_rate = models.DecimalField(
+    property_tax_rate = models.FloatField(
         _('Размер налогаовой ставки на имущество'),
-        max_digits=5,
-        decimal_places=3,
         default=0.019,
     )
-    patent_tax_rate = models.DecimalField(
+    patent_tax_rate = models.FloatField(
         _('Размер налоговой ставки по патенту'),
-        max_digits=5,
-        decimal_places=3,
         default=0.06,
     )
-    personal_income_rate = models.DecimalField(
+    personal_income_rate = models.FloatField(
         _('Размер НДФЛ'),
-        max_digits=5,
-        decimal_places=3,
         default=0.013,
     )
-    pension_contributions_rate = models.DecimalField(
+    pension_contributions_rate = models.FloatField(
         _('Размер ставки для пенсионных отчислений'),
-        max_digits=5,
-        decimal_places=3,
+
         default=0.22,
     )
-    medical_contributions_rate = models.DecimalField(
+    medical_contributions_rate = models.FloatField(
         _('Размер ставки для медицинских отчислений'),
-        max_digits=5,
-        decimal_places=3,
         default=0.051,
     )
-    lower_tax_margin_error = models.DecimalField(
+    lower_tax_margin_error = models.FloatField(
         _('Нижний уровень погрешности для поиска записей по налогам'),
-        max_digits=5,
-        decimal_places=3,
         default=0.9,
     )
-    upper_tax_margin_error = models.DecimalField(
+    upper_tax_margin_error = models.FloatField(
         _('Верхний уровень погрешности для поиска записей по налогам'),
-        max_digits=5,
-        decimal_places=3,
         default=1.1,
     )
     land_cadastral_value = models.JSONField(
@@ -85,36 +69,26 @@ class Archive(AbstractBaseModel):
         _('Расходы на регистрацию бизнеса'),
         default=get_registration_costs,
     )
-    avg_land_lease_costs = models.DecimalField(
+    avg_land_lease_costs = models.FloatField(
         _('Средняя стоимость аренды земли'),
-        max_digits=20,
-        decimal_places=3,
-        default=50000,
+        default=50,
     )
-    avg_land_purchase_costs = models.DecimalFieldmanagement(
+    avg_land_purchase_costs = models.FloatField(
         _('Средняя стоимость покупки земли'),
-        max_digits=5,
-        decimal_places=3,
-        default=100000,
+        default=100,
     )
 
-    avg_property_lease_costs = models.DecimalField(
+    avg_property_lease_costs = models.FloatField(
         _('Средняя стоимость аренды недвижимости'),
-        max_digits=5,
-        decimal_places=3,
-        default=100000,
+        default=100,
     )
-    avg_property_purchase_costs = models.DecimalField(
+    avg_property_purchase_costs = models.FloatField(
         _('Средняя стоимость покупки недвижимости'),
-        max_digits=5,
-        decimal_places=3,
-        default=200000,
+        default=200,
     )
-    avg_property_repair_costs = models.DecimalField(
+    avg_property_repair_costs = models.FloatField(
         _('Средняя стоимость капитального строительства недвижимости'),
-        max_digits=5,
-        decimal_places=3,
-        default=100000,
+        default=100,
     )
 
     is_actual = models.BooleanField(
@@ -134,4 +108,4 @@ class Archive(AbstractBaseModel):
         ]
 
     def __str__(self):
-        return f'{self.user}: {self.created_at}'
+        return f'{self.year}: {self.created_at}'

@@ -68,13 +68,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):  # noqa: WPS110
         """Добавление данных в Indicator"""
-        workbook = xlrd.open_workbook('data.xls')
+        workbook = xlrd.open_workbook('server/apps/hincal/management/commands/data.xls')
         worksheet = workbook.sheet_by_index(0)
 
         # Iterate the rows and columns
         indicators = []
-        for i in range(1, 10):
-            business = Business.objects.get_or_create(
+        for i in range(1, 3529):
+            business, created = Business.objects.get_or_create(
                 sector=BUSINESS_SECTOR.get(worksheet.cell_value(i, 0)),
                 sub_sector=BUSINESS_SUB_SECTOR.get(worksheet.cell_value(i, 1)),
             )
@@ -108,4 +108,5 @@ class Command(BaseCommand):
                     other_taxes=worksheet.cell_value(i, 18),
                 ),
             )
+            print(i)
         Indicator.objects.bulk_create(indicators)

@@ -175,7 +175,7 @@ class Business(AbstractBaseModel):
             ),
             models.CheckConstraint(
                 name='sub_sector_valid',
-                check=models.Q(sub_sector__in=BusinessSubSector.values),
+                check=models.Q(sub_sector__in=[*BusinessSubSector.values, '']),
             ),
             models.CheckConstraint(
                 name='territorial_location_valid',

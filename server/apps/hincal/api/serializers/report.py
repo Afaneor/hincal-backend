@@ -83,7 +83,8 @@ class CreateReportSerializer(serializers.Serializer):
                 raise ValidationError(
                     {'sectors': [_('Вы выбрали некорректный сектор')]},
                 )
-        return sectors
+        # Распаковка нужна для будущей сериализации в json.
+        return [*sectors]
 
     def validate_sub_sectors(self, sub_sectors):
         """Валидация подсектора."""
@@ -92,7 +93,8 @@ class CreateReportSerializer(serializers.Serializer):
                 raise ValidationError(
                     {'sub_sectors': [_('Вы выбрали некорректный подсектор')]},
                 )
-        return sub_sectors
+        # Распаковка нужна для будущей сериализации в json.
+        return [*sub_sectors]
 
     def validate_territorial_locations(self, territorial_locations):
         """Валидация районов расположения."""
@@ -106,7 +108,8 @@ class CreateReportSerializer(serializers.Serializer):
                         ),
                     ]},
                 )
-        return territorial_locations
+        # Распаковка нужна для будущей сериализации в json.
+        return [*territorial_locations]
 
     def validate_type_tax_system(self, type_tax_system):
         """Валидация типа системы налогооблажения."""

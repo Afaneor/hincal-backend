@@ -9,7 +9,7 @@ class ReportContextDataClass:
     """Дата класс контекста отчета."""
 
     # Дата формирования отчета.
-    create_date: str = datetime.datetime.now()
+    create_date: str = str(datetime.datetime.now())
     # Информация о бизнесе.
     business: dict = None
     # Исходные данные.
@@ -23,6 +23,15 @@ class ReportContextDataClass:
     chat_gpt_page_6: str = ''
     chat_gpt_page_7: str = ''
     chat_gpt_page_8: str = ''
+
+    # рассчитанные показатели расходов.
+    avg_number_of_staff_math: float = 0
+    avg_salary_of_staff_math: float = 0
+    avg_personal_income_tax_math: float = 0
+    avg_taxes_to_the_subject_budget_math: float = 0
+    avg_taxes_to_the_federal_budget_math: float = 0
+    avg_property_tax_math: float = 0
+    avg_land_tax_math: float = 0
 
     # Итоговые возможные расходы по всему.
     all_possible_costs: float = field(init=False)
@@ -77,23 +86,23 @@ class ReportContextDataClass:
     def __post_init__(self):
         # Расходы на налоги/взносы персонала. Размер налогов уже включен в з/п.
         self.avg_staff_tax_costs = (
-            self.avg_number_of_staff *
-            self.avg_salary_of_staff *
+            self.avg_number_of_staff_by_indicators *
+            self.avg_salary_of_staff_by_indicators *
             self.archive.personal_income_rate
         )
         self.avg_staff_pension_contributions_costs = (
-            self.avg_number_of_staff *
-            self.avg_salary_of_staff *
+            self.avg_number_of_staff_by_indicators *
+            self.avg_salary_of_staff_by_indicators *
             self.archive.pension_contributions_rate
         )
         self.avg_staff_medical_contributions_costs = (
-            self.avg_number_of_staff *
-            self.avg_salary_of_staff *
+            self.avg_number_of_staff_by_indicators *
+            self.avg_salary_of_staff_by_indicators *
             self.archive.medical_contributions_rate
         )
 
         # Расходы аренды/покупки земли.
-        land_area = self.avg_land_tax / self.archive.land_tax_rate
+        land_area = self.avg_land_tax_by_indicators / self.archive.land_tax_rate
         self.avg_land_lease_costs = (
             land_area * self.archive.avg_land_lease_costs
         )
@@ -102,7 +111,7 @@ class ReportContextDataClass:
         )
 
         # Расходы аренды/покупки/ремонта на объекты недвижимости.
-        property_area = self.avg_property_tax / self.archive.property_tax_rate
+        property_area = self.avg_property_tax_by_indicators / self.archive.property_tax_rate
         self.property_lease_costs = (
             property_area * self.archive.avg_property_lease_costs
         )
@@ -115,15 +124,15 @@ class ReportContextDataClass:
 
         # Итоговые возможные расходы по всему.
         self.all_possible_costs = (
-            self.avg_number_of_staff +
-            self.avg_salary_of_staff +
-            self.avg_taxes_to_the_budget +
-            self.avg_income_tax +
-            self.avg_property_tax +
-            self.avg_land_tax +
-            self.avg_personal_income_tax +
-            self.avg_transport_tax +
-            self.avg_other_taxes +
+            self.avg_number_of_staff_by_indicators +
+            self.avg_salary_of_staff_by_indicators +
+            self.avg_taxes_to_the_budget_by_indicators +
+            self.avg_income_tax_by_indicators +
+            self.avg_property_tax_by_indicators +
+            self.avg_land_tax_by_indicators +
+            self.avg_personal_income_tax_by_indicators +
+            self.avg_transport_tax_by_indicators +
+            self.avg_other_taxes_by_indicators +
             self.avg_staff_pension_contributions_costs +
             self.avg_staff_medical_contributions_costs +
             self.avg_land_lease_costs +
@@ -134,7 +143,7 @@ class ReportContextDataClass:
         )
         # Общие расходны на сотрудников.
         self.all_staff_costs = (
-            self.avg_salary_of_staff +
+            self.avg_salary_of_staff_by_indicators +
             self.avg_staff_pension_contributions_costs +
             self.avg_staff_medical_contributions_costs
         )
@@ -152,8 +161,8 @@ class ReportContextDataClass:
         )
         # Общие расходны на налоги по земле и объектам недвижимости.
         self.all_lp_tax_costs = (
-            self.avg_property_tax +
-            self.avg_land_tax
+            self.avg_property_tax_by_indicators +
+            self.avg_land_tax_by_indicators
         )
         # Общие расходы на сотрудников, аренду земли и объекты недвижимости.
         self.all_staff_and_lease_lp_costs = (

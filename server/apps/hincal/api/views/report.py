@@ -76,7 +76,7 @@ class ReportViewSet(RetrieveListCreateDeleteViewSet):
         serializer.is_valid(raise_exception=True)
         report = ReportWithContext(
             user=request.user,
-            data=serializer.data,
+            data=serializer.validated_data,
         ).formation_report()
 
         headers = self.get_success_headers(serializer.data)

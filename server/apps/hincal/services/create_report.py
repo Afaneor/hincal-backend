@@ -22,8 +22,7 @@ from server.apps.user.models import User
 class ReportWithContext(object):
     """Формирование context для отчета."""
 
-    _archive: Archive
-    # archive, created =
+    _archive: Archive = None
 
     def __init__(
         self,
@@ -31,7 +30,7 @@ class ReportWithContext(object):
         user: Optional[Union[User, AnonymousUser]],
     ):
         """Инициализация переменных для работы."""
-        self.user = user
+        self.user = user if user.is_authenticated else None
         self.data = data
         # Верхний и нижний уровни погрешности. Уменьшаем или увеличиваем
         # переданные показатели.
@@ -286,9 +285,11 @@ class ReportWithContext(object):
                 self.data.get('type_business', 'other'),
                 {}
             )
-            return accounting_costs.get(
-                self.data.get('type_tx_system', 'other'),
+            # Получаем словарь с верхней и нижней границей.
+            accounting_costs_range = accounting_costs.get(
+                self.data.get('type_tax_system', 'other'),
             )
+            return (accounting_costs_range.get('lower') + accounting_costs_range.get('upper')) / 2
         return 0
 
     def get_equipment_costs(self):
@@ -316,7 +317,7 @@ class ReportWithContext(object):
             avg_other_taxes=models.Avg('other_taxes'),
         )
 
-        business = Business.objects.filter(user=self.user).first()
+        business = Business.objects.filter(user=self.user, user__isnull=False).first()
         context = ReportContextDataClass(
             # Информация по бизнесу.
             business=BusinessForReportSerializer(business).data if business else {},
@@ -334,24 +335,27 @@ class ReportWithContext(object):
             avg_transport_tax_by_indicators=avg_indicators.get('avg_transport_tax'),
             avg_other_taxes_by_indicators=avg_indicators.get('avg_other_taxes'),
 
-            # avg_number_of_staff=self.get_avg_number_of_staff()
-            # avg_salary_of_staff=self.get_avg_salary_of_staff()
-            # avg_personal_income_tax=self.get_avg_personal_income_tax()
-            # avg_taxes_to_the_subject_budget=self.get_avg_taxes_to_the_subject_budget()
-            # avg_taxes_to_the_federal_budget=self.get_avg_taxes_to_the_federal_budget()
-            # avg_property_tax=self.get_avg_property_tax()
-            # avg_land_tax=self.get_avg_land_tax()
-
+            avg_number_of_staff_math=self.get_avg_number_of_staff(),
+            avg_salary_of_staff_math=self.get_avg_salary_of_staff(),
+            avg_personal_income_tax_math=self.get_avg_personal_income_tax(),
+            avg_taxes_to_the_subject_budget_math=self.get_avg_taxes_to_the_subject_budget(),
+            avg_taxes_to_the_federal_budget_math=self.get_avg_taxes_to_the_federal_budget(),
+            avg_property_tax_math=self.get_avg_property_tax(),
+            avg_land_tax_math=self.get_avg_land_tax(),
 
             # Рассчитанные показатели на основе простой математике.
             equipment_costs=self.get_equipment_costs(),
             accounting_costs=self.get_accounting_costs(),
             registration_costs=self.get_registration_costs(),
+
+            archive=self.archive,
         )
+        correct_context = context.__dict__
+        correct_context.pop('archive')
         return Report.objects.create(
             user=self.user,
             initial_data=self.data,
-            context=context.__dict__,
+            context=correct_context,
         )
 
     def get_avg_number_of_staff(self):
@@ -370,7 +374,6 @@ class ReportWithContext(object):
             self.get_value_by_sector(property_name='average_salary') *
             self.archive.personal_income_rate
         )
-
 
     def get_avg_taxes_to_the_subject_budget(self):
         """Уплата возможного налога на доходы в бюджет субъекта."""

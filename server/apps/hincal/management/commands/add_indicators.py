@@ -1,6 +1,4 @@
 import xlrd
-from django.conf import settings
-from django.core.cache import cache
 from django.core.management.base import BaseCommand
 from server.apps.hincal.models import Indicator, Business
 from server.apps.hincal.services.enums import BusinessSector, BusinessSubSector
@@ -74,7 +72,7 @@ class Command(BaseCommand):
         # Iterate the rows and columns
         indicators = []
         for i in range(1, 3529):
-            business, created = Business.objects.get_or_create(
+            business = Business.objects.create(
                 sector=BUSINESS_SECTOR.get(worksheet.cell_value(i, 0)),
                 sub_sector=BUSINESS_SUB_SECTOR.get(worksheet.cell_value(i, 1)),
             )
@@ -82,31 +80,31 @@ class Command(BaseCommand):
                 Indicator(
                     business=business,
                     year=2021,
-                    average_number_of_staff=worksheet.cell_value(i, 3),
-                    average_salary_of_staff=worksheet.cell_value(i, 5),
-                    taxes_to_the_budget=worksheet.cell_value(i, 7),
-                    income_tax=worksheet.cell_value(i, 9),
-                    property_tax=worksheet.cell_value(i, 11),
-                    land_tax=worksheet.cell_value(i, 13),
-                    personal_income_tax=worksheet.cell_value(i, 15),
-                    transport_tax=worksheet.cell_value(i, 17),
-                    other_taxes=worksheet.cell_value(i, 19),
+                    average_number_of_staff=float(worksheet.cell_value(i, 3)),
+                    average_salary_of_staff=float(worksheet.cell_value(i, 5)),
+                    taxes_to_the_budget=float(worksheet.cell_value(i, 7)),
+                    income_tax=float(worksheet.cell_value(i, 9)),
+                    property_tax=float(worksheet.cell_value(i, 11)),
+                    land_tax=float(worksheet.cell_value(i, 13)),
+                    personal_income_tax=float(worksheet.cell_value(i, 15)),
+                    transport_tax=float(worksheet.cell_value(i, 17)),
+                    other_taxes=float(worksheet.cell_value(i, 19)),
                 ),
             )
             indicators.append(
                 Indicator(
                     business=business,
                     year=2022,
-                    average_number_of_staff=worksheet.cell_value(i, 2),
-                    average_salary_of_staff=worksheet.cell_value(i, 4),
-                    taxes_to_the_budget=worksheet.cell_value(i, 6),
-                    income_tax=worksheet.cell_value(i, 8),
-                    property_tax=worksheet.cell_value(i, 10),
-                    land_tax=worksheet.cell_value(i, 12),
-                    personal_income_tax=worksheet.cell_value(i, 14),
-                    transport_tax=worksheet.cell_value(i, 16),
-                    other_taxes=worksheet.cell_value(i, 18),
+                    average_number_of_staff=float(worksheet.cell_value(i, 2)),
+                    average_salary_of_staff=float(worksheet.cell_value(i, 4)),
+                    taxes_to_the_budget=float(worksheet.cell_value(i, 6)),
+                    income_tax=float(worksheet.cell_value(i, 8)),
+                    property_tax=float(worksheet.cell_value(i, 10)),
+                    land_tax=float(worksheet.cell_value(i, 12)),
+                    personal_income_tax=float(worksheet.cell_value(i, 14)),
+                    transport_tax=float(worksheet.cell_value(i, 16)),
+                    other_taxes=float(worksheet.cell_value(i, 18)),
                 ),
             )
-            print(i)
+            print(f'Обработана строка № {i}')
         Indicator.objects.bulk_create(indicators)

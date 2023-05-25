@@ -5,7 +5,8 @@ from django.conf import settings
 from rest_framework import status
 
 from server.apps.hincal.models import Business
-from server.apps.hincal.services.enums import TerritorialLocation, TypeBusiness
+from server.apps.hincal.services.enums import TerritorialLocation, TypeBusiness, \
+    BusinessSector, BusinessSubSector
 from server.apps.services.exception import ApiError
 from server.apps.user.models import User
 
@@ -121,5 +122,7 @@ def create_business(inn: str, user: User) -> None:
             first_name=user.first_name,
             last_name=user.last_name,
             middle_name=user.middle_name,
+            sector=BusinessSector.OTHER,
+            sub_sector=BusinessSubSector.OTHER,
         )
 

@@ -9,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from server.apps.services.views import RetrieveListCreateUpdateViewSet
+from server.apps.services.views import RetrieveListUpdateViewSet
 from server.apps.user.api.serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
@@ -46,7 +46,7 @@ class UserFilter(django_filters.FilterSet):
         )
 
 
-class UserViewSet(RetrieveListCreateUpdateViewSet):
+class UserViewSet(RetrieveListUpdateViewSet):
     """Пользователь. Просмотр/создание/изменение.
 
     Описание: Админы платформы могут добавить пользователя в систему, а сами
@@ -62,9 +62,10 @@ class UserViewSet(RetrieveListCreateUpdateViewSet):
     filterset_class = UserFilter
     ordering_fields = '__all__'
     permission_type_map = {
-        **RetrieveListCreateUpdateViewSet.permission_type_map,
+        **RetrieveListUpdateViewSet.permission_type_map,
         'login': None,
         'logout': 'action_is_authenticated',
+        'register': None,
         'reset_password_request': None,
         'reset_password_process': None,
         'change_password': 'action_is_authenticated',

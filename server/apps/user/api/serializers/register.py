@@ -26,7 +26,7 @@ class RegisterSerializer(serializers.Serializer):
         self._validate_email()
         self._validate_password()
 
-        return super().is_valid(raise_exception)
+        return super().is_valid(raise_exception=True)
 
     def _validate_email(self) -> None:
         if User.objects.filter(email=self.initial_data['email']).exists():

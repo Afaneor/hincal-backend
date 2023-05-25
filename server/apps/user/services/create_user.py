@@ -25,7 +25,7 @@ def send_confirm_email(  # noqa: WPS210, C901
         kwargs={'extra_path': f'{user.email}/{temp_key}'},
     )
     url = build_absolute_uri(request, path)
-    url_without_api = url.replace('api/users/user/', '')
+    url_without_api = url.replace('api/user/users/', '')
 
     context = {
         'current_site': get_current_site(request),

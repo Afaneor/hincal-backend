@@ -68,7 +68,7 @@ def send_email_with_reset_password(
         },
     )
     url = build_absolute_uri(request, path)
-    url_without_api = url.replace('api/users/user/', '')
+    url_without_api = url.replace('api/user/users', '')
 
     context = {
         'current_site': get_current_site(request),

@@ -13,7 +13,7 @@ class BaseInfoUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id',
-            'avatar'
+            'avatar',
             'email',
             'username',
             'first_name',

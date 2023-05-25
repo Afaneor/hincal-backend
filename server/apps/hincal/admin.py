@@ -2,6 +2,7 @@ from django.contrib import admin
 from server.apps.hincal.models import (
     Archive,
     Business,
+    Equipment,
     Statistic,
     Indicator,
     Report,
@@ -145,5 +146,24 @@ class ReportAdmin(admin.ModelAdmin[Report]):
     ordering = (
         'id',
         'user',
+    )
+
+
+@admin.register(Equipment)
+class EquipmentAdmin(admin.ModelAdmin[Equipment]):
+    """Оборудование."""
+
+    list_display = (
+        'id',
+        'name',
+        'cost',
+    )
+    search_fields = (
+        'name',
+    )
+    ordering = (
+        'id',
+        'name',
+        'cost',
     )
 

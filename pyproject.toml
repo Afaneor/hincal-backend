@@ -69,9 +69,9 @@ djangorestframework-simplejwt = "^5.2.2"  # https://github.com/jazzband/djangore
 rules = "^3.3"  # https://github.com/dfunckt/django-rules
 reportlab = "3.6.12"  # https://pypi.org/project/reportlab/
 requests-cache = "0.9.8"  # https://pypi.org/project/requests-cache/
-gdrfile = "^0.0.1"
 django-taggit = "^4.0.0"  # https://github.com/jazzband/django-taggit/
-xlrd = "^2.0.1"
+xlrd = "^2.0.1"  # https://github.com/python-excel/xlrd/
+drf-yasg = "^1.21.5"   # https://github.com/axnsan12/drf-yasg/
 
 [tool.poetry.dev-dependencies]
 django-coverage-plugin = "^3.0"  # https://github.com/nedbat/django_coverage_plugin

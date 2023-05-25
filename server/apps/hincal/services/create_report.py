@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from django.contrib.auth.models import AnonymousUser
 from django.db import models
@@ -6,7 +6,8 @@ from django.db import models
 from server.apps.hincal.api.serializers import (
     BusinessForReportSerializer,
 )
-from server.apps.hincal.models import Archive, Indicator, Equipment, Business
+from server.apps.hincal.models import Archive, Indicator, Equipment, Business, \
+    Report
 from server.apps.hincal.services.enums import (
     BusinessSector,
     BusinessSubSector,
@@ -18,63 +19,54 @@ from server.apps.hincal.services.report_context import (
 from server.apps.user.models import User
 
 
-class ReportContext(object):
+class ReportWithContext(object):
     """Формирование context для отчета."""
 
-    archive = Archive.objects.get(is_actual=True)
+    archive, created = Archive.objects.get_or_create(is_actual=True)
 
-    def __int__(
+    def __init__(
         self,
-        user: Optional[User, AnonymousUser],
         data: dict,
-        margin_error: bool,
+        user: Optional[Union[User, AnonymousUser]],
     ):
         """Инициализация переменных для работы."""
         self.user = user
         self.data = data
         # Верхний и нижний уровни погрешности. Уменьшаем или увеличиваем
         # переданные показатели.
-        if margin_error:
-            self.lower_margin_error = 0.9
-            self.upper_margin_error = 1.1
-        else:
-            self.lower_margin_error = 1
-            self.upper_margin_error = 1
+        self.lower_margin_error = 0.9
+        self.upper_margin_error = 1.1
 
     def get_filter_with_correct_sector(self) -> models.Q:
         """Получение фильтра с корректным сектором."""
-        filters = models.Q()
         if sectors := self.data.get('sectors'):
-            filters = models.Q(
-                filters &
-                models.Q(business__sector__in=sectors)
-            )
-            # Если выбран подсектор, то ищем совпадения и по сектору и
-            # по подсектору. Иначе ищем по всем доступным.
-            if sub_sectors := self.data.get('sub_sectors'):
-                filters = models.Q(
-                    filters &
-                    models.Q(business__sub_sector__in=sub_sectors)
-                )
-            else:
-                filters = models.Q(
-                    filters &
-                    models.Q(business__sub_sector__in=BusinessSubSector.value)
-                )
-        else:
-            filters = models.Q(
-                filters &
-                models.Q(business__sector__in=BusinessSector.value)
-            )
+            return models.Q(business__sector__in=sectors)
 
-        return filters
+        else:
+            return models.Q(business__sector__in=BusinessSector.values)
+
+    def get_filter_with_correct_sub_sector(self) -> models.Q:
+        """Получение фильтра с корректным подсектором."""
+        # Если выбран подсектор, то ищем совпадения и по сектору и
+        # по подсектору. Иначе ищем по всем доступным.
+        if sub_sectors := self.data.get('sub_sectors'):
+            return models.Q(business__sub_sector__in=sub_sectors)
+        else:
+            return models.Q(business__sub_sector__in=BusinessSubSector.values)
 
     def get_filter_with_correct_staff(self) -> models.Q:
-        """Получение фильтра с корректным персоналом."""
-        return models.Q(
-            models.Q(average_number_of_staff__gte=self.data.get('from_staff') * self.lower_margin_error) &  # noqa: E501
-            models.Q(average_number_of_staff__lte=self.data.get('to_staff') * self.upper_margin_error)  # noqa: E501
-        )
+        """Получение фильтра с корректным персоналом.
+
+        Если персонала не передан, то ищем с любыми значениями.
+        """
+        from_staff = self.data.get('from_staff', None)
+        to_staff = self.data.get('to_staff', from_staff)
+        if from_staff and to_staff:
+            return models.Q(
+                models.Q(average_number_of_staff__gte=self.data.get('from_staff') * self.lower_margin_error) &  # noqa: E501
+                models.Q(average_number_of_staff__lte=self.data.get('to_staff') * self.upper_margin_error)  # noqa: E501
+            )
+        return models.Q()
 
     def get_filter_with_correct_location(self) -> models.Q:
         """Получение фильтра с корректным территориальным расположением."""
@@ -90,7 +82,6 @@ class ReportContext(object):
 
     def get_value_by_territorial_locations(
         self,
-        helper_name: str,
         property_name: str,
     ):
         """Получение корректных числовых значений по переданным округам."""
@@ -127,21 +118,19 @@ class ReportContext(object):
 
     def get_filter_with_correct_land_area(self) -> models.Q:
         """Получение фильтра с корректной площадью земельного участка."""
-        filters = models.Q()
         from_land_area = self.data.get('from_land_area', None)
         to_land_area = self.data.get('to_land_area', from_land_area)
         # Если не передан размер земли, то ищем по всем доступным. Поскольку
         # данных по земли нет, то переводим размер земли в размер налога
         # на землю.
-        if from_land_area:
+        if from_land_area and to_land_area:
             #  Средний размер площади земельного участка.
             average_land_area = (from_land_area + to_land_area) // 2
             # Размер налога.
             land_tax = (
                 average_land_area *
                 self.get_value_by_territorial_locations(
-                    helper_name='land_cadastral_value',
-                    property_name='land_tax_rate',
+                    property_name='land_cadastral_value',
                 ) *
                 self.archive.land_tax_rate
             )
@@ -151,25 +140,23 @@ class ReportContext(object):
                 models.Q(land_tax__lte=land_tax * self.archive.upper_tax_margin_error)
             )
 
-        return filters
+        return models.Q()
 
     def get_filter_with_correct_property_area(self) -> models.Q:
         """Получение фильтра с корректной площадью объектов капитального строительства."""
-        filters = models.Q()
         from_property_area = self.data.get('from_property_area', None)
         to_property_area = self.data.get('to_property_area', from_property_area)
         # Если не передан размер имущества, то ищем по всем доступным. Поскольку
         # данных по имуществу нет, то переводим размер имущества в размер налога
         # на имущество.
-        if from_property_area:
+        if from_property_area and to_property_area:
             #  Средний размер площади имущества.
             average_property_area = (from_property_area + to_property_area) // 2
             # Размер налога.
             property_tax = (
                 average_property_area *
                 self.get_value_by_territorial_locations(
-                    helper_name='property_cadastral_value',
-                    property_name='property_tax_rate',
+                    property_name='property_cadastral_value',
                 ) *
                 self.archive.property_tax_rate
             )
@@ -179,28 +166,80 @@ class ReportContext(object):
                 models.Q(property_tax__lte=property_tax * self.archive.upper_tax_margin_error)
             )
 
-        return filters
+        return models.Q()
 
-    def get_avg_indicators(self) -> models.QuerySet[Indicator]:
+    def get_indicators(self) -> models.QuerySet[Indicator]:
         """Получение корректных показателей для формирования отчета."""
-        filters = models.Q(
-            self.get_filter_with_correct_sector() &
-            self.get_filter_with_correct_staff() &
-            self.get_filter_with_correct_location() &
-            self.get_filter_with_correct_land_area() &
-            self.get_filter_with_correct_property_area()
-        )
-        return Indicator.objects.filter(filters).aggregate(
-            avg_number_of_staff=models.Avg('average_number_of_staff'),
-            avg_salary_of_staff=models.Avg('average_salary_of_staff'),
-            avg_taxes_to_the_budget=models.Avg('taxes_to_the_budget'),
-            avg_income_tax=models.Avg('income_tax'),
-            avg_property_tax=models.Avg('property_tax'),
-            avg_land_tax=models.Avg('land_tax'),
-            avg_personal_income_tax=models.Avg('personal_income_tax'),
-            avg_transport_tax=models.Avg('transport_tax'),
-            avg_other_taxes=models.Avg('other_taxes'),
-        )
+        correct_sector = self.get_filter_with_correct_sector()
+        correct_sub_sector = self.get_filter_with_correct_sub_sector()
+        correct_staff = self.get_filter_with_correct_staff()
+        correct_land_area = self.get_filter_with_correct_land_area()
+        correct_property_area = self.get_filter_with_correct_property_area()
+        correct_location = self.get_filter_with_correct_location()
+        if (
+            indicators := Indicator.objects.filter(
+                models.Q(
+                    correct_sector &
+                    correct_sub_sector &
+                    correct_staff &
+                    correct_land_area &
+                    correct_property_area &
+                    correct_location
+                )
+            )
+        ):
+            return indicators
+
+        if (
+            indicators := Indicator.objects.filter(
+                models.Q(
+                    correct_sector &
+                    correct_sub_sector &
+                    correct_staff &
+                    correct_land_area &
+                    correct_property_area
+                )
+            )
+        ):
+            return indicators
+
+        if (
+            indicators := Indicator.objects.filter(
+                models.Q(
+                    correct_sector &
+                    correct_sub_sector &
+                    correct_staff &
+                    correct_land_area
+                )
+            )
+        ):
+            return indicators
+
+        if (
+            indicators := Indicator.objects.filter(
+                models.Q(
+                    correct_sector &
+                    correct_sub_sector &
+                    correct_staff
+                )
+            )
+        ):
+            return indicators
+
+        if (
+            indicators := Indicator.objects.filter(
+                models.Q(
+                    correct_sector &
+                    correct_sub_sector
+                )
+            )
+        ):
+            return indicators
+
+        if indicators := Indicator.objects.filter(correct_sector):
+            return indicators
+
+        return Indicator.objects.all()
 
     def get_patent_costs(self):
         """Получить размер возможных налогов на патент."""
@@ -241,12 +280,24 @@ class ReportContext(object):
             return equipment
         return 0
 
-    def formation_context(self):
+    def formation_report(self):
         """Формирование контекста."""
-        avg_indicators = self.get_avg_indicators()
+        indicators = self.get_indicators()
+        avg_indicators = indicators.aggregate(
+            avg_number_of_staff=models.Avg('average_number_of_staff'),
+            avg_salary_of_staff=models.Avg('average_salary_of_staff'),
+            avg_taxes_to_the_budget=models.Avg('taxes_to_the_budget'),
+            avg_income_tax=models.Avg('income_tax'),
+            avg_property_tax=models.Avg('property_tax'),
+            avg_land_tax=models.Avg('land_tax'),
+            avg_personal_income_tax=models.Avg('personal_income_tax'),
+            avg_transport_tax=models.Avg('transport_tax'),
+            avg_other_taxes=models.Avg('other_taxes'),
+        )
+
         business = Business.objects.filter(user=self.user).first()
         context = ReportContextDataClass(
-            business=BusinessForReportSerializer(business).data,
+            business=BusinessForReportSerializer(business).data if business else {},
             initial_data=self.data,
 
             avg_number_of_staff=avg_indicators.get('avg_number_of_staff'),
@@ -263,4 +314,9 @@ class ReportContext(object):
             equipment_costs=self.get_equipment_costs(),
             accounting_costs=self.get_accounting_costs(),
             registration_costs=self.get_registration_costs(),
+        )
+        return Report.objects.create(
+            user=self.user,
+            initial_data=self.data,
+            context=context.__dict__,
         )

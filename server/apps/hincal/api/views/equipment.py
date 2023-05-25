@@ -28,7 +28,7 @@ class EquipmentFilter(
 
 
 class EquipmentViewSet(BaseReadOnlyViewSet):
-    """Оборудование. Просмотр"""
+    """Оборудование. Просмотр."""
 
     serializer_class = EquipmentSerializer
     queryset = Equipment.objects.all()

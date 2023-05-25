@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from server.apps.hincal.services.archive import (
@@ -14,7 +15,8 @@ class Archive(AbstractBaseModel):
     """Архив."""
 
     year = models.PositiveIntegerField(
-        _('Год, к которому относятся данные')
+        _('Год, к которому относятся данные'),
+        default=now().year,
     )
     land_tax_rate = models.FloatField(
         _('Размер налоговой ставки на землю'),
@@ -43,11 +45,11 @@ class Archive(AbstractBaseModel):
     )
     lower_tax_margin_error = models.FloatField(
         _('Нижний уровень погрешности для поиска записей по налогам'),
-        default=0.9,
+        default=0.8,
     )
     upper_tax_margin_error = models.FloatField(
         _('Верхний уровень погрешности для поиска записей по налогам'),
-        default=1.1,
+        default=1.2,
     )
     land_cadastral_value = models.JSONField(
         _('Кадастровая стоимость земли'),

@@ -7,6 +7,7 @@ from server.apps.hincal.api.serializers import (
     ReportSerializer,
 )
 from server.apps.hincal.models import Report
+from server.apps.hincal.services.create_report import ReportWithContext
 from server.apps.services.filters_mixins import (
     CreatedUpdatedDateFilterMixin,
     UserFilterMixin,
@@ -73,14 +74,14 @@ class ReportViewSet(RetrieveListCreateDeleteViewSet):
         """Создание отчета."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        ReportContext(
+        report = ReportWithContext(
             user=request.user,
             data=serializer.data,
-        )
+        ).formation_report()
 
         headers = self.get_success_headers(serializer.data)
         return Response(
-            data=serializer.data,
+            data=ReportSerializer(report).data,
             status=status.HTTP_201_CREATED,
             headers=headers,
         )

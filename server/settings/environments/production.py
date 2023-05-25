@@ -12,13 +12,34 @@ from server.settings.components import config
 
 DEBUG = config('DJANGO_DEBUG', cast=bool, default=False)
 
+DOMAIN_NAMES = config(
+    'DOMAIN_NAME',
+    default=config('ALLOWED_HOSTS', default=''),
+).replace(' ', '').split(',')
+
 ALLOWED_HOSTS = [
     # TODO: check production hosts
-    config('DOMAIN_NAME'),
+    *DOMAIN_NAMES,
     # We need this value for `healthcheck` to work:
     'localhost',
 ]
 
+# CORS settings
+CORS_ALLOW_CREDENTIALS = config(
+    'CORS_ALLOW_CREDENTIALS',
+    cast=bool,
+    default=False,
+)
+CSRF_COOKIE_HTTPONLY = config(
+    'CSRF_COOKIE_HTTPONLY',
+    cast=bool,
+    default=True,
+)
+SESSION_COOKIE_HTTPONLY = config(
+    'SESSION_COOKIE_HTTPONLY',
+    cast=bool,
+    default=True,
+)
 
 # Staticfiles
 # https://docs.djangoproject.com/en/2.2/ref/contrib/staticfiles/
@@ -39,12 +60,10 @@ STATICFILES_STORAGE = (
     'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 )
 
-
 # Media files
 # https://docs.djangoproject.com/en/2.2/topics/files/
 
 MEDIA_ROOT = '/var/www/django/media'
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -57,7 +76,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': '{0}.CommonPasswordValidator'.format(_PASS)},
     {'NAME': '{0}.NumericPasswordValidator'.format(_PASS)},
 ]
-
 
 # Security
 # https://docs.djangoproject.com/en/2.2/topics/security/
@@ -75,3 +93,31 @@ SECURE_REDIRECT_EXEMPT = [
 
 SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', cast=bool, default=True)
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', cast=bool, default=True)
+
+CSRF_COOKIE_SAMESITE = config('CSRF_COOKIE_SAMESITE', cast=str, default='Lax')
+SESSION_COOKIE_SAMESITE = config(
+    'SESSION_COOKIE_SAMESITE',
+    cast=str,
+    default='Lax',
+)
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}

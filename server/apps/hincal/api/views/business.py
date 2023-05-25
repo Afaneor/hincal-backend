@@ -7,6 +7,7 @@ from server.apps.services.filters_mixins import (
     CreatedUpdatedDateFilterMixin,
     UserFilterMixin,
 )
+from server.apps.services.views import BaseModelViewSet
 
 
 class BusinessFilter(
@@ -43,7 +44,7 @@ class BusinessFilter(
         )
 
 
-class BusinessViewSet(ModelViewSet):
+class BusinessViewSet(BaseModelViewSet):
     """Бизнес.
 
     Компании и ИП получаются из DaData.

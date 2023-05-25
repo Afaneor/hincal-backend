@@ -51,8 +51,13 @@ class StatisticViewSet(BaseReadOnlyViewSet):
         if user.is_superuser:
             return queryset
 
+        if user.is_authenticated:
+            return queryset.filter(
+                models.Q(user=user) |
+                models.Q(user__isnull=True)
+            )
+
         return queryset.filter(
-            models.Q(user=user) |
             models.Q(user__isnull=True)
         )
 

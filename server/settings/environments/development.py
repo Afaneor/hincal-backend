@@ -110,6 +110,7 @@ DTM_IGNORED_MIGRATIONS = frozenset(
         ('axes', '*'),
         ('filer', '*'),
         ('actstream', '*'),
+        ('taggit', '*'),
         ('easy_thumbnails', '*'),
         ('account', '*'),
     ),

@@ -8,6 +8,7 @@ from server.apps.hincal.services.enums import (
     BusinessSubSector,
     TerritorialLocation, TypeBusiness, TypeTaxSystem,
 )
+from server.apps.hincal.services.validate_report import check_range
 from server.apps.services.serializers import ModelSerializerWithPermission
 
 
@@ -30,20 +31,21 @@ class ReportSerializer(ModelSerializerWithPermission):
 class CreateReportSerializer(serializers.Serializer):
     """Создание отчета."""
 
-    type_business = serializers.CharField(
+    type_business = serializers.ChoiceField(
+        choices=[TypeBusiness.LEGAL, TypeBusiness.INDIVIDUAL],
         required=True,
     )
-    sectors = serializers.ListField(
-        child=serializers.CharField(),
+    sectors = serializers.MultipleChoiceField(
+        choices=BusinessSector.choices,
         required=True,
     )
-    sub_sectors = serializers.ListField(
-        child=serializers.CharField(),
+    sub_sectors = serializers.MultipleChoiceField(
+        choices=BusinessSubSector.choices,
     )
     from_staff = serializers.IntegerField()
     to_staff = serializers.IntegerField()
-    territorial_locations = serializers.ListField(
-        child=serializers.CharField(),
+    territorial_locations = serializers.MultipleChoiceField(
+        choices=TerritorialLocation.choices,
     )
     from_land_area = serializers.IntegerField()
     to_land_area = serializers.IntegerField()
@@ -53,7 +55,8 @@ class CreateReportSerializer(serializers.Serializer):
         queryset=Equipment.objects.all(),
         many=True,
     )
-    type_tax_system = serializers.CharField(
+    type_tax_system = serializers.ChoiceField(
+        choices=TypeTaxSystem.choices,
         default=TypeTaxSystem.OSN,
     )
     need_accounting = serializers.BooleanField()
@@ -76,7 +79,7 @@ class CreateReportSerializer(serializers.Serializer):
     def validate_sectors(self, sectors):
         """Валидация сектора."""
         for sector in sectors:
-            if sector not in BusinessSector.value:
+            if sector not in BusinessSector.values:
                 raise ValidationError(
                     {'sectors': [_('Вы выбрали некорректный сектор')]},
                 )
@@ -85,7 +88,7 @@ class CreateReportSerializer(serializers.Serializer):
     def validate_sub_sectors(self, sub_sectors):
         """Валидация подсектора."""
         for sub_sector in sub_sectors:
-            if sub_sector not in BusinessSubSector.value:
+            if sub_sector not in BusinessSubSector.values:
                 raise ValidationError(
                     {'sub_sectors': [_('Вы выбрали некорректный подсектор')]},
                 )
@@ -94,7 +97,7 @@ class CreateReportSerializer(serializers.Serializer):
     def validate_territorial_locations(self, territorial_locations):
         """Валидация районов расположения."""
         for territorial_location in territorial_locations:
-            if territorial_location not in TerritorialLocation.value:
+            if territorial_location not in TerritorialLocation.values:
                 raise ValidationError(
                     {'territorial_locations': [
                         _(
@@ -126,4 +129,23 @@ class CreateReportSerializer(serializers.Serializer):
                      [_('У юридического лица нет патентной системы налогооблажения')]
                  },
             )
+        # Проверка диапазона по сотрудникам.
+        attrs = check_range(
+            attrs=attrs,
+            from_name_value='from_staff',
+            to_name_value='to_staff',
+        )
+        # Проверка диапазона по земле.
+        attrs = check_range(
+            attrs=attrs,
+            from_name_value='from_land_area',
+            to_name_value='to_land_area',
+        )
+        # Проверка диапазона по имуществу.
+        attrs = check_range(
+            attrs=attrs,
+            from_name_value='from_property_area',
+            to_name_value='to_property_area',
+        )
+
         return attrs

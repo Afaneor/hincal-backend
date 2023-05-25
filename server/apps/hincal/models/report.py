@@ -13,6 +13,7 @@ class Report(AbstractBaseModel):
         verbose_name=_('Пользователь'),
         related_name='reports',
         db_index=True,
+        null=True,
     )
     initial_data = models.JSONField(
         _('Исходные данные по которым был сформирован отчет'),

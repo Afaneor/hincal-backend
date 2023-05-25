@@ -1,4 +1,3 @@
-from drf_nova_router.api_router import ApiRouter
 from rest_framework.routers import APIRootView
 
 from server.apps.hincal.api.views import (
@@ -7,6 +6,7 @@ from server.apps.hincal.api.views import (
     IndicatorViewSet,
     ReportViewSet,
 )
+from server.apps.services.custom_router.api_router import ApiRouter
 
 
 class HincalAPIRootView(APIRootView):

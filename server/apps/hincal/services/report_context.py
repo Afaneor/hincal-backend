@@ -41,15 +41,15 @@ class ReportContextDataClass:
 
     # Средние показатели расходов.
     # Расходы по персоналу.
-    avg_number_of_staff: float = 0
-    avg_salary_of_staff: float = 0
-    avg_taxes_to_the_budget: float = 0
-    avg_income_tax: float = 0
-    avg_property_tax: float = 0
-    avg_land_tax: float = 0
-    avg_personal_income_tax: float = 0
-    avg_transport_tax: float = 0
-    avg_other_taxes: float = 0
+    avg_number_of_staff_by_indicators: float = 0
+    avg_salary_of_staff_by_indicators: float = 0
+    avg_taxes_to_the_budget_by_indicators: float = 0
+    avg_income_tax_by_indicators: float = 0
+    avg_property_tax_by_indicators: float = 0
+    avg_land_tax_by_indicators: float = 0
+    avg_personal_income_tax_by_indicators: float = 0
+    avg_transport_tax_by_indicators: float = 0
+    avg_other_taxes_by_indicators: float = 0
 
     # Расходы на оборудование.
     equipment_costs: float = 0

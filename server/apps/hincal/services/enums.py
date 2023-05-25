@@ -38,6 +38,7 @@ class BusinessSector(models.TextChoices):
     PRODUCTION_OF_RAILWAY_TRANSPORT = 'production_of_railway_transport', _('Производство ж/д транспорта')
     MANUFACTURE_OF_CONSUMER_ELECTRONICS = 'manufacture_of_consumer_electronics', _('Производство бытовой электроники и электрических приборов')
     ADDITIVE_TECHNOLOGIES = 'additive_technologies', _('Аддитивные технологии')
+    OTHER = 'other', _('Иные сектора')
 
 
 class BusinessSubSector(models.TextChoices):
@@ -58,7 +59,7 @@ class BusinessSubSector(models.TextChoices):
     MACHINE_TOOL_INDUSTRY = 'machine_tool_industry', _('Станкоинструментальная промышленность')
     MICROELECTRONICS = 'microelectronics', _('Микроэлектроника')
     MILLING_AND_CEREAL_INDUSTRY = 'milling_and_cereal_industry', _('Мукомольно-крупяная отрасль')
-    OTHER_INDUSTRIES = 'other_industries', _('Иные отрасли')
+    OTHER = 'other', _('Иные подсектора')
     BEVERAGE_PRODUCTION = 'beverage_production', _('Производство напитков')
     ANIMAL_FEED = 'animal_feed', _('Корма для животных')
     ELECTRICAL_ENGINEERING_AND_SHIPBUILDING = 'electrical_engineering_and_shipbuilding', _('Электротехника/Судостроение')

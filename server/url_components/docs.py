@@ -7,7 +7,7 @@ from rest_framework import permissions
 
 schema_view = get_schema_view(
     openapi.Info(
-        title=_('Nova Health Backend'),
+        title=_('Backend'),
         default_version='v1',
     ),
     public=True,

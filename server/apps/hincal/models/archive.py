@@ -3,9 +3,11 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from server.apps.hincal.services.archive import (
+    get_average_salary,
     get_cost_accounting,
     get_land_cadastral_value,
-    get_property_cadastral_value, get_possible_income_from_patent,
+    get_property_cadastral_value,
+    get_possible_income_from_patent,
     get_registration_costs,
 )
 from server.apps.services.base_model import AbstractBaseModel
@@ -18,12 +20,20 @@ class Archive(AbstractBaseModel):
         _('Год, к которому относятся данные'),
         default=now().year,
     )
+    income_tax_rate_to_the_subject_budget = models.FloatField(
+        _('Налог на прибыль, уплачиваемый в бюджет субъекта'),
+        default=0.18,
+    )
+    income_tax_rate_to_the_federal_budget = models.FloatField(
+        _('Налог на прибыль, уплачиваемый в федеральный бюджет'),
+        default=0.02,
+    )
     land_tax_rate = models.FloatField(
         _('Размер налоговой ставки на землю'),
         default=0.015,
     )
     property_tax_rate = models.FloatField(
-        _('Размер налогаовой ставки на имущество'),
+        _('Размер налоговой ставки на имущество'),
         default=0.019,
     )
     patent_tax_rate = models.FloatField(
@@ -36,7 +46,6 @@ class Archive(AbstractBaseModel):
     )
     pension_contributions_rate = models.FloatField(
         _('Размер ставки для пенсионных отчислений'),
-
         default=0.22,
     )
     medical_contributions_rate = models.FloatField(
@@ -91,6 +100,10 @@ class Archive(AbstractBaseModel):
     avg_property_repair_costs = models.FloatField(
         _('Средняя стоимость капитального строительства недвижимости'),
         default=100,
+    )
+    average_salary = models.JSONField(
+        _('Средняя заработная плата по секторам'),
+        default=get_average_salary,
     )
 
     is_actual = models.BooleanField(

@@ -15,7 +15,6 @@ class ApiRouter(DefaultRouter):
     Теперь можно регистрировать как DRF ViewSets, так и другие роутеры
     Примеры использования:
     1. Тут регистрируется другой роутер
-    router.register('nova', config.nova_router.router, 'nova')
     2. Тут регистрируется ViewSet
     router.register('organizations', OrganizationViewSet)  # noqa: F821
     """
@@ -152,12 +151,12 @@ def _reverse(  # noqa: WPS211
 reverse._reverse = _reverse
 
 
-class NovaAPIRootView(APIRootView):
+class CustomAPIRootView(APIRootView):
     """Корневой элемент для роутера."""
 
-    __doc__ = 'The root view for Nova API'
-    name = _('Nova')
+    __doc__ = 'The root view for Custom API'
+    name = _('Custom')
 
 
 router = ApiRouter()
-router.APIRootView = NovaAPIRootView
+router.APIRootView = CustomAPIRootView

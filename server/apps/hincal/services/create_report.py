@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Set, Tuple, List
 
 from django.contrib.auth.models import AnonymousUser
 from django.db import models
@@ -22,7 +22,8 @@ from server.apps.user.models import User
 class ReportWithContext(object):
     """Формирование context для отчета."""
 
-    archive, created = Archive.objects.get_or_create(is_actual=True)
+    _archive: Archive
+    # archive, created =
 
     def __init__(
         self,
@@ -36,6 +37,15 @@ class ReportWithContext(object):
         # переданные показатели.
         self.lower_margin_error = 0.9
         self.upper_margin_error = 1.1
+
+    @property
+    def archive(self):
+        """Получение Архива."""
+        if not ReportWithContext._archive:  # noqa: WPS437
+            ReportWithContext._archive, created = Archive.objects.get_or_create(
+                is_actual=True,
+            )
+        return ReportWithContext._archive  # noqa: WPS437
 
     def get_filter_with_correct_sector(self) -> models.Q:
         """Получение фильтра с корректным сектором."""
@@ -88,33 +98,18 @@ class ReportWithContext(object):
         # Получаем территориальное расположение. Если передан список,
         # то проходимся по списку, берем все значения и берем их среднее.
         # В противном случае отдаем просто среднее значение по всем.
-        if territorial_locations := self.data.get('territorial_locations'):
-            average_value = 0
-            for territorial_location in territorial_locations:
-                archive = getattr(self.archive, property_name)
-                average_value += archive.get(territorial_location)
+        archive = getattr(self.archive, property_name, None)
+        if archive:
+            if territorial_locations := self.data.get('territorial_locations'):
+                average_value = 0
+                for territorial_location in territorial_locations:
+                    average_value += archive.get(territorial_location)
 
-            return average_value // len(territorial_locations)
+                return average_value / len(territorial_locations)
 
-        return self.archive.land_tax_rate.get('OTHER')
+            return archive.get('other')
 
-    def get_value_by_need_patent(
-        self,
-        property_name: str,
-    ):
-        """Получение корректных числовых значений.
-
-        Рассчитываем размер налога по патентной системе.
-        """
-        if sectors := self.data.get('sectors'):
-            average_value = 0
-            for sector in sectors:
-                archive = getattr(self.archive, property_name)
-                average_value += archive.get(sector)
-
-            return average_value // len(sectors)
-
-        return self.archive.land_tax_rate.get('OTHER')
+        return 0
 
     def get_filter_with_correct_land_area(self) -> models.Q:
         """Получение фильтра с корректной площадью земельного участка."""
@@ -125,7 +120,7 @@ class ReportWithContext(object):
         # на землю.
         if from_land_area and to_land_area:
             #  Средний размер площади земельного участка.
-            average_land_area = (from_land_area + to_land_area) // 2
+            average_land_area = (from_land_area + to_land_area) / 2
             # Размер налога.
             land_tax = (
                 average_land_area *
@@ -151,7 +146,7 @@ class ReportWithContext(object):
         # на имущество.
         if from_property_area and to_property_area:
             #  Средний размер площади имущества.
-            average_property_area = (from_property_area + to_property_area) // 2
+            average_property_area = (from_property_area + to_property_area) / 2
             # Размер налога.
             property_tax = (
                 average_property_area *
@@ -168,8 +163,34 @@ class ReportWithContext(object):
 
         return models.Q()
 
-    def get_indicators(self) -> models.QuerySet[Indicator]:
-        """Получение корректных показателей для формирования отчета."""
+    def get_value_by_sector(
+        self,
+        property_name: str,
+    ):
+        """Получение корректных числовых значений.
+
+        Рассчитываем размер налога по патентной системе.
+        """
+        archive = getattr(self.archive, property_name, None)
+        if archive:
+            if sectors := self.data.get('sectors'):
+                average_value = 0
+                for sector in sectors:
+                    average_value += archive.get(sector)
+
+                return average_value / len(sectors)
+
+            return archive.get('other')
+
+        return 0
+
+    def get_indicators(self):
+        """Получение корректных показателей для формирования отчета.
+
+        Здесь мы ищем в бд реальный существующий бизнес, который подходит под
+        наши критерии.
+        Отдаем найденное пользователю.
+        """
         correct_sector = self.get_filter_with_correct_sector()
         correct_sub_sector = self.get_filter_with_correct_sub_sector()
         correct_staff = self.get_filter_with_correct_staff()
@@ -188,7 +209,7 @@ class ReportWithContext(object):
                 )
             )
         ):
-            return indicators
+            return indicators, ['sector', 'sub_sector', 'staff', 'land_area', 'property_area', 'location']
 
         if (
             indicators := Indicator.objects.filter(
@@ -201,7 +222,7 @@ class ReportWithContext(object):
                 )
             )
         ):
-            return indicators
+            return indicators, ['sector', 'sub_sector', 'staff', 'land_area', 'property_area']
 
         if (
             indicators := Indicator.objects.filter(
@@ -213,7 +234,7 @@ class ReportWithContext(object):
                 )
             )
         ):
-            return indicators
+            return indicators, ['sector', 'sub_sector', 'staff', 'land_area']
 
         if (
             indicators := Indicator.objects.filter(
@@ -224,7 +245,7 @@ class ReportWithContext(object):
                 )
             )
         ):
-            return indicators
+            return indicators, ['sector', 'sub_sector', 'staff']
 
         if (
             indicators := Indicator.objects.filter(
@@ -234,17 +255,17 @@ class ReportWithContext(object):
                 )
             )
         ):
-            return indicators
+            return indicators, ['sector', 'sub_sector']
 
         if indicators := Indicator.objects.filter(correct_sector):
-            return indicators
+            return indicators, ['sector']
 
-        return Indicator.objects.all()
+        return Indicator.objects.all(), []
 
     def get_patent_costs(self):
         """Получить размер возможных налогов на патент."""
         if self.data.get('need_patent'):
-            return self.get_value_by_need_patent(
+            return self.get_value_by_sector(
                 property_name='possible_income_from_patent',
             ) * self.archive.patent_tax_rate
         return 0
@@ -282,7 +303,7 @@ class ReportWithContext(object):
 
     def formation_report(self):
         """Формирование контекста."""
-        indicators = self.get_indicators()
+        indicators, filters_key = self.get_indicators()
         avg_indicators = indicators.aggregate(
             avg_number_of_staff=models.Avg('average_number_of_staff'),
             avg_salary_of_staff=models.Avg('average_salary_of_staff'),
@@ -297,20 +318,32 @@ class ReportWithContext(object):
 
         business = Business.objects.filter(user=self.user).first()
         context = ReportContextDataClass(
+            # Информация по бизнесу.
             business=BusinessForReportSerializer(business).data if business else {},
+            # Исходные данные.
             initial_data=self.data,
 
-            avg_number_of_staff=avg_indicators.get('avg_number_of_staff'),
-            avg_salary_of_staff=avg_indicators.get('avg_salary_of_staff'),
-            avg_taxes_to_the_budget=avg_indicators.get('avg_taxes_to_the_budget'),
-            avg_income_tax=avg_indicators.get('avg_income_tax'),
+            # ППоказатели других бизнесов, которые есть в БД.
+            avg_number_of_staff_by_indicators=avg_indicators.get('avg_number_of_staff'),
+            avg_salary_of_staff_by_indicators=avg_indicators.get('avg_salary_of_staff'),
+            avg_taxes_to_the_budget_by_indicators=avg_indicators.get('avg_taxes_to_the_budget'),
+            avg_income_tax_by_indicators=avg_indicators.get('avg_income_tax'),
+            avg_property_tax_by_indicators=avg_indicators.get('avg_property_tax'),
+            avg_land_tax_by_indicators=avg_indicators.get('avg_land_tax'),
+            avg_personal_income_tax_by_indicators=avg_indicators.get('avg_personal_income_tax'),
+            avg_transport_tax_by_indicators=avg_indicators.get('avg_transport_tax'),
+            avg_other_taxes_by_indicators=avg_indicators.get('avg_other_taxes'),
 
-            avg_property_tax=avg_indicators.get('avg_property_tax'),
-            avg_land_tax=avg_indicators.get('avg_land_tax'),
-            avg_personal_income_tax=avg_indicators.get('avg_personal_income_tax'),
-            avg_transport_tax=avg_indicators.get('avg_transport_tax'),
-            avg_other_taxes=avg_indicators.get('avg_other_taxes'),
+            # avg_number_of_staff=self.get_avg_number_of_staff()
+            # avg_salary_of_staff=self.get_avg_salary_of_staff()
+            # avg_personal_income_tax=self.get_avg_personal_income_tax()
+            # avg_taxes_to_the_subject_budget=self.get_avg_taxes_to_the_subject_budget()
+            # avg_taxes_to_the_federal_budget=self.get_avg_taxes_to_the_federal_budget()
+            # avg_property_tax=self.get_avg_property_tax()
+            # avg_land_tax=self.get_avg_land_tax()
 
+
+            # Рассчитанные показатели на основе простой математике.
             equipment_costs=self.get_equipment_costs(),
             accounting_costs=self.get_accounting_costs(),
             registration_costs=self.get_registration_costs(),
@@ -320,3 +353,43 @@ class ReportWithContext(object):
             initial_data=self.data,
             context=context.__dict__,
         )
+
+    def get_avg_number_of_staff(self):
+        """Получение среднего числа персонала по переданным данным."""
+        return (self.data.get('from_staff') + self.data.get('to_staff')) / 2
+
+    def get_avg_salary_of_staff(self):
+        """Получение среднего размера зп исходя из отрасли."""
+        return self.get_value_by_sector(property_name='average_salary')
+
+    def get_avg_personal_income_tax(self):
+        """Размер НДФЛ."""
+        avg_number_of_staff = (self.data.get('from_staff') + self.data.get('to_staff')) / 2
+        return (
+            avg_number_of_staff *
+            self.get_value_by_sector(property_name='average_salary') *
+            self.archive.personal_income_rate
+        )
+
+
+    def get_avg_taxes_to_the_subject_budget(self):
+        """Уплата возможного налога на доходы в бюджет субъекта."""
+        income = self.get_value_by_sector(property_name='possible_income_from_patent')
+        return income * self.archive.income_tax_rate_to_the_subject_budget
+
+    def get_avg_taxes_to_the_federal_budget(self):
+        """Уплата возможного налога на доходы в бюджет страны."""
+        income = self.get_value_by_sector(property_name='possible_income_from_patent')
+        return income * self.archive.income_tax_rate_to_the_federal_budget
+
+    def get_avg_property_tax(self):
+        """Уплата возможного налога на имущество."""
+        avg_property_range = (self.data.get('from_property_area') + self.data.get('from_property_area')) / 2
+        avg_property_costs = avg_property_range * self.get_value_by_territorial_locations('property_cadastral_value')
+        return avg_property_costs * self.archive.property_tax_rate
+
+    def get_avg_land_tax(self):
+        """Уплата возможного налога на землю."""
+        avg_property_range = (self.data.get('from_land_area') + self.data.get('to_land_area')) / 2
+        avg_property_costs = avg_property_range * self.get_value_by_territorial_locations('land_cadastral_value')
+        return avg_property_costs * self.archive.land_tax_rate

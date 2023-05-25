@@ -4,29 +4,35 @@ from django.conf import settings
 from django.contrib.auth import login, logout
 from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 
 from server.apps.services.views import RetrieveListUpdateViewSet
 from server.apps.user.api.serializers import (
     ChangePasswordSerializer,
+    ConfirmEmailRequestSerializer,
+    ConfirmEmailProcessSerializer,
     LoginSerializer,
+    RegisterSerializer,
     ResetPasswordConfirmSerializer,
     ResetPasswordRequestSerializer,
-    UserSerializer, RegisterSerializer, ConfirmEmailRequestSerializer,
-    ConfirmEmailProcessSerializer,
+    UserSerializer,
 )
 from server.apps.user.models import User
-from server.apps.user.services.create_user import create_new_user, \
-    send_confirm_email
-from server.apps.user.services.helper import get_django_user, check_extra_path, \
-    get_user_by_email_and_check_token
-from server.apps.user.services.password import (
+from server.apps.user.services.confirm_email import (
+    check_extra_path,
+    get_user_by_email_and_check_token,
+)
+from server.apps.user.services.create_user import create_new_user
+from server.apps.user.services.reset_password import (
     get_user_reset_password_process,
-    send_email_with_reset_password,
     set_new_password,
+)
+from server.apps.user.services.send_email import (
+    send_confirm_email,
+    send_email_with_reset_password,
 )
 
 
@@ -64,11 +70,14 @@ class UserViewSet(RetrieveListUpdateViewSet):
     permission_type_map = {
         **RetrieveListUpdateViewSet.permission_type_map,
         'login': None,
-        'logout': 'action_is_authenticated',
         'register': None,
+        'confirm_email_request': None,
+        'confirm_email_process': None,
         'reset_password_request': None,
         'reset_password_process': None,
         'change_password': 'action_is_authenticated',
+        'get_info': 'action_is_authenticated',
+        'logout': 'action_is_authenticated',
     }
 
     def get_queryset(self):
@@ -79,36 +88,16 @@ class UserViewSet(RetrieveListUpdateViewSet):
         if user.is_superuser:
             return queryset
 
+        if user.is_anonymous:
+            return queryset.none()
+
         return queryset.filter(pk=user.pk)
-
-    def create(self, request, *args, **kwargs):
-        """Создание пользователя через api.
-
-        После добавления пользователя отправляем на почту письмо с
-        инструкцией по установке пароля.
-        """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        # Отправляем письмо с установкой пароля.
-        send_email_with_reset_password(
-            user=serializer.instance,
-            request=request,
-        )
-
-        return Response(
-            data=serializer.data,
-            status=status.HTTP_201_CREATED,
-            headers=headers,
-        )
 
     @action(
         ['POST'],
         url_path='login',
         detail=False,
         serializer_class=LoginSerializer,
-        permission_classes=[permissions.AllowAny],
     )
     def login(self, request):
         """Авторизация пользователя.
@@ -122,7 +111,7 @@ class UserViewSet(RetrieveListUpdateViewSet):
         serializer.is_valid(raise_exception=True)  # noqa: WPS204
         login(request, serializer.user)
 
-        return Response(None, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
     @action(
         ['POST'],
@@ -136,10 +125,6 @@ class UserViewSet(RetrieveListUpdateViewSet):
         serializer.is_valid(raise_exception=True)
         user = create_new_user(data=serializer.validated_data)
 
-        user.set_password(serializer.validated_data.get('password1'))
-        user.save()
-        user.refresh_from_db()
-
         # Отправляем письмо активации пользователя
         send_confirm_email(
             request=request,
@@ -147,7 +132,7 @@ class UserViewSet(RetrieveListUpdateViewSet):
         )
 
         return Response(
-            DetailedUserSerializer(user).data,  # type: ignore
+            data=UserSerializer(user).data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -165,9 +150,10 @@ class UserViewSet(RetrieveListUpdateViewSet):
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = get_django_user(serializer.validated_data.get('email'))
+
+        # Отправляем письмо активации пользователя
         send_confirm_email(
-            user=user,
+            user=serializer.user,
             request=request,
         )
 
@@ -191,51 +177,39 @@ class UserViewSet(RetrieveListUpdateViewSet):
     def confirm_email_process(self, request, extra_path=None):
         """Подтверждение регистрации."""
         if request.method == 'GET':
+            # Проверка токена.
             email, key = check_extra_path(extra_path)
+            user = get_user_by_email_and_check_token(email, key)
             return Response(
-                data=UserSerializer(get_user_by_email_and_check_token(email, key)).data,
+                data=UserSerializer(user).data,
                 status=status.HTTP_200_OK,
             )
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        # Проверка токена.
         email, key = check_extra_path(extra_path)
         user = get_user_by_email_and_check_token(email, key)
 
         if not default_token_generator.check_token(user, key):
-            raise ValidationError(
+            raise ParseError(
                 _('Некорректный ключ подтверждения активации'),
             )
+
         if user.is_active:
             return HttpResponseRedirect(settings.EMAIL_CONFIRM_REDIRECT_URL)
+
         user.is_active = True
         user.save()
 
         return HttpResponseRedirect(settings.EMAIL_CONFIRM_REDIRECT_URL)
 
     @action(
-        methods=['GET'],
-        detail=False,
-        url_path='get-info',
-        serializer_class=UserSerializer,
-    )
-    def get_info(self, request):
-        """Получение информации о пользователе."""
-        if request.user.is_authenticated:
-            serializer = self.get_serializer(
-                User.objects.get(id=request.user.id),
-            )
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(
-            status=status.HTTP_403_FORBIDDEN,
-        )
-
-    @action(
         methods=['POST'],
         url_path='send-reset-password-email',
         detail=False,
         serializer_class=ResetPasswordRequestSerializer,
-        permission_classes=[permissions.AllowAny],
     )
     def reset_password_request(self, request):
         """Запрос сброса пароля.
@@ -268,7 +242,6 @@ class UserViewSet(RetrieveListUpdateViewSet):
         detail=False,
         url_path='reset-password/(?P<extra_path>.+)?',
         serializer_class=ResetPasswordConfirmSerializer,
-        permission_classes=[permissions.AllowAny],
     )
     def reset_password_process(self, request, extra_path: str):
         """Сброс пароля пользователя.
@@ -318,6 +291,20 @@ class UserViewSet(RetrieveListUpdateViewSet):
 
         return Response(
             data={'detail': _('Пароль успешно изменен')},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        methods=['GET'],
+        detail=False,
+        url_path='get-info',
+        serializer_class=UserSerializer,
+    )
+    def get_info(self, request):
+        """Получение информации о пользователе."""
+        serializer = self.get_serializer(request.user)
+        return Response(
+            data=serializer.data,
             status=status.HTTP_200_OK,
         )
 

@@ -1,12 +1,10 @@
 from typing import Optional
 
-from django.conf import settings
-from django.contrib.auth import authenticate, get_user_model
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import authenticate
 from rest_framework import serializers
 
-User = get_user_model()
+from server.apps.user.models import User
+from server.apps.user.services.check_user import get_django_user
 
 
 class LoginSerializer(serializers.Serializer):
@@ -14,25 +12,18 @@ class LoginSerializer(serializers.Serializer):
 
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
-    captcha_token = serializers.CharField(required=True)
 
-    user: Optional[User] = None  # type: ignore
+    user: Optional[User] = None
 
     def validate(self, attrs):
         """Пробуем авторизовать пользователя."""
         email = attrs.get('email')
         password = attrs.get('password')
-
-        try:
-            User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise ValidationError({
-                'email': _('Пользователь с таким email не найден.'),
-            })
+        user = get_django_user(email=email)
 
         self.user = authenticate(
             request=self.context.get('request'),
-            username=email,
+            email=email,
             password=password,
         )
 

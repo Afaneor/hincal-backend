@@ -28,6 +28,7 @@ _base_settings = (
     'components/csp.py',
     'components/hincal.py',
     'components/email.py',
+    'components/celery.py',
     # Select the right env:
     'environments/{0}.py'.format(_ENV),
     # Optionally override some settings:

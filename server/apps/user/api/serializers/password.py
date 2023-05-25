@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from server.apps.user.models import User
-from server.apps.user.services.password import check_new_password
+from server.apps.user.services.reset_password import check_new_password
 
 
 class ResetPasswordRequestSerializer(serializers.Serializer):

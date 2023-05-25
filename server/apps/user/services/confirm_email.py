@@ -2,27 +2,14 @@ import re
 from typing import Optional, Tuple
 
 from allauth.account.forms import default_token_generator
-from django.contrib.auth.models import AbstractUser, User
 from django.utils.translation import gettext as _
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound
 
 from server.apps.services.exception import ApiError
+from server.apps.user.models import User
+
 
 CONFIRM_EMAIL_REGEXP = re.compile('(?P<email>.+)/(?P<key>.+)')
-
-
-def get_django_user(email: Optional[str]) -> AbstractUser:
-    """Поиск пользователя с заданным email."""
-    try:
-        user = User.objects.get(email=email)
-    except User.DoesNotExist:
-        raise NotFound(_('Пользователь не найден'))
-
-    if user.is_active:
-        raise ValidationError(
-            {'email': [_('Пользователь с указанным email уже активен')]},
-        )
-    return user
 
 
 def check_extra_path(
@@ -40,6 +27,7 @@ def check_extra_path(
         ),
     )
 
+
 def get_user_by_email_and_check_token(email: str, key: str):
     """Получаем пользователя по e-mail и проверяем токен."""
     try:
@@ -51,4 +39,3 @@ def get_user_by_email_and_check_token(email: str, key: str):
         raise ApiError(_('Токен подтверждения регистрации не действителен'))
 
     return user
-

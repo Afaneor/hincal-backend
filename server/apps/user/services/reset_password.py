@@ -1,19 +1,12 @@
 import re
 
-from allauth import account
 from allauth.account.forms import default_token_generator
-from allauth.account.utils import url_str_to_user_pk, user_username, \
-    user_pk_to_url_str
-from allauth.utils import build_absolute_uri
+from allauth.account.utils import url_str_to_user_pk
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from rest_framework.exceptions import ValidationError
-from rest_framework.request import Request
-from rest_framework.reverse import reverse
 
 from server.apps.services.exception import ApiError
 from server.apps.user.models import User
@@ -52,38 +45,6 @@ def get_user_by_token(uidb36_inner: str, key: str) -> AbstractUser:
     if reset_user is None or invalid_token:
         raise ApiError(_('Токен сброса пароля не действителен'))
     return reset_user
-
-
-def send_email_with_reset_password(
-    user: User,
-    request: Request,
-) -> None:
-    """Отправка пользователю письма со сбросом пароля."""
-    path = reverse(
-        settings.USERS_PASSWORD_RESET_REVERSE_URL,  # type: ignore
-        kwargs={
-            'extra_path':
-                f'{user_pk_to_url_str(user)}-' +  # noqa: WPS237
-                str(default_token_generator.make_token(user)),
-        },
-    )
-    url = build_absolute_uri(request, path)
-    url_without_api = url.replace('api/user/users', '')
-
-    context = {
-        'current_site': get_current_site(request),
-        'user': user,
-        'password_reset_url': url_without_api,
-        'request': request,
-        'year': now().year,
-    }
-
-    method = account.app_settings.AUTHENTICATION_METHOD
-    if method != account.app_settings.AuthenticationMethod.EMAIL:
-        context['username'] = user_username(user)  # noqa: WPS226
-    account.adapter.get_adapter(request).send_mail(
-        'account/email/password_reset_key', user.email, context,
-    )
 
 
 def set_new_password(extra_path: str, password: str):

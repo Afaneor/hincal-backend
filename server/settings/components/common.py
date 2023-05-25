@@ -24,12 +24,8 @@ SITE_ID = 1
 
 # Application definition:
 INSTALLED_APPS: Tuple[str, ...] = (
-    # Your apps go here:
-    'server.apps.hincal',
-    'server.apps.blog',
-    'server.apps.user',
-
     # Default django apps:
+    'corsheaders',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.messages',
@@ -48,6 +44,11 @@ INSTALLED_APPS: Tuple[str, ...] = (
     'allauth.account',
     'rules',
     'taggit',
+
+    # Your apps go here:
+    'server.apps.hincal',
+    'server.apps.blog',
+    'server.apps.user',
 
     # documentation
     'drf_yasg',
@@ -69,6 +70,7 @@ MIDDLEWARE: Tuple[str, ...] = (
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

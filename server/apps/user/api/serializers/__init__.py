@@ -4,7 +4,7 @@ from server.apps.user.api.serializers.password import (
     ResetPasswordConfirmSerializer,
     ResetPasswordRequestSerializer,
 )
-
+from server.apps.user.api.serializers.register import RegisterSerializer
 from server.apps.user.api.serializers.user import (  # noqa: WPS235
     BaseInfoUserSerializer,
     UserSerializer,
@@ -12,6 +12,7 @@ from server.apps.user.api.serializers.user import (  # noqa: WPS235
 
 __all__ = [
     'LoginSerializer',
+    'RegisterSerializer',
     'BaseInfoUserSerializer',
     'ChangePasswordSerializer',
     'ResetPasswordRequestSerializer',

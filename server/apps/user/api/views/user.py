@@ -11,9 +11,11 @@ from server.apps.user.api.serializers import (
     LoginSerializer,
     ResetPasswordConfirmSerializer,
     ResetPasswordRequestSerializer,
-    UserSerializer,
+    UserSerializer, RegisterSerializer,
 )
 from server.apps.user.models import User
+from server.apps.user.services.create_user import create_new_user, \
+    send_confirm_email
 from server.apps.user.services.serializers.password import (
     get_user_reset_password_process,
     send_email_with_reset_password,
@@ -54,8 +56,8 @@ class UserViewSet(RetrieveListCreateUpdateViewSet):
     ordering_fields = '__all__'
     permission_type_map = {
         **RetrieveListCreateUpdateViewSet.permission_type_map,
-        'logout': 'action_is_authenticated',
         'login': None,
+        'logout': 'action_is_authenticated',
         'reset_password_request': None,
         'reset_password_process': None,
         'change_password': 'action_is_authenticated',
@@ -113,6 +115,79 @@ class UserViewSet(RetrieveListCreateUpdateViewSet):
         login(request, serializer.user)
 
         return Response(None, status=status.HTTP_200_OK)
+
+    @action(
+        ['POST'],
+        detail=False,
+        url_path='register',
+        serializer_class=RegisterSerializer,
+    )
+    def register(self, request):  # noqa: WPS210
+        """Регистрация пользователя."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = create_new_user(data=serializer.validated_data)
+
+        user.set_password(serializer.validated_data.get('password1'))
+        user.save()
+        user.refresh_from_db()
+
+        # Отправляем письмо активации пользователя
+        send_confirm_email(
+            request=request,
+            user=user,
+            flag='django_all_auth',
+        )
+
+        return Response(
+            DetailedUserSerializer(user).data,  # type: ignore
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        methods=['GET'],
+        detail=False,
+        url_path='confirm-email/(?P<email>.+)/(?P<key>.+)',
+    )
+    def confirm_email(self, request, email=None, key=None):
+        """Подтверждение регистрации."""
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise ValidationError(
+                _('Пользователь не зарегистрирован в системе'),
+            )
+        if not default_token_generator.check_token(user, key):
+            raise ValidationError(
+                _('Некорректный ключ подтверждения активации'),
+            )
+        if user.is_active:
+            return HttpResponseRedirect(settings.EMAIL_CONFIRM_REDIRECT_URL)
+        user.is_active = True
+        user.save()
+
+        return HttpResponseRedirect(settings.EMAIL_CONFIRM_REDIRECT_URL)
+
+    @action(
+        methods=['GET'],
+        detail=False,
+        url_path='get-info',
+        serializer_class=DetailedUserSerializer,
+    )
+    def get_info(self, request):
+        """Получение информации о пользователе."""
+        if request.user.is_authenticated:
+            serializer = self.get_serializer(
+                User.objects.get(id=request.user.id),
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(
+            {'status': 'error', 'message': _('Требуется вход')},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+
+
 
     @action(
         methods=['POST'],

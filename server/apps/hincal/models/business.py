@@ -8,6 +8,7 @@ from server.apps.hincal.services.enums import (
     TerritorialLocation,
     TypeBusiness,
 )
+from server.apps.hincal.services.validators import inn_validator
 from server.apps.services.base_model import AbstractBaseModel
 
 
@@ -30,7 +31,6 @@ class Business(AbstractBaseModel):
         _('Должность пользователя в бизнесе'),
         max_length=settings.MAX_STRING_LENGTH,
         blank=True,
-
     )
     type = models.CharField(
         _('Тип бизнеса'),
@@ -40,7 +40,8 @@ class Business(AbstractBaseModel):
     )
     inn = models.CharField(
         _('ИНН физического лица, ИП или компания'),
-        max_length=settings.MAX_STRING_LENGTH,
+        max_length=12,  # noqa: WPS432
+        validators=[inn_validator],
         blank=True,
     )
     sector = models.CharField(
@@ -52,6 +53,7 @@ class Business(AbstractBaseModel):
         _('Подотрасль хозяйственной деятельности'),
         max_length=settings.MAX_STRING_LENGTH,
         choices=BusinessSubSector.choices,
+        blank=True,
     )
     territorial_location = models.CharField(
         _('Территориальное положение бизнеса'),

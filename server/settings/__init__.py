@@ -26,7 +26,7 @@ _base_settings = (
     'components/common.py',
     'components/logging.py',
     'components/csp.py',
-    'components/hincal_backend.py',
+    'components/hincal.py',
     # Select the right env:
     'environments/{0}.py'.format(_ENV),
     # Optionally override some settings:

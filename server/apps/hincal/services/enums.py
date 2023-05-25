@@ -84,3 +84,11 @@ class TerritorialLocation(models.TextChoices):
     YUWAO = 'yuwao', _('ЮВАО')
     YUZAO = 'yuzao', _('ЮЗАО')
     OTHER = 'other', _('Другое')
+
+
+class TypeTaxSystem(models.TextChoices):
+    """Тип системы налогооблажения."""
+
+    OSN = 'osn', _('Общая система налогооблажения')
+    YSN = 'ysn', _('Упрощенная система налогооблажения')
+    PATENT = 'patent', _('Патентная система налогооблажения')

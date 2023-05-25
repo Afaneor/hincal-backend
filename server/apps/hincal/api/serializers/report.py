@@ -6,7 +6,7 @@ from server.apps.hincal.models import Report, Equipment
 from server.apps.hincal.services.enums import (
     BusinessSector,
     BusinessSubSector,
-    TerritorialLocation,
+    TerritorialLocation, TypeBusiness, TypeTaxSystem,
 )
 from server.apps.services.serializers import ModelSerializerWithPermission
 
@@ -30,6 +30,9 @@ class ReportSerializer(ModelSerializerWithPermission):
 class CreateReportSerializer(serializers.Serializer):
     """Создание отчета."""
 
+    type_business = serializers.CharField(
+        required=True,
+    )
     sectors = serializers.ListField(
         child=serializers.CharField(),
         required=True,
@@ -50,9 +53,25 @@ class CreateReportSerializer(serializers.Serializer):
         queryset=Equipment.objects.all(),
         many=True,
     )
-    is_accounting = serializers.BooleanField()
-    is_patent = serializers.BooleanField()
+    type_tax_system = serializers.CharField(
+        default=TypeTaxSystem.OSN,
+    )
+    need_accounting = serializers.BooleanField()
+    need_registration = serializers.BooleanField()
+
     other = serializers.JSONField()
+
+    def validate_type_business(self, type_business):
+        """Валидация типа."""
+        if type_business not in {TypeBusiness.LEGAL, TypeBusiness.INDIVIDUAL}:
+            raise ValidationError(
+                {'type_business': [
+                    _(
+                        'Ведение бизнеса может только ИП или юридическое лицо',
+                    ),
+                ]},
+            )
+        return type_business
 
     def validate_sectors(self, sectors):
         """Валидация сектора."""
@@ -77,13 +96,34 @@ class CreateReportSerializer(serializers.Serializer):
         for territorial_location in territorial_locations:
             if territorial_location not in TerritorialLocation.value:
                 raise ValidationError(
-                    {
-                        'territorial_locations': [
-                            _(
-                                'Вы выбрали некорректное территориальное ' +
-                                'расположение',
-                            ),
-                        ],
-                    },
+                    {'territorial_locations': [
+                        _(
+                            'Вы выбрали некорректное территориальное ' +
+                            'расположение',
+                        ),
+                    ]},
                 )
         return territorial_locations
+
+    def validate_type_tax_system(self, type_tax_system):
+        """Валидация типа системы налогооблажения."""
+        if type_tax_system not in TypeTaxSystem.values:
+            raise ValidationError(
+                {'type_tax_system': [_('Некорректная система налогооблажения')]},
+            )
+        return type_tax_system
+
+    def validate(self, attrs):
+        """Общая валидация.
+
+        У юридического лица нет патентной системы налогооблажения.
+        """
+        type_business = attrs.get('type_business')
+        type_tax_system = attrs.get('type_tax_system')
+        if type_business == TypeBusiness.LEGAL and type_tax_system == TypeTaxSystem.PATENT:
+            raise ValidationError(
+                {'type_tax_system':
+                     [_('У юридического лица нет патентной системы налогооблажения')]
+                 },
+            )
+        return attrs

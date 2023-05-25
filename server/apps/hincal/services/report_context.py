@@ -1,179 +1,172 @@
-from typing import Optional
+import datetime
+from dataclasses import dataclass, field
+from decimal import Decimal
 
-from django.contrib.auth.models import AnonymousUser
-from django.db import models
-
-from server.apps.hincal.models import Archive, Indicator
-from server.apps.hincal.services.enums import (
-    BusinessSector,
-    BusinessSubSector,
-    TerritorialLocation,
-)
-from server.apps.user.models import User
+from server.apps.hincal.models import Business, Archive
 
 
-class ReportContext(object):
-    """Формирование context для отчета."""
+@dataclass()
+class ReportContextDataClass:
+    """Дата класс контекста отчета."""
 
-    archive = Archive.objects.get(is_actual=True)
+    # Дата формирования отчета.
+    create_date: str = datetime.datetime.now()
+    # Информация о бизнесе.
+    business: dict = None
+    # Исходные данные.
+    initial_data: dict = None
 
-    def __int__(
-        self,
-        user: Optional[User, AnonymousUser],
-        data: dict,
-        margin_error: bool,
-    ):
-        """Инициализация переменных для работы."""
-        self.user = user
-        self.data = data
-        # Верхний и нижний уровни погрешности. Уменьшаем или увеличиваем
-        # переданные показатели.
-        if margin_error:
-            self.lower_margin_error = 0.9
-            self.upper_margin_error = 1.1
-        else:
-            self.lower_margin_error = 1
-            self.upper_margin_error = 1
+    # Генерация текста из ChatGPT.
+    chat_gpt_page_2: str = ''
+    chat_gpt_page_3: str = ''
+    chat_gpt_page_4: str = ''
+    chat_gpt_page_5: str = ''
+    chat_gpt_page_6: str = ''
+    chat_gpt_page_7: str = ''
+    chat_gpt_page_8: str = ''
 
-    def get_filter_with_correct_sector(self) -> models.Q:
-        """Получение фильтра с корректным сектором."""
-        filters = models.Q()
-        if sectors := self.data.get('sectors'):
-            filters = models.Q(
-                filters &
-                models.Q(business__sector__in=sectors)
-            )
-            # Если выбран подсектор, то ищем совпадения и по сектору и
-            # по подсектору. Иначе ищем по всем доступным.
-            if sub_sectors := self.data.get('sub_sectors'):
-                filters = models.Q(
-                    filters &
-                    models.Q(business__sub_sector__in=sub_sectors)
-                )
-            else:
-                filters = models.Q(
-                    filters &
-                    models.Q(business__sub_sector__in=BusinessSubSector.value)
-                )
-        else:
-            filters = models.Q(
-                filters &
-                models.Q(business__sector__in=BusinessSector.value)
-            )
+    # Итоговые возможные расходы по всему.
+    all_possible_costs: Decimal = field(init=False)
+    # Общие расходны на сотрудников.
+    all_staff_costs: Decimal = field(init=False)
+    # Общие расходны на аренду земли и объектов недвижимости.
+    all_lp_lease_costs: Decimal = field(init=False)
+    # Общие расходны на покупку земли и объектов недвижимости.
+    all_lp_purchase_costs: Decimal = field(init=False)
+    # Общие расходны на налоги по земле и объектам недвижимости.
+    all_lp_tax_costs: Decimal = field(init=False)
+    # Общие налоги на сотрудников, землю и объекты недвижимости.
+    all_tax_costs: Decimal = field(init=False)
+    # Общие расходы на услуги.
+    all_services_costs: Decimal = field(init=False)
 
-        return filters
+    # Средние показатели расходов.
+    # Расходы по персоналу.
+    avg_number_of_staff: Decimal = Decimal(0)
+    avg_salary_of_staff: Decimal = Decimal(0)
+    avg_taxes_to_the_budget: Decimal = Decimal(0)
+    avg_income_tax: Decimal = Decimal(0)
+    avg_property_tax: Decimal = Decimal(0)
+    avg_land_tax: Decimal = Decimal(0)
+    avg_personal_income_tax: Decimal = Decimal(0)
+    avg_transport_tax: Decimal = Decimal(0)
+    avg_other_taxes: Decimal = Decimal(0)
 
-    def get_filter_with_correct_staff(self) -> models.Q:
-        """Получение фильтра с корректным персоналом."""
-        return models.Q(
-            models.Q(average_number_of_employees__gte=self.data.get('from_staff') * self.lower_margin_error) &  # noqa: E501
-            models.Q(average_number_of_employees__lte=self.data.get('to_staff') * self.upper_margin_error)  # noqa: E501
+    # Расходы на оборудование.
+    equipment_costs: Decimal = Decimal(0)
+    # Расходы на бухгалтерские услуги.
+    accounting_costs: Decimal = Decimal(0)
+    # Расходы на регистрацию.
+    registration_costs: Decimal = Decimal(0)
+
+    # Расходы на з.п./налоги/взносы персонала.'
+    avg_staff_tax_costs: Decimal = field(init=False)
+    avg_staff_pension_contributions_costs: Decimal = field(init=False)
+    avg_staff_medical_contributions_costs: Decimal = field(init=False)
+
+    # Расходы аренды/покупки земли.
+    avg_land_lease_costs: Decimal = field(init=False)
+    avg_land_purchase_costs: Decimal = field(init=False)
+
+    # Расходы аренды/покупки/ремонта на объекты недвижимости.
+    building_lease_costs: Decimal = field(init=False)
+    building_purchase_costs: Decimal = field(init=False)
+    building_repair_costs: Decimal = field(init=False)
+
+    archive: Archive = None
+
+    def __post_init__(self):
+        # Расходы на налоги/взносы персонала. Размер налогов уже включен в з/п.
+        self.avg_staff_tax_costs = (
+            self.avg_number_of_staff *
+            self.avg_salary_of_staff *
+            self.archive.personal_income_rate
+        )
+        self.avg_staff_pension_contributions_costs = (
+            self.avg_number_of_staff *
+            self.avg_salary_of_staff *
+            self.archive.pension_contributions_rate
+        )
+        self.avg_staff_medical_contributions_costs = (
+            self.avg_number_of_staff *
+            self.avg_salary_of_staff *
+            self.archive.medical_contributions_rate
         )
 
-    def get_filter_with_correct_location(self) -> models.Q:
-        """Получение фильтра с корректным территориальным расположением."""
-        # Eсли локация не передана, ищем по всем доступным.
-        if territorial_locations := self.data.get('territorial_locations'):
-            return models.Q(
-                models.Q(business__territorial_location__in=territorial_locations)  # noqa: E501
-            )
-        else:
-            return models.Q(
-                models.Q(business__territorial_location__in=TerritorialLocation.values)  # noqa: E501
-            )
-
-    def get_value_by_territorial_locations(self, helper_name: str):
-        """Получение корректных числовых значений по переданным округам."""
-        # Получаем территориальное расположение. Если передан список,
-        # то проходимся по списку, берем все знаяченя и и берем их среднее.
-        # В противном случае отдаем просто среднее значение по всем.
-        if territorial_locations := self.data.get('territorial_locations'):
-            average_value = 0
-            for territorial_location in territorial_locations:
-                average_value += self.archive.land_tax_rate.get(territorial_location)
-
-            return average_value // len(territorial_locations)
-
-        return self.archive.land_tax_rate.get('OTHER')
-
-
-    def get_filter_with_correct_land_area(self) -> models.Q:
-        """Получение фильтра с корректной площадью земельного участка."""
-        filters = models.Q()
-        from_land_area = self.data.get('from_land_area', None)
-        to_land_area = self.data.get('to_land_area', from_land_area)
-        # Если не передан размер земли, то ищем по всем доступным. Поскольку
-        # данных по земли нет, то переводим размер земли в размер налога
-        # на землю.
-        if from_land_area:
-            #  Средний размер площади земельного участка.
-            average_land_area = (from_land_area + to_land_area) // 2
-            # Размер налога.
-            land_tax = (
-                average_land_area *
-                self.get_value_by_territorial_locations(
-                    helper_name='land_cadastral_value',
-                ) *
-                self.archive.land_tax_rate
-            )
-
-            return models.Q(
-                models.Q(land_tax__gte=land_tax * self.archive.lower_tax_margin_error) &
-                models.Q(land_tax__lte=land_tax * self.archive.upper_tax_margin_error)
-            )
-
-        return filters
-
-
-    def get_filter_with_correct_property_area(self) -> models.Q:
-        """Получение фильтра с корректной площадью объектов капитального строительства."""
-        filters = models.Q()
-        from_property_area = self.data.get('from_property_area', None)
-        to_property_area = self.data.get('to_property_area', from_property_area)
-        # Если не передан размер имущества, то ищем по всем доступным. Поскольку
-        # данных по имуществу нет, то переводим размер имущества в размер налога
-        # на имущество.
-        if from_property_area:
-            #  Средний размер площади имущества.
-            average_property_area = (from_property_area + to_property_area) // 2
-            # Размер налога.
-            property_tax = (
-                average_property_area *
-                self.get_value_by_territorial_locations(
-                    helper_name='property_cadastral_value',
-                ) *
-                self.archive.property_tax_rate
-            )
-
-            return models.Q(
-                models.Q(property_tax__gte=property_tax * self.archive.lower_tax_margin_error) &
-                models.Q(property_tax__lte=property_tax * self.archive.upper_tax_margin_error)
-            )
-
-        return filters
-
-    def get_avg_indicators(self) -> models.QuerySet[Indicator]:
-        """Получение корректных показателей для формирования отчета."""
-        filters = models.Q(
-            self.get_filter_with_correct_sector() &
-            self.get_filter_with_correct_staff() &
-            self.get_filter_with_correct_location() &
-            self.get_filter_with_correct_land_area() &
-            self.get_filter_with_correct_property_area()
+        # Расходы аренды/покупки земли.
+        land_area = self.avg_land_tax / self.archive.land_tax_rate
+        self.avg_land_lease_costs = (
+            land_area * self.archive.avg_land_lease_costs
         )
-        return Indicator.objects.filter(filters).aggregate(
-            avg_average_number_of_employees=models.Avg('average_number_of_employees'),
-            avg_average_salary_of_employees=models.Avg('average_salary_of_employees'),
-            avg_taxes_to_the_budget=models.Avg('taxes_to_the_budget'),
-            avg_income_tax=models.Avg('income_tax'),
-            avg_property_tax=models.Avg('property_tax'),
-            avg_land_tax=models.Avg('land_tax'),
-            avg_personal_income_tax=models.Avg('personal_income_tax'),
-            avg_transport_tax=models.Avg('transport_tax'),
-            avg_other_taxes=models.Avg('other_taxes'),
+        self.avg_land_purchase_costs = (
+            land_area * self.archive.avg_land_purchase_costs
         )
 
-    def formation_context(self):
-        """Формирование контекста."""
-        avg_indicators = self.get_avg_indicators()
+        # Расходы аренды/покупки/ремонта на объекты недвижимости.
+        property_area = self.avg_property_tax / self.archive.property_tax_rate
+        self.property_lease_costs = (
+            property_area * self.archive.avg_property_lease_costs
+        )
+        self.property_purchase_costs = (
+            property_area * self.archive.avg_property_purchase_costs
+        )
+        self.property_repair_costs = (
+            property_area * self.archive.avg_property_repair_costs
+        )
 
+        # Итоговые возможные расходы по всему.
+        self.all_possible_costs = (
+            self.avg_number_of_staff +
+            self.avg_salary_of_staff +
+            self.avg_taxes_to_the_budget +
+            self.avg_income_tax +
+            self.avg_property_tax +
+            self.avg_land_tax +
+            self.avg_personal_income_tax +
+            self.avg_transport_tax +
+            self.avg_other_taxes +
+            self.avg_staff_pension_contributions_costs +
+            self.avg_staff_medical_contributions_costs +
+            self.avg_land_lease_costs +
+            self.property_lease_costs +
+            self.equipment_costs +
+            self.accounting_costs +
+            self.registration_costs
+        )
+        # Общие расходны на сотрудников.
+        self.all_staff_costs = (
+            self.avg_salary_of_staff +
+            self.avg_staff_pension_contributions_costs +
+            self.avg_staff_medical_contributions_costs
+        )
+        # Общие расходны на аренду земли и объектов недвижимости.
+        self.all_lp_lease_costs = (
+            self.avg_land_lease_costs +
+            self.property_lease_costs +
+            self.property_repair_costs
+        )
+        # Общие расходны на покупку земли и объектов недвижимости.
+        self.all_lp_purchase_costs = (
+            self.avg_land_purchase_costs +
+            self.property_lease_costs +
+            self.property_repair_costs
+        )
+        # Общие расходны на налоги по земле и объектам недвижимости.
+        self.all_lp_tax_costs = (
+            self.avg_property_tax +
+            self.avg_land_tax
+        )
+        # Общие расходы на сотрудников, аренду земли и объекты недвижимости.
+        self.all_staff_and_lease_lp_costs = (
+            self.all_staff_costs +
+            self.all_lp_lease_costs
+        )
+        # Общие расходы на сотрудников, покпку земли и объекты недвижимости.
+        self.all_staff_and_lease_lp_costs = (
+            self.all_staff_costs +
+            self.all_lp_purchase_costs
+        )
+        # Общие расходы на услуги.
+        self.all_services_costs =(
+            self.accounting_costs
+        )

@@ -18,13 +18,13 @@ class Indicator(AbstractBaseModel):
     year = models.IntegerField(
         _('Год, к которому относятся показатели'),
     )
-    average_number_of_employees = models.DecimalField(
-        _('Среднесписочная численность персонала'),
+    average_number_of_staff = models.DecimalField(
+        _('Среднесписочная численность сотрудников'),
         max_digits=20,
         decimal_places=3,
         null=True,
     )
-    average_salary_of_employees = models.DecimalField(
+    average_salary_of_staff = models.DecimalField(
         _('Средняя заработная плата сотрудника'),
         max_digits=20,
         decimal_places=3,

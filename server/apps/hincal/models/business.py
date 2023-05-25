@@ -36,6 +36,7 @@ class Business(AbstractBaseModel):
         _('Тип бизнеса'),
         max_length=settings.MAX_STRING_LENGTH,
         choices=TypeBusiness.choices,
+        null=True,
     )
     inn = models.CharField(
         _('ИНН физического лица, ИП или компания'),
@@ -147,7 +148,7 @@ class Business(AbstractBaseModel):
         max_length=settings.MAX_STRING_LENGTH,
         blank=True,
     )
-    email = models.CharField(
+    email = models.EmailField(
         _('Email, относящийся к бизнесу'),
         max_length=settings.MAX_STRING_LENGTH,
         blank=True,

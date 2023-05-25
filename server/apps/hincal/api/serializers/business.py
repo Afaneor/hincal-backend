@@ -45,3 +45,35 @@ class BusinessSerializer(ModelSerializerWithPermission):
             'created_at',
             'updated_at',
         )
+
+
+class BusinessForReportSerializer(ModelSerializerWithPermission):
+    """Информация о бизнесе для отчета."""
+
+    class Meta(object):
+        model = Business
+        fields = (
+            'type',
+            'inn',
+            'sector',
+            'sub_sector',
+            'territorial_location',
+            'short_business_name',
+            'full_business_name',
+            'management_name',
+            'management_position',
+            'full_opf',
+            'short_opf',
+            'okved',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'address',
+            'country',
+            'region',
+            'city_area',
+            'city_district',
+            'phone',
+            'email',
+            'site',
+        )

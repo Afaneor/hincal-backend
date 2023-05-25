@@ -1,8 +1,12 @@
 import django_filters
-from django.contrib.auth import get_user_model, login, logout
+from allauth.account.forms import default_token_generator
+from django.conf import settings
+from django.contrib.auth import login, logout
+from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from rest_framework import permissions, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from server.apps.services.views import RetrieveListCreateUpdateViewSet
@@ -11,12 +15,15 @@ from server.apps.user.api.serializers import (
     LoginSerializer,
     ResetPasswordConfirmSerializer,
     ResetPasswordRequestSerializer,
-    UserSerializer, RegisterSerializer,
+    UserSerializer, RegisterSerializer, ConfirmEmailRequestSerializer,
+    ConfirmEmailProcessSerializer,
 )
 from server.apps.user.models import User
 from server.apps.user.services.create_user import create_new_user, \
     send_confirm_email
-from server.apps.user.services.serializers.password import (
+from server.apps.user.services.helper import get_django_user, check_extra_path, \
+    get_user_by_email_and_check_token
+from server.apps.user.services.password import (
     get_user_reset_password_process,
     send_email_with_reset_password,
     set_new_password,
@@ -136,7 +143,6 @@ class UserViewSet(RetrieveListCreateUpdateViewSet):
         send_confirm_email(
             request=request,
             user=user,
-            flag='django_all_auth',
         )
 
         return Response(
@@ -145,18 +151,56 @@ class UserViewSet(RetrieveListCreateUpdateViewSet):
         )
 
     @action(
-        methods=['GET'],
+        methods=['POST'],
         detail=False,
-        url_path='confirm-email/(?P<email>.+)/(?P<key>.+)',
+        url_path='resend-email-confirmation',
+        serializer_class=ConfirmEmailRequestSerializer,
     )
-    def confirm_email(self, request, email=None, key=None):
+    def confirm_email_request(self, request):
+        """Повторная отправка сообщения об активации аккаунта.
+
+        Общее описание: api позволяет направить письмо для активации аккаунта
+        пользователя.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = get_django_user(serializer.validated_data.get('email'))
+        send_confirm_email(
+            user=user,
+            request=request,
+        )
+
+        return Response(
+            data={
+                'detail': _(
+                    'На указанный адрес электронной почты ' +
+                    'отправлено письмо с подтверждением ' +
+                    'регистрации',
+                ),
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        methods=['GET', 'POST'],
+        detail=False,
+        url_path='confirm-email/(?P<extra_path>.+)?',
+        serializer_class=ConfirmEmailProcessSerializer,
+    )
+    def confirm_email_process(self, request, extra_path=None):
         """Подтверждение регистрации."""
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise ValidationError(
-                _('Пользователь не зарегистрирован в системе'),
+        if request.method == 'GET':
+            email, key = check_extra_path(extra_path)
+            return Response(
+                data=UserSerializer(get_user_by_email_and_check_token(email, key)).data,
+                status=status.HTTP_200_OK,
             )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email, key = check_extra_path(extra_path)
+        user = get_user_by_email_and_check_token(email, key)
+
         if not default_token_generator.check_token(user, key):
             raise ValidationError(
                 _('Некорректный ключ подтверждения активации'),
@@ -172,7 +216,7 @@ class UserViewSet(RetrieveListCreateUpdateViewSet):
         methods=['GET'],
         detail=False,
         url_path='get-info',
-        serializer_class=DetailedUserSerializer,
+        serializer_class=UserSerializer,
     )
     def get_info(self, request):
         """Получение информации о пользователе."""
@@ -182,12 +226,8 @@ class UserViewSet(RetrieveListCreateUpdateViewSet):
             )
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(
-            {'status': 'error', 'message': _('Требуется вход')},
             status=status.HTTP_403_FORBIDDEN,
         )
-
-
-
 
     @action(
         methods=['POST'],

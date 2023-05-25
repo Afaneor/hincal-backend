@@ -2,18 +2,21 @@ import re
 
 from allauth import account
 from allauth.account.forms import default_token_generator
-from allauth.account.utils import url_str_to_user_pk, user_username
+from allauth.account.utils import url_str_to_user_pk, user_username, \
+    user_pk_to_url_str
+from allauth.utils import build_absolute_uri
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
+from rest_framework.reverse import reverse
 
 from server.apps.services.exception import ApiError
 from server.apps.user.models import User
-from server.apps.user.services.path_to_api import path_for_front
 
 # Регулярное выражение для проверки на корректность пути сброса пароля
 RESET_PASSWORD_REGEXP = re.compile('(?P<uidb36>[0-9A-Za-z]+)-(?P<key>.+)')
@@ -56,11 +59,23 @@ def send_email_with_reset_password(
     request: Request,
 ) -> None:
     """Отправка пользователю письма со сбросом пароля."""
+    path = reverse(
+        settings.USERS_PASSWORD_RESET_REVERSE_URL,  # type: ignore
+        kwargs={
+            'extra_path':
+                f'{user_pk_to_url_str(user)}-' +  # noqa: WPS237
+                str(default_token_generator.make_token(user)),
+        },
+    )
+    url = build_absolute_uri(request, path)
+    url_without_api = url.replace('api/users/user/', '')
+
     context = {
         'current_site': get_current_site(request),
         'user': user,
-        'password_reset_url': path_for_front(user, request),
+        'password_reset_url': url_without_api,
         'request': request,
+        'year': now().year,
     }
 
     method = account.app_settings.AUTHENTICATION_METHOD

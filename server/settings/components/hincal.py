@@ -10,3 +10,12 @@ DADATA_API_URL = config(
     cast=str,
 )
 DADATA_TIMEOUT_SEC = 5
+
+
+USERS_PASSWORD_RESET_REVERSE_URL = (
+    'api:user-reset-password-process'  # noqa: S105
+)
+
+USERS_CONFIRM_EMAIL_REVERSE_URL = (
+    'api:user-confirm-email-process'
+)

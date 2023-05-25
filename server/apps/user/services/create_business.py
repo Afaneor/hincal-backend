@@ -36,27 +36,27 @@ class ClientBase:
         }
         if secret:
             headers["X-Secret"] = secret
-        self._client = httpx.AsyncClient(base_url=base_url, headers=headers)
+        self._client = httpx.Client(base_url=base_url, headers=headers)
 
-    async def __aenter__(self) -> "ClientBase":
+    def __aenter__(self) -> "ClientBase":
         return self
 
-    async def __aexit__(self, exc_type, exc_value, traceback):
-        await self.close()
+    def __aexit__(self, exc_type, exc_value, traceback):
+        self.close()
 
-    async def close(self):
+    def close(self):
         """Close network connections"""
-        await self._client.aclose()
+        self._client.aclose()
 
-    async def get(self, url, data, timeout=settings.DADATA_TIMEOUT_SEC):
+    def get(self, url, data, timeout=settings.DADATA_TIMEOUT_SEC):
         """GET request to Dadata API"""
-        response = await self._client.get(url, params=data, timeout=timeout)
+        response = self._client.get(url, params=data, timeout=timeout)
         response.raise_for_status()
         return response.json()
 
-    async def post(self, url, data, timeout=settings.DADATA_TIMEOUT_SEC):
+    def post(self, url, data, timeout=settings.DADATA_TIMEOUT_SEC):
         """POST request to Dadata API"""
-        response = await self._client.post(url, json=data, timeout=timeout)
+        response = self._client.post(url, json=data, timeout=timeout)
         response.raise_for_status()
         return response.json()
 
@@ -74,7 +74,7 @@ def get_business_by_inn(inn: str) -> List[dict]:
         base_url=settings.DADATA_API_URL,
         token=settings.DADATA_API_TOKEN,
     )
-    response = await client.post(
+    response = client.post(
         url=f'{settings.DADATA_API_URL}/findById/party',
         data={'query': inn},
     )

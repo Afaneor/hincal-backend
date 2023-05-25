@@ -4,7 +4,11 @@ from server.apps.user.api.serializers.password import (
     ResetPasswordConfirmSerializer,
     ResetPasswordRequestSerializer,
 )
-from server.apps.user.api.serializers.register import RegisterSerializer
+from server.apps.user.api.serializers.register import (
+    ConfirmEmailProcessSerializer,
+    ConfirmEmailRequestSerializer,
+    RegisterSerializer,
+)
 from server.apps.user.api.serializers.user import (  # noqa: WPS235
     BaseInfoUserSerializer,
     UserSerializer,
@@ -12,6 +16,8 @@ from server.apps.user.api.serializers.user import (  # noqa: WPS235
 
 __all__ = [
     'LoginSerializer',
+    'ConfirmEmailRequestSerializer',
+    'ConfirmEmailProcessSerializer',
     'RegisterSerializer',
     'BaseInfoUserSerializer',
     'ChangePasswordSerializer',

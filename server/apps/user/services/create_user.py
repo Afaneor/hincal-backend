@@ -17,7 +17,6 @@ from rest_framework.reverse import reverse
 def send_confirm_email(  # noqa: WPS210, C901
     user: AbstractUser,
     request: Request,
-    flag: str,
 ) -> None:
     """Отправка письма со ссылкой для подтверждения регистрации."""
     temp_key = default_token_generator.make_token(user)

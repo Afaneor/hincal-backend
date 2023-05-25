@@ -1,5 +1,6 @@
 import django_filters
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from server.apps.hincal.api.serializers import (
@@ -70,8 +71,20 @@ class ReportViewSet(RetrieveListCreateDeleteViewSet):
             report__in=user.reports.all()
         )
 
-    def create(self, request, *args, **kwargs):
-        """Создание отчета."""
+    @action(
+        ['POST'],
+        url_path='calculator',
+        detail=False,
+        serializer_class=CreateReportSerializer,
+    )
+    def calculator(self, request):
+        """Авторизация пользователя.
+
+        Общее описание: пользователь с указанными данными авторизуется с
+        помощью сессии.
+
+        Доступно: любому пользователю.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         report = ReportWithContext(

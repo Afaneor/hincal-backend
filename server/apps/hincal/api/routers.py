@@ -2,6 +2,7 @@ from rest_framework.routers import APIRootView
 
 from server.apps.hincal.api.views import (
     BusinessViewSet,
+    EquipmentViewSet,
     StatisticViewSet,
     IndicatorViewSet,
     ReportViewSet,
@@ -22,4 +23,5 @@ router.APIRootView = HincalAPIRootView
 router.register('businesses', BusinessViewSet, 'businesses')
 router.register('statistics', StatisticViewSet, 'statistics')
 router.register('indicators', IndicatorViewSet, 'indicators')
+router.register('equipments', EquipmentViewSet, 'equipments')
 router.register('reports', ReportViewSet, 'reports')

@@ -41,28 +41,56 @@ class CreateReportSerializer(serializers.Serializer):
     )
     sub_sectors = serializers.MultipleChoiceField(
         choices=BusinessSubSector.choices,
+        required=False,
+        allow_null=True,
+        allow_blank=True,
     )
-    from_staff = serializers.IntegerField()
-    to_staff = serializers.IntegerField()
+    from_staff = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+    )
+    to_staff = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+    )
     territorial_locations = serializers.MultipleChoiceField(
         choices=TerritorialLocation.choices,
+        required=False,
+        allow_null=True,
+        allow_blank=True,
     )
-    from_land_area = serializers.IntegerField()
-    to_land_area = serializers.IntegerField()
-    from_property_area = serializers.IntegerField()
-    to_property_area = serializers.IntegerField()
+    from_land_area = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+    )
+    to_land_area = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+    )
+    from_property_area = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+    )
+    to_property_area = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+    )
     equipment = serializers.PrimaryKeyRelatedField(
         queryset=Equipment.objects.all(),
         many=True,
+        required=False,
+        allow_null=True,
     )
     type_tax_system = serializers.ChoiceField(
         choices=TypeTaxSystem.choices,
         default=TypeTaxSystem.OSN,
     )
-    need_accounting = serializers.BooleanField()
-    need_registration = serializers.BooleanField()
+    need_accounting = serializers.BooleanField(default=False)
+    need_registration = serializers.BooleanField(default=False)
 
-    other = serializers.JSONField()
+    other = serializers.JSONField(
+        allow_null=True,
+    )
 
     def validate_type_business(self, type_business):
         """Валидация типа."""
@@ -84,7 +112,7 @@ class CreateReportSerializer(serializers.Serializer):
                     {'sectors': [_('Вы выбрали некорректный сектор')]},
                 )
         # Распаковка нужна для будущей сериализации в json.
-        return [*sectors]
+        return [*sectors] if sectors else sectors
 
     def validate_sub_sectors(self, sub_sectors):
         """Валидация подсектора."""
@@ -94,7 +122,7 @@ class CreateReportSerializer(serializers.Serializer):
                     {'sub_sectors': [_('Вы выбрали некорректный подсектор')]},
                 )
         # Распаковка нужна для будущей сериализации в json.
-        return [*sub_sectors]
+        return [*sub_sectors] if sub_sectors else sub_sectors
 
     def validate_territorial_locations(self, territorial_locations):
         """Валидация районов расположения."""
@@ -109,7 +137,7 @@ class CreateReportSerializer(serializers.Serializer):
                     ]},
                 )
         # Распаковка нужна для будущей сериализации в json.
-        return [*territorial_locations]
+        return [*territorial_locations] if territorial_locations else territorial_locations
 
     def validate_type_tax_system(self, type_tax_system):
         """Валидация типа системы налогооблажения."""

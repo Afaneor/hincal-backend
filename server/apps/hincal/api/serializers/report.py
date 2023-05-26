@@ -97,6 +97,7 @@ class CreateReportSerializer(serializers.Serializer):
 
     other = serializers.JSONField(
         allow_null=True,
+        required=False,
     )
 
     def validate_type_tax_system(self, type_tax_system):

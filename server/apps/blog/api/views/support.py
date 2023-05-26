@@ -1,7 +1,7 @@
 import django_filters
 
-from server.apps.blog.api.serializers import PostSerializer
-from server.apps.blog.models import Post
+from server.apps.blog.api.serializers import SupportSerializer
+from server.apps.blog.models import Support
 from server.apps.services.filters_mixins import (
     CreatedUpdatedDateFilterMixin,
     TagFilterMixin,
@@ -9,38 +9,38 @@ from server.apps.services.filters_mixins import (
 from server.apps.services.views import BaseReadOnlyViewSet
 
 
-class PostFilter(
+class SupportFilter(
     TagFilterMixin,
     CreatedUpdatedDateFilterMixin,
     django_filters.FilterSet,
 ):
-    """Фильтр записей."""
+    """Фильтр мер поддержки."""
 
     title = django_filters.CharFilter(lookup_expr='icontains')
 
     class Meta(object):
-        model = Post
+        model = Support
         fields = (
             'title',
             'tags',
-            'is_published',
+            'is_actual',
         )
 
 
-class PostViewSet(BaseReadOnlyViewSet):
-    """Посты. Просмотр."""
+class SupportViewSet(BaseReadOnlyViewSet):
+    """Меры поддержки. Просмотр."""
 
-    serializer_class = PostSerializer
-    queryset = Post.objects.prefetch_related('tags')
+    serializer_class = SupportSerializer
+    queryset = Support.objects.prefetch_related('tags')
     ordering_fields = '__all__'
     search_fields = ('title',)
-    filterset_class = PostFilter
+    filterset_class = SupportFilter
 
     def get_queryset(self):  # noqa: WPS615
-        """Выдача постов.
+        """Выдача мер поддержки.
 
         Суперпользователь видит все.
-        Остальные видят только опубликованные посты.
+        Остальные видят только актуальные меры.
         """
         queryset = super().get_queryset()
         user = self.request.user
@@ -48,4 +48,4 @@ class PostViewSet(BaseReadOnlyViewSet):
         if user.is_superuser:
             return queryset
 
-        return queryset.filter(is_published=True)
+        return queryset.filter(is_actual=True)

@@ -76,7 +76,7 @@ class CreateReportSerializer(serializers.Serializer):
         required=False,
         allow_null=True,
     )
-    equipment = serializers.PrimaryKeyRelatedField(
+    equipments = serializers.PrimaryKeyRelatedField(
         queryset=Equipment.objects.all(),
         many=True,
         required=False,
@@ -125,9 +125,7 @@ class CreateReportSerializer(serializers.Serializer):
         type_tax_system = attrs.get('type_tax_system')
         if type_business == TypeBusiness.LEGAL and type_tax_system == TypeTaxSystem.PATENT:
             raise ValidationError(
-                {'type_tax_system':
-                     [_('У юридического лица нет патентной системы налогооблажения')]
-                 },
+                {'type_tax_system': [_('У юридического лица нет патентной системы налогооблажения')]},
             )
         # Проверка диапазона по сотрудникам.
         attrs = check_range(

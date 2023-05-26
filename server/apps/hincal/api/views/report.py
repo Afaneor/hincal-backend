@@ -52,6 +52,10 @@ class ReportViewSet(RetrieveListDeleteViewSet):
     )
     ordering_fields = '__all__'
     filterset_class = ReportFilter
+    permission_type_map = {
+        **RetrieveListDeleteViewSet.permission_type_map,
+        'calculator': None,
+    }
 
     def get_queryset(self):
         """Выдача экономических показателей.

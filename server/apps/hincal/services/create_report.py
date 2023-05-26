@@ -450,7 +450,7 @@ class ReportWithContext(object):
             # Рассчитанные показатели на основе простой математике.
             avg_number_of_staff_math=self.avg_number_of_staff,
             avg_salary_of_staff_math=self.get_avg_salary_of_staff(),
-            all_salary=self.all_salary(),
+            all_salary=self.get_all_salary(),
             avg_personal_income_tax_math=self.get_avg_personal_income_tax(),
 
             avg_land_area_math=self.avg_land_area,
@@ -472,9 +472,28 @@ class ReportWithContext(object):
         correct_context = context.__dict__
         correct_context.pop('archive')
 
+        initial_data = {}
+        for key_data, value_data in self.data.items():
+            if key_data == 'sectors':
+                initial_data.update(
+                    {'sectors': [sector.name for sector in value_data]}
+                )
+            elif key_data == 'sub_sectors':
+                initial_data.update(
+                    {'sub_sectors': [sub_sector.name for sub_sector in value_data]}
+                )
+            elif key_data == 'equipments':
+                initial_data.update(
+                    {'equipments': [equipment.name for equipment in value_data]}
+                )
+            else:
+                initial_data.update({key_data: value_data})
+        # FIXME: Убрать когда перепишу все.
+        initial_data.pop('territorial_locations')
+        correct_context.update({'initial_data': initial_data})
         self.report = Report.objects.create(
             user=self.user,
-            initial_data=self.data,
+            initial_data=initial_data,
             context=correct_context,
         )
         self.create_tags()

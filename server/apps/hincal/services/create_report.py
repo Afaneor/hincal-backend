@@ -6,7 +6,7 @@ from django.db import models
 from server.apps.hincal.api.serializers import (
     BusinessForReportSerializer,
 )
-from server.apps.hincal.models import Archive, Indicator, Equipment, Business, \
+from server.apps.hincal.models import Archive, BusinessIndicator, Equipment, Business, \
     Report
 from server.apps.hincal.services.enums import (
     BusinessSector,
@@ -183,7 +183,7 @@ class ReportWithContext(object):
 
         return 0
 
-    def get_indicators(self):
+    def get_business_indicators(self):
         """Получение корректных показателей для формирования отчета.
 
         Здесь мы ищем в бд реальный существующий бизнес, который подходит под
@@ -197,7 +197,7 @@ class ReportWithContext(object):
         correct_property_area = self.get_filter_with_correct_property_area()
         correct_location = self.get_filter_with_correct_location()
         if (
-            indicators := Indicator.objects.filter(
+            business_indicators := BusinessIndicator.objects.filter(
                 models.Q(
                     correct_sector &
                     correct_sub_sector &
@@ -208,10 +208,10 @@ class ReportWithContext(object):
                 )
             )
         ):
-            return indicators, ['sector', 'sub_sector', 'staff', 'land_area', 'property_area', 'location']
+            return business_indicators, ['sector', 'sub_sector', 'staff', 'land_area', 'property_area', 'location']
 
         if (
-            indicators := Indicator.objects.filter(
+            business_indicators := BusinessIndicator.objects.filter(
                 models.Q(
                     correct_sector &
                     correct_sub_sector &
@@ -221,10 +221,10 @@ class ReportWithContext(object):
                 )
             )
         ):
-            return indicators, ['sector', 'sub_sector', 'staff', 'land_area', 'property_area']
+            return business_indicators, ['sector', 'sub_sector', 'staff', 'land_area', 'property_area']
 
         if (
-            indicators := Indicator.objects.filter(
+            business_indicators := BusinessIndicator.objects.filter(
                 models.Q(
                     correct_sector &
                     correct_sub_sector &
@@ -233,10 +233,10 @@ class ReportWithContext(object):
                 )
             )
         ):
-            return indicators, ['sector', 'sub_sector', 'staff', 'land_area']
+            return business_indicators, ['sector', 'sub_sector', 'staff', 'land_area']
 
         if (
-            indicators := Indicator.objects.filter(
+            business_indicators := BusinessIndicator.objects.filter(
                 models.Q(
                     correct_sector &
                     correct_sub_sector &
@@ -244,22 +244,22 @@ class ReportWithContext(object):
                 )
             )
         ):
-            return indicators, ['sector', 'sub_sector', 'staff']
+            return business_indicators, ['sector', 'sub_sector', 'staff']
 
         if (
-            indicators := Indicator.objects.filter(
+            business_indicators := BusinessIndicator.objects.filter(
                 models.Q(
                     correct_sector &
                     correct_sub_sector
                 )
             )
         ):
-            return indicators, ['sector', 'sub_sector']
+            return business_indicators, ['sector', 'sub_sector']
 
-        if indicators := Indicator.objects.filter(correct_sector):
-            return indicators, ['sector']
+        if business_indicators := BusinessIndicator.objects.filter(correct_sector):
+            return business_indicators, ['sector']
 
-        return Indicator.objects.all(), []
+        return BusinessIndicator.objects.all(), []
 
     def get_patent_costs(self):
         """Получить размер возможных налогов на патент."""
@@ -304,8 +304,8 @@ class ReportWithContext(object):
 
     def formation_report(self):
         """Формирование контекста."""
-        indicators, filters_key = self.get_indicators()
-        avg_indicators = indicators.aggregate(
+        business_indicators, filters_key = self.get_business_indicators()
+        avg_indicators = business_indicators.aggregate(
             avg_number_of_staff=models.Avg('average_number_of_staff'),
             avg_salary_of_staff=models.Avg('average_salary_of_staff'),
             avg_taxes_to_the_budget=models.Avg('taxes_to_the_budget'),

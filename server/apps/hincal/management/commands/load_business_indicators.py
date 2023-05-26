@@ -1,6 +1,6 @@
 import xlrd
 from django.core.management.base import BaseCommand
-from server.apps.hincal.models import Indicator, Business
+from server.apps.hincal.models import BusinessIndicator, Business
 from server.apps.hincal.services.enums import BusinessSector, BusinessSubSector
 
 BUSINESS_SECTOR = {
@@ -60,24 +60,24 @@ BUSINESS_SUB_SECTOR = {
 
 
 class Command(BaseCommand):
-    """Добавление данных в Indicator"""
+    """Добавление данных в BusinessIndicator"""
 
-    help = 'Добавление данных в Indicator'
+    help = 'Добавление данных в BusinessIndicator'
 
     def handle(self, *args, **options):  # noqa: WPS110
-        """Добавление данных в Indicator"""
+        """Добавление данных в BusinessIndicator"""
         workbook = xlrd.open_workbook('server/apps/hincal/management/commands/data.xls')
         worksheet = workbook.sheet_by_index(0)
 
         # Iterate the rows and columns
-        indicators = []
+        business_indicator = []
         for i in range(1, 3529):
             business = Business.objects.create(
                 sector=BUSINESS_SECTOR.get(worksheet.cell_value(i, 0)),
                 sub_sector=BUSINESS_SUB_SECTOR.get(worksheet.cell_value(i, 1)),
             )
-            indicators.append(
-                Indicator(
+            business_indicator.append(
+                BusinessIndicator(
                     business=business,
                     year=2021,
                     average_number_of_staff=float(worksheet.cell_value(i, 3)),
@@ -91,8 +91,8 @@ class Command(BaseCommand):
                     other_taxes=float(worksheet.cell_value(i, 19)),
                 ),
             )
-            indicators.append(
-                Indicator(
+            business_indicator.append(
+                BusinessIndicator(
                     business=business,
                     year=2022,
                     average_number_of_staff=float(worksheet.cell_value(i, 2)),
@@ -107,4 +107,4 @@ class Command(BaseCommand):
                 ),
             )
             print(f'Обработана строка № {i}')
-        Indicator.objects.bulk_create(indicators)
+        BusinessIndicator.objects.bulk_create(business_indicator)

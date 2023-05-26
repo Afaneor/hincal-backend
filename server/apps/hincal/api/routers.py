@@ -4,7 +4,7 @@ from server.apps.hincal.api.views import (
     BusinessViewSet,
     EquipmentViewSet,
     StatisticViewSet,
-    IndicatorViewSet,
+    BusinessIndicatorViewSet,
     ReportViewSet,
 )
 from server.apps.services.custom_router.api_router import ApiRouter
@@ -22,6 +22,6 @@ router = ApiRouter()
 router.APIRootView = HincalAPIRootView
 router.register('businesses', BusinessViewSet, 'businesses')
 router.register('statistics', StatisticViewSet, 'statistics')
-router.register('indicators', IndicatorViewSet, 'indicators')
+router.register('business-indicator', BusinessIndicatorViewSet, 'business-indicator')
 router.register('equipments', EquipmentViewSet, 'equipments')
 router.register('reports', ReportViewSet, 'reports')

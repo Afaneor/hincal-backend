@@ -2,7 +2,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from server.apps.hincal.models import Report, Equipment
+from server.apps.hincal.models import Report, Equipment, Sector
 from server.apps.hincal.services.enums import (
     BusinessSector,
     BusinessSubSector,
@@ -35,8 +35,9 @@ class CreateReportSerializer(serializers.Serializer):
         choices=[TypeBusiness.LEGAL, TypeBusiness.INDIVIDUAL],
         required=True,
     )
-    sectors = serializers.MultipleChoiceField(
-        choices=BusinessSector.choices,
+    sectors = serializers.PrimaryKeyRelatedField(
+        queryset=Sector.objects.all(),
+        many=True,
         required=True,
     )
     sub_sectors = serializers.MultipleChoiceField(

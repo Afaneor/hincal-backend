@@ -21,7 +21,7 @@ class BusinessSector(models.TextChoices):
     LIGHT_INDUSTRY = 'light_industry', _('Легкая промышленность')
     PRODUCTION_OF_PETROLEUM_PRODUCTS = 'production_of_petroleum_products', _('Производство кокса и нефтепродуктов')
     CHEMICAL_INDUSTRY = 'chemical_industry', _('Химическая промышленность')
-    PRODUCTION_OF_BUILDING_MATERIALS = 'production_of_building_materials', _('Химическая промышленность')
+    PRODUCTION_OF_BUILDING_MATERIALS = 'production_of_building_materials', _('Производство строительных материалов')
     PRODUCTION_FOR_MILITARY = 'production_for_military', _('Производство оружия, боеприпасов, спецхимии, военных машин')
     PHARMACEUTICAL_INDUSTRY = 'pharmaceutical_industry', _('Фармацевтическая промышленность')
     FUEL_AND_ENERGY_COMPLEX = 'fuel_and_energy_complex', _('Топливно-энергетический комплекс')

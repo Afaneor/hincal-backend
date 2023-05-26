@@ -7,25 +7,44 @@ SECURITY WARNING: don't run with debug turned on in production!
 import logging
 from typing import List
 
+from django.conf import settings
+
 from server.settings.components import config
 from server.settings.components.common import (
     DATABASES,
     INSTALLED_APPS,
     MIDDLEWARE,
 )
-
-# Setting the development status:
+from server.settings.components.logging import LOGGING
 
 DEBUG = True
 
+DOMAIN_NAMES = config('DOMAIN_NAME').replace(' ', '').split(',')
+
 ALLOWED_HOSTS = [
-    config('DOMAIN_NAME'),
+    *DOMAIN_NAMES,
     'localhost',
     '0.0.0.0',  # noqa: S104
     '127.0.0.1',
     '[::1]',
 ]
 
+# CORS
+CORS_ALLOW_CREDENTIALS = config(
+    'CORS_ALLOW_CREDENTIALS',
+    cast=bool,
+    default=True,
+)
+CSRF_COOKIE_HTTPONLY = config(
+    'CSRF_COOKIE_HTTPONLY',
+    cast=bool,
+    default=False,
+)
+SESSION_COOKIE_HTTPONLY = config(
+    'SESSION_COOKIE_HTTPONLY',
+    cast=bool,
+    default=False,
+)
 
 # Installed apps for development only:
 
@@ -47,12 +66,10 @@ INSTALLED_APPS += (
     'extra_checks',
 )
 
-
 # Static files:
 # https://docs.djangoproject.com/en/2.2/ref/settings/#std:setting-STATICFILES_DIRS
 
 STATICFILES_DIRS: List[str] = []
-
 
 # Django debug toolbar:
 # https://django-debug-toolbar.readthedocs.io
@@ -68,6 +85,8 @@ MIDDLEWARE += (
 
 def _custom_show_toolbar(request):
     """Only show the debug toolbar to users with the superuser flag."""
+    if settings.TESTING:  # type: ignore
+        return False
     return DEBUG and request.user.is_superuser
 
 
@@ -100,22 +119,20 @@ NPLUSONE_WHITELIST = [
     {'model': '*'},
 ]
 
-
 # django-test-migrations
 # https://github.com/wemake-services/django-test-migrations
 
 # Set of badly named migrations to ignore:
 DTM_IGNORED_MIGRATIONS = frozenset(
     (
-        ('axes', '*'),
         ('filer', '*'),
-        ('actstream', '*'),
         ('taggit', '*'),
         ('easy_thumbnails', '*'),
-        ('account', '*'),
+        ('sites', '*'),
+        ('authtoken', '*'),
+        ('django_celery_beat', '*'),
     ),
 )
-
 
 # django-extra-checks
 # https://github.com/kalekseev/django-extra-checks
@@ -130,11 +147,11 @@ EXTRA_CHECKS = {
         'no-index-together',
         # Each model must be registered in admin:
         'model-admin',
-        # FileField/ImageField must have non empty `upload_to` argument:
+        # FileField/ImageField must have no empty `upload_to` argument:
         'field-file-upload-to',
         # Text fields shouldn't use `null=True`:
         'field-text-null',
-        # Prefer using BooleanField(null=True) instead of NullBooleanField:
+        # Don't pass `null=False` to model fields (this is django default)
         'field-null',
         # ForeignKey fields must specify db_index explicitly if used in
         # other indexes:
@@ -151,3 +168,10 @@ EXTRA_CHECKS = {
 # Disable persistent DB connections
 # https://docs.djangoproject.com/en/2.2/ref/databases/#caveats
 DATABASES['default']['CONN_MAX_AGE'] = 0
+
+CSRF_COOKIE_SAMESITE = config('CSRF_COOKIE_SAMESITE', cast=str, default='None')
+SESSION_COOKIE_SAMESITE = config(
+    'SESSION_COOKIE_SAMESITE',
+    cast=str,
+    default='None',
+)

@@ -1,14 +1,14 @@
 from rest_framework import serializers
 
-from server.apps.hincal.models import Indicator
+from server.apps.hincal.models import BusinessIndicator
 from server.apps.services.serializers import ModelSerializerWithPermission
 
 
-class IndicatorSerializer(ModelSerializerWithPermission):
+class BusinessIndicatorSerializer(ModelSerializerWithPermission):
     """Экономические показатели ИП, физического лица или компании."""
 
     class Meta(object):
-        model = Indicator
+        model = BusinessIndicator
         fields = (
             'id',
             'business',

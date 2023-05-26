@@ -6,8 +6,6 @@ from server.apps.user.api.serializers import BaseInfoUserSerializer
 class EquipmentSerializer(ModelSerializerWithPermission):
     """Сериалайзер оборудования."""
 
-    user = BaseInfoUserSerializer()
-
     class Meta(object):
         model = Equipment
         fields = (

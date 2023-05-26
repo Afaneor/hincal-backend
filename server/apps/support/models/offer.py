@@ -11,7 +11,7 @@ class Offer(AbstractBaseModel):
 
     title = models.CharField(
         _('Заголовок'),
-        max_length=settings.MAX_STRING_LENGTH
+        max_length=settings.MAX_STRING_LENGTH,
     )
     text = models.TextField(
         _('Полное описание предложения'),

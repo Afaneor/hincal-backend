@@ -4,14 +4,14 @@ from django.utils.translation import gettext_lazy as _
 from server.apps.services.base_model import AbstractBaseModel
 
 
-class Indicator(AbstractBaseModel):
+class BusinessIndicator(AbstractBaseModel):
     """Экономические показатели ИП, физического лица или компании."""
 
     business = models.ForeignKey(
         'hincal.Business',
         on_delete=models.CASCADE,
         verbose_name=_('Бизнес'),
-        related_name='indicators',
+        related_name='business_indicators',
         db_index=True,
         null=True,
     )

@@ -1,13 +1,13 @@
 from server.apps.hincal.permissions import (
     business,
-    indicator,
+    business_indicator,
     report,
     statistic,
 )
 
 __all__ = [
     'business',
-    'indicator',
+    'business_indicator',
     'report',
     'statistic',
 ]

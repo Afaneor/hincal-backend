@@ -2,10 +2,11 @@ from django.contrib import admin
 from server.apps.hincal.models import (
     Archive,
     Business,
+    BusinessIndicator,
     Equipment,
     Statistic,
-    Indicator,
     Report,
+    Sector,
 )
 
 
@@ -101,8 +102,8 @@ class StatisticAdmin(admin.ModelAdmin[Statistic]):
     )
 
 
-@admin.register(Indicator)
-class IndicatorAdmin(admin.ModelAdmin[Indicator]):
+@admin.register(BusinessIndicator)
+class BusinessIndicatorAdmin(admin.ModelAdmin[BusinessIndicator]):
     """Экономические показатели ИП, физического лица или компании."""
 
     list_display = (
@@ -165,5 +166,24 @@ class EquipmentAdmin(admin.ModelAdmin[Equipment]):
         'id',
         'name',
         'cost',
+    )
+
+
+@admin.register(Sector)
+class SectorAdmin(admin.ModelAdmin[Sector]):
+    """Сектор."""
+
+    list_display = (
+        'id',
+        'name',
+        'slug',
+    )
+    search_fields = (
+        'name',
+    )
+    ordering = (
+        'id',
+        'name',
+        'slug',
     )
 

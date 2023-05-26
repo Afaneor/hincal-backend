@@ -1,4 +1,5 @@
-from server.apps.hincal.models import Business, Sector, SubSector
+from server.apps.hincal.models import Business, Sector, SubSector, \
+    TerritorialLocation
 from server.apps.hincal.services.enums import TypeBusiness
 
 from server.apps.user.models import User
@@ -22,12 +23,16 @@ def create_business(self, inn: str, user_id: int) -> None:
     sub_sector = SubSector.objects.get(slug='other')
     if business_information:
         business = business_information[0]
+        territorial_location = TerritorialLocation.objects.get(
+
+        )
         data = business.get('data', {})
         address = data.get('address', {})
         Business.objects.create(
             type=data.get('type').lower(),
             inn=inn,
-            territorial_location=HANDLER_TERRITORIAL_LOCATION.get(
+            territorial_location=TerritorialLocation.objects.get()
+            HANDLER_TERRITORIAL_LOCATION.get(
                 address.get('data', {}).get('city_area', '').lower(),
             ),
             hid=data.get('hid', ''),

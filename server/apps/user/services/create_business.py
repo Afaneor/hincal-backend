@@ -9,19 +9,34 @@ from server.apps.services.exception import ApiError
 
 
 HANDLER_TERRITORIAL_LOCATION = {
-    'восточный': TerritorialLocation.WAO,
-    'западный': TerritorialLocation.ZAO,
-    'зеленоградский': TerritorialLocation.ZELAO,
-    'новомосковский': TerritorialLocation.NAO,
-    'северный': TerritorialLocation.SAO,
-    'северо-восточный': TerritorialLocation.SWAO,
-    'северо-западный': TerritorialLocation.SZAO,
-    'троицкий': TerritorialLocation.TAO,
-    'центральный': TerritorialLocation.CAO,
-    'южный': TerritorialLocation.YUAO,
-    'юго-восточный': TerritorialLocation.YUWAO,
-    'юго-западный': TerritorialLocation.YUZAO,
+    'восточный': 'wao',
+    'западный': 'zao',
+    'зеленоградский': 'zelao',
+    'новомосковский': 'nao',
+    'северный': 'sao',
+    'северо-восточный': 'swao',
+    'северо-западный': 'szao',
+    'троицкий': 'tao',
+    'центральный': 'cao',
+    'южный': 'yuao',
+    'юго-восточный': 'yuwao',
+    'юго-западный': 'yuzao',
 }
+
+WAO = 'wao', _('ВАО')
+ZAO = 'zao', _('ЗАО')
+ZELAO = 'zelao', _('ЗелАО')
+NAO = 'nao', _('НАО')
+SAO = 'sao', _('САО')
+SWAO = 'swao', _('СВАО')
+SZAO = 'szao', _('СЗАО')
+TAO = 'tao', _('ТАО')
+CAO = 'cao', _('ЦАО')
+YUAO = 'yuao', _('ЮАО')
+YUWAO = 'yuwao', _('ЮВАО')
+YUZAO = 'yuzao', _('ЮЗАО')
+OTHER = 'other', _('Другое')
+
 
 
 class ClientBase:

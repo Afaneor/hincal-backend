@@ -39,7 +39,7 @@ CORS_PREFLIGHT_MAX_AGE = config(
 CORS_ALLOW_CREDENTIALS = config(
     'CORS_ALLOW_CREDENTIALS',
     cast=bool,
-    default=False,
+    default=True,
 )
 
 CSRF_TRUSTED_ORIGINS = [

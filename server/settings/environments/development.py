@@ -7,6 +7,7 @@ SECURITY WARNING: don't run with debug turned on in production!
 import logging
 from typing import List
 
+import structlog
 from django.conf import settings
 
 from server.settings.components import config
@@ -168,6 +169,23 @@ EXTRA_CHECKS = {
 # Disable persistent DB connections
 # https://docs.djangoproject.com/en/2.2/ref/databases/#caveats
 DATABASES['default']['CONN_MAX_AGE'] = 0
+
+LOGGING.update(
+    {
+        'formatters': {
+            'json_formatter': {
+                '()': structlog.stdlib.ProcessorFormatter,
+                'processor': structlog.processors.JSONRenderer(),
+            },
+            'console': {
+                '()': structlog.stdlib.ProcessorFormatter,
+                'processor': structlog.dev.ConsoleRenderer(),
+            },
+        },
+    },
+)
+
+structlog.reset_defaults()
 
 CSRF_COOKIE_SAMESITE = config('CSRF_COOKIE_SAMESITE', cast=str, default='None')
 SESSION_COOKIE_SAMESITE = config(

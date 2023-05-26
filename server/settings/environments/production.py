@@ -102,6 +102,10 @@ SESSION_COOKIE_SAMESITE = config(
 )
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
@@ -113,9 +117,5 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
         'rest_framework.filters.SearchFilter',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
     ),
 }

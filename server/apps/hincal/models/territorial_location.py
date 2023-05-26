@@ -48,6 +48,11 @@ class TerritorialLocation(AbstractBaseModel):
         _('Средняя стоимость на покупку  имуществу, тыс. руб.'),
         default=200,
     )
+    extra_data = models.JSONField(
+        _('Дополнительные параметры'),
+        null=True,
+        blank=True,
+    )
     tags = TaggableManager(blank=True)
 
     class Meta(AbstractBaseModel.Meta):

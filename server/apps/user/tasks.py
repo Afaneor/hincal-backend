@@ -23,18 +23,17 @@ def create_business(self, inn: str, user_id: int) -> None:
     sub_sector = SubSector.objects.get(slug='other')
     if business_information:
         business = business_information[0]
-        territorial_location = TerritorialLocation.objects.get(
-
-        )
         data = business.get('data', {})
         address = data.get('address', {})
+        territorial_location = TerritorialLocation.objects.get(
+            slug=HANDLER_TERRITORIAL_LOCATION.get(
+                address.get('data', {}).get('city_area', '').lower(),
+            ),
+        )
         Business.objects.create(
             type=data.get('type').lower(),
             inn=inn,
-            territorial_location=TerritorialLocation.objects.get()
-            HANDLER_TERRITORIAL_LOCATION.get(
-                address.get('data', {}).get('city_area', '').lower(),
-            ),
+            territorial_location=territorial_location,
             hid=data.get('hid', ''),
             short_business_name=data.get('name', {}).get('short_with_opf', ''),
             full_business_name=data.get('name', {}).get('full_with_opf', ''),

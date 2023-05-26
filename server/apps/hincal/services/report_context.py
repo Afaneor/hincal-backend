@@ -173,21 +173,21 @@ class ReportContextDataClass:
         #     self.property_repair_costs
         # )
         # Общие расходны на налоги по земле и объектам недвижимости.
-        self.all_lp_tax_costs = (
-            self.avg_property_tax_by_business_indicators +
-            self.avg_land_tax_by_business_indicators
-        )
-        # Общие расходы на сотрудников, аренду земли и объекты недвижимости.
-        self.all_staff_and_lease_lp_costs = (
-            self.all_staff_costs +
-            self.all_lp_lease_costs
-        )
-        # Общие расходы на сотрудников, покпку земли и объекты недвижимости.
-        self.all_staff_and_lease_lp_costs = (
-            self.all_staff_costs +
-            self.all_lp_purchase_costs
-        )
-        # Общие расходы на услуги.
-        self.all_services_costs =(
-            self.accounting_costs
-        )
+        # self.all_lp_tax_costs = (
+        #     self.avg_property_tax_by_business_indicators +
+        #     self.avg_land_tax_by_business_indicators
+        # )
+        # # Общие расходы на сотрудников, аренду земли и объекты недвижимости.
+        # self.all_staff_and_lease_lp_costs = (
+        #     self.all_staff_costs +
+        #     self.all_lp_lease_costs
+        # )
+        # # Общие расходы на сотрудников, покпку земли и объекты недвижимости.
+        # self.all_staff_and_lease_lp_costs = (
+        #     self.all_staff_costs +
+        #     self.all_lp_purchase_costs
+        # )
+        # # Общие расходы на услуги.
+        # self.all_services_costs =(
+        #     self.accounting_costs
+        # )

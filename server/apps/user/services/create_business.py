@@ -23,21 +23,6 @@ HANDLER_TERRITORIAL_LOCATION = {
     'юго-западный': 'yuzao',
 }
 
-WAO = 'wao', _('ВАО')
-ZAO = 'zao', _('ЗАО')
-ZELAO = 'zelao', _('ЗелАО')
-NAO = 'nao', _('НАО')
-SAO = 'sao', _('САО')
-SWAO = 'swao', _('СВАО')
-SZAO = 'szao', _('СЗАО')
-TAO = 'tao', _('ТАО')
-CAO = 'cao', _('ЦАО')
-YUAO = 'yuao', _('ЮАО')
-YUWAO = 'yuwao', _('ЮВАО')
-YUZAO = 'yuzao', _('ЮЗАО')
-OTHER = 'other', _('Другое')
-
-
 
 class ClientBase:
     """Base class for API client"""

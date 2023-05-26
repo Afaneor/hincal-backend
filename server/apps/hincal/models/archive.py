@@ -64,6 +64,14 @@ class Archive(AbstractBaseModel):
         _('Расходы на регистрацию бизнеса'),
         default=get_registration_costs,
     )
+    avg_land_cadastral_value = models.FloatField(
+        _('Средняя кадастровая стоимость на землю, тыс. руб.'),
+        default=17.23389,
+    )
+    avg_property_cadastral_value = models.FloatField(
+        _('Средняя кадастровая стоимость на имуществу, тыс. руб.'),
+        default=17.23389,
+    )
     is_actual = models.BooleanField(
         _('Актуальные данные в архиве или нет'),
         default=True

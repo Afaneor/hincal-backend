@@ -71,6 +71,7 @@ class ReportWithContext(object):
         self.data = data
 
         self.sectors = data.get('sectors')
+        self.territorial_locations = self.data.get('territorial_locations')
 
     @property
     def archive(self):
@@ -85,7 +86,11 @@ class ReportWithContext(object):
     def create_tags(self) -> None:
         """Прикрепление тегов к отчету."""
         for sector in self.sectors:
-            self.report.tags.add(sector.slug, sector.tags)
+            self.report.tags.add(
+                sector.name,
+                *sector.tags.values_list('name', flat=True),
+            )
+
         self.report.save()
 
     def get_filter_with_correct_sector(self) -> models.Q:
@@ -123,9 +128,9 @@ class ReportWithContext(object):
     def get_filter_with_correct_location(self) -> models.Q:
         """Получение фильтра с корректным территориальным расположением."""
         # Если локация не передана, ищем по всем доступным.
-        if territorial_locations := self.data.get('territorial_locations'):
+        if self.territorial_locations:
             return models.Q(
-                business__territorial_location__in=territorial_locations
+                business__territorial_location__in=self.territorial_locations
             )
         else:
             return models.Q()
@@ -138,19 +143,16 @@ class ReportWithContext(object):
         # Получаем территориальное расположение. Если передан список,
         # то проходимся по списку, берем все значения и берем их среднее.
         # В противном случае отдаем просто среднее значение по всем.
-        archive = getattr(self.archive, property_name, None)
-        if archive:
-            if territorial_locations := self.data.get('territorial_locations'):
-                average_value = 0
-                # Из атрибута объекта берем нужную информацию по округу.
-                for territorial_location in territorial_locations:
-                    average_value += archive.get(territorial_location)
+        if self.territorial_locations:
+            average_value = 0
+            # Из атрибута объекта берем нужную информацию по округу.
+            for territorial_location in self.territorial_locations:
+                average_value += getattr(territorial_location, property_name, 0)
 
-                return average_value / len(territorial_locations)
+            return average_value / len(self.territorial_locations)
 
-            return archive.get('other')
+        return getattr(self.archive, property_name, 0)
 
-        return 0
 
     def get_filter_with_correct_land_area(self) -> models.Q:
         """Получение фильтра с корректной площадью земельного участка."""
@@ -164,7 +166,7 @@ class ReportWithContext(object):
             self.avg_land_area = (from_land_area + to_land_area) / 2
             # Средняя кадастровая стоимость на землю.
             self.avg_land_cadastral_value = self.get_value_by_territorial_locations(
-                property_name='land_cadastral_value',
+                property_name='avg_land_cadastral_value',
             )
             # Размер налога.
             self.avg_land_tax = (
@@ -192,7 +194,7 @@ class ReportWithContext(object):
             self.avg_property_area = (from_property_area + to_property_area) / 2
             # Средняя кадастровая стоимость на имущество.
             self.avg_property_cadastral_value = self.get_value_by_territorial_locations(
-                    property_name='property_cadastral_value',
+                    property_name='avg_property_cadastral_value',
                 )
             # Размер налога на имущество.
             self.avg_property_tax = (

@@ -305,7 +305,7 @@ class ReportWithContext(object):
     def formation_report(self):
         """Формирование контекста."""
         business_indicators, filters_key = self.get_business_indicators()
-        avg_indicators = business_indicators.aggregate(
+        avg_business_indicator = business_indicators.aggregate(
             avg_number_of_staff=models.Avg('average_number_of_staff'),
             avg_salary_of_staff=models.Avg('average_salary_of_staff'),
             avg_taxes_to_the_budget=models.Avg('taxes_to_the_budget'),
@@ -325,15 +325,15 @@ class ReportWithContext(object):
             initial_data=self.data,
 
             # ППоказатели других бизнесов, которые есть в БД.
-            avg_number_of_staff_by_indicators=avg_indicators.get('avg_number_of_staff'),
-            avg_salary_of_staff_by_indicators=avg_indicators.get('avg_salary_of_staff'),
-            avg_taxes_to_the_budget_by_indicators=avg_indicators.get('avg_taxes_to_the_budget'),
-            avg_income_tax_by_indicators=avg_indicators.get('avg_income_tax'),
-            avg_property_tax_by_indicators=avg_indicators.get('avg_property_tax'),
-            avg_land_tax_by_indicators=avg_indicators.get('avg_land_tax'),
-            avg_personal_income_tax_by_indicators=avg_indicators.get('avg_personal_income_tax'),
-            avg_transport_tax_by_indicators=avg_indicators.get('avg_transport_tax'),
-            avg_other_taxes_by_indicators=avg_indicators.get('avg_other_taxes'),
+            avg_number_of_staff_by_business_indicators=avg_business_indicator.get('avg_number_of_staff'),
+            avg_salary_of_staff_by_business_indicators=avg_business_indicator.get('avg_salary_of_staff'),
+            avg_taxes_to_the_budget_by_business_indicators=avg_business_indicator.get('avg_taxes_to_the_budget'),
+            avg_income_tax_by_business_indicators=avg_business_indicator.get('avg_income_tax'),
+            avg_property_tax_by_business_indicators=avg_business_indicator.get('avg_property_tax'),
+            avg_land_tax_by_business_indicators=avg_business_indicator.get('avg_land_tax'),
+            avg_personal_income_tax_by_business_indicators=avg_business_indicator.get('avg_personal_income_tax'),
+            avg_transport_tax_by_business_indicators=avg_business_indicator.get('avg_transport_tax'),
+            avg_other_taxes_by_business_indicators=avg_business_indicator.get('avg_other_taxes'),
 
             avg_number_of_staff_math=self.get_avg_number_of_staff(),
             avg_salary_of_staff_math=self.get_avg_salary_of_staff(),

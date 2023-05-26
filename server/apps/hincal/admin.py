@@ -7,6 +7,7 @@ from server.apps.hincal.models import (
     Statistic,
     Report,
     Sector,
+    SubSector,
 )
 
 
@@ -187,3 +188,21 @@ class SectorAdmin(admin.ModelAdmin[Sector]):
         'slug',
     )
 
+
+@admin.register(SubSector)
+class SubSectorAdmin(admin.ModelAdmin[SubSector]):
+    """Сектор."""
+
+    list_display = (
+        'id',
+        'name',
+        'slug',
+    )
+    search_fields = (
+        'name',
+    )
+    ordering = (
+        'id',
+        'name',
+        'slug',
+    )

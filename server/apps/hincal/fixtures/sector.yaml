@@ -30,7 +30,7 @@
 - model: hincal.sector
   pk: 5
   fields:
-    name: Общее машиностроение
+    name: Общее машиностроение (в т.ч. оборудование пищевой переработки, дорожногстроительная и сельскохозяйственная техника)
     slug: general_mechanical_engineering
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
@@ -181,5 +181,164 @@
     slug: other
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
-
-
+- model: hincal.subsector
+  pk: 1
+  fields:
+    name: Молочная отрасль
+    slug: dairy_industry
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 2
+  fields:
+    name: Приборостроение
+    slug: instrumentation
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 3
+  fields:
+    name: Мясная отрасль
+    slug: meat_industry
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 4
+  fields:
+    name: Металлообработка
+    slug: metalworking
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 5
+  fields:
+    name: Кондитерская отрасль
+    slug: confectionery_industry
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 6
+  fields:
+    name: Производство прочих машин и оборудования общего назначения
+    slug: manufacture_of_other_general
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 7
+  fields:
+    name: Хлебопекарная отрасль
+    slug: bakery_industry
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 8
+  fields:
+    name: Производство ж/д транспорта
+    slug: production_of_railway_transport
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 9
+  fields:
+    name: Рыбная отрасль
+    slug: fishing_industry
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 10
+  fields:
+    name: Производство машин и оборудования общего назначения
+    slug: production_of_general_purpose_equipment
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 11
+  fields:
+    name: Производство плодоовощных консервов
+    slug: production_of_canned_fruits_and_vegetables
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 12
+  fields:
+    name: Электротехника
+    slug: electrical_engineering
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 13
+  fields:
+    name: Производство прочих машин специального назначения
+    slug: production_of_other_special_purpose_machines
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 14
+  fields:
+    name: Станкоинструментальная промышленность
+    slug: machine_tool_industry
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 15
+  fields:
+    name: Микроэлектроника
+    slug: microelectronics
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 16
+  fields:
+    name: Мукомольно-крупяная отрасль
+    slug: milling_and_cereal_industry
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 17
+  fields:
+    name: Иные отрасли
+    slug: other
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 18
+  fields:
+    name: Производство напитков
+    slug: beverage_production
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 19
+  fields:
+    name: Корма для животных
+    slug: animal_feed
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 20
+  fields:
+    name: Электротехника/Судостроение
+    slug: electrical_engineering_and_shipbuilding
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 21
+  fields:
+    name: Сахарная отрасль
+    slug: sugar_industry
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 22
+  fields:
+    name: Производство машин и оборудования для сельского и лесного хозяйства
+    slug: production_of_equipment_for_agriculture_and_forestry
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00
+- model: hincal.subsector
+  pk: 23
+  fields:
+    name: Масложировая отрасль
+    slug: fat_and_oil_industry
+    created_at: 2023-01-01 10:00:00
+    updated_at: 2023-01-01 10:00:00

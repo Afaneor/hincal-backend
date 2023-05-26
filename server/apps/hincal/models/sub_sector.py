@@ -5,8 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from server.apps.services.base_model import AbstractBaseModel
 
 
-class Sector(AbstractBaseModel):
-    """Отрасль."""
+class SubSector(AbstractBaseModel):
+    """Подотрасль."""
 
     name = models.CharField(
         _('Название'),
@@ -20,8 +20,8 @@ class Sector(AbstractBaseModel):
     )
 
     class Meta(AbstractBaseModel.Meta):
-        verbose_name = _('Отрасль')
-        verbose_name_plural = _('Отрасли')
+        verbose_name = _('Подотрасль')
+        verbose_name_plural = _('Подотрасли')
 
     def __str__(self):
         return self.name

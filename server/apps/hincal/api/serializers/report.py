@@ -2,11 +2,11 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from server.apps.hincal.models import Report, Equipment, Sector
+from server.apps.hincal.models import Report, Equipment, Sector, SubSector
 from server.apps.hincal.services.enums import (
-    BusinessSector,
-    BusinessSubSector,
-    TerritorialLocation, TypeBusiness, TypeTaxSystem,
+    TerritorialLocation,
+    TypeBusiness,
+    TypeTaxSystem,
 )
 from server.apps.hincal.services.validate_report import check_range
 from server.apps.services.serializers import ModelSerializerWithPermission
@@ -40,11 +40,11 @@ class CreateReportSerializer(serializers.Serializer):
         many=True,
         required=True,
     )
-    sub_sectors = serializers.MultipleChoiceField(
-        choices=BusinessSubSector.choices,
+    sub_sectors = serializers.PrimaryKeyRelatedField(
+        queryset=SubSector.objects.all(),
+        many=True,
         required=False,
         allow_null=True,
-        allow_blank=True,
     )
     from_staff = serializers.IntegerField(
         required=False,
@@ -92,38 +92,6 @@ class CreateReportSerializer(serializers.Serializer):
     other = serializers.JSONField(
         allow_null=True,
     )
-
-    def validate_type_business(self, type_business):
-        """Валидация типа."""
-        if type_business not in {TypeBusiness.LEGAL, TypeBusiness.INDIVIDUAL}:
-            raise ValidationError(
-                {'type_business': [
-                    _(
-                        'Ведение бизнеса может только ИП или юридическое лицо',
-                    ),
-                ]},
-            )
-        return type_business
-
-    def validate_sectors(self, sectors):
-        """Валидация сектора."""
-        for sector in sectors:
-            if sector not in BusinessSector.values:
-                raise ValidationError(
-                    {'sectors': [_('Вы выбрали некорректный сектор')]},
-                )
-        # Распаковка нужна для будущей сериализации в json.
-        return [*sectors] if sectors else sectors
-
-    def validate_sub_sectors(self, sub_sectors):
-        """Валидация подсектора."""
-        for sub_sector in sub_sectors:
-            if sub_sector not in BusinessSubSector.values:
-                raise ValidationError(
-                    {'sub_sectors': [_('Вы выбрали некорректный подсектор')]},
-                )
-        # Распаковка нужна для будущей сериализации в json.
-        return [*sub_sectors] if sub_sectors else sub_sectors
 
     def validate_territorial_locations(self, territorial_locations):
         """Валидация районов расположения."""

@@ -1,9 +1,5 @@
-from server.apps.hincal.models import Business
-from server.apps.hincal.services.enums import (
-    BusinessSector,
-    BusinessSubSector,
-    TypeBusiness,
-)
+from server.apps.hincal.models import Business, Sector, SubSector
+from server.apps.hincal.services.enums import TypeBusiness
 
 from server.apps.user.models import User
 from server.apps.user.services.create_business import (
@@ -22,6 +18,8 @@ def create_business(self, inn: str, user_id: int) -> None:
     """
     user = User.objects.get(id=user_id)
     business_information = get_business_by_inn(inn=inn)
+    sector = Sector.objects.get(slug='other')
+    sub_sector = SubSector.objects.get(slug='other')
     if business_information:
         business = business_information[0]
         data = business.get('data', {})
@@ -50,6 +48,8 @@ def create_business(self, inn: str, user_id: int) -> None:
             city_district=address.get('data', {}).get('city_district', ''),
             phone=data.get('phones', {})[0].get('value', ''),
             email=data.get('phones', {})[0].get('value', ''),
+            sector=sector,
+            sub_sector=sub_sector,
         )
     else:
         Business.objects.create(
@@ -58,6 +58,6 @@ def create_business(self, inn: str, user_id: int) -> None:
             first_name=user.first_name,
             last_name=user.last_name,
             middle_name=user.middle_name,
-            sector=BusinessSector.OTHER,
-            sub_sector=BusinessSubSector.OTHER,
+            sector=sector,
+            sub_sector=sub_sector,
         )

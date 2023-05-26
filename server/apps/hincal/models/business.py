@@ -44,16 +44,17 @@ class Business(AbstractBaseModel):
         validators=[inn_validator],
         blank=True,
     )
-    sector = models.CharField(
-        _('Отрасль хозяйственной деятельности'),
-        max_length=settings.MAX_STRING_LENGTH,
-        choices=BusinessSector.choices,
+    sector = models.ForeignKey(
+        'hincal.Sector',
+        on_delete=models.CASCADE,
+        verbose_name=_('Отрасль хозяйственной деятельности'),
+        related_name='businesses',
     )
-    sub_sector = models.CharField(
-        _('Подотрасль хозяйственной деятельности'),
-        max_length=settings.MAX_STRING_LENGTH,
-        choices=BusinessSubSector.choices,
-        blank=True,
+    sub_sector = models.ForeignKey(
+        'hincal.SubSector',
+        on_delete=models.CASCADE,
+        verbose_name=_('Подотрасль хозяйственной деятельности'),
+        related_name='business',
     )
     territorial_location = models.CharField(
         _('Территориальное положение бизнеса'),
@@ -168,14 +169,6 @@ class Business(AbstractBaseModel):
             models.CheckConstraint(
                 name='type_valid',
                 check=models.Q(type__in=[*TypeBusiness.values, '']),
-            ),
-            models.CheckConstraint(
-                name='sector_valid',
-                check=models.Q(sector__in=BusinessSector.values),
-            ),
-            models.CheckConstraint(
-                name='sub_sector_valid',
-                check=models.Q(sub_sector__in=[*BusinessSubSector.values, '']),
             ),
             models.CheckConstraint(
                 name='territorial_location_valid',

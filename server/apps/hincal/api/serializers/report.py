@@ -9,7 +9,11 @@ from server.apps.hincal.models import (
     SubSector,
     TerritorialLocation,
 )
-from server.apps.hincal.services.enums import TypeBusiness, TypeTaxSystem
+from server.apps.hincal.services.enums import (
+    TypeBusiness,
+    TypeBusinessForCalculator,
+    TypeTaxSystem,
+)
 from server.apps.hincal.services.validate_report import check_range
 from server.apps.services.serializers import ModelSerializerWithPermission
 
@@ -34,7 +38,7 @@ class CreateReportSerializer(serializers.Serializer):
     """Создание отчета."""
 
     type_business = serializers.ChoiceField(
-        choices=[TypeBusiness.LEGAL, TypeBusiness.INDIVIDUAL],
+        choices=TypeBusinessForCalculator.choices,
         required=True,
     )
     sectors = serializers.PrimaryKeyRelatedField(

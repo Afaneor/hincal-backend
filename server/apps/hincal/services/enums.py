@@ -10,6 +10,13 @@ class TypeBusiness(models.TextChoices):
     PHYSICAL = 'physical', _('Физическое лицо')
 
 
+class TypeBusinessForCalculator(models.TextChoices):
+    """Тип бизнеса: ИП, физическое лицо или компания."""
+
+    LEGAL = 'legal', _('Юридическое лицо')
+    INDIVIDUAL = 'individual', _('Индивидуальный предприниматель')
+
+
 class BusinessSector(models.TextChoices):
     """Отрасль хозяйственной деятельности"""
 
@@ -90,6 +97,6 @@ class TerritorialLocation(models.TextChoices):
 class TypeTaxSystem(models.TextChoices):
     """Тип системы налогооблажения."""
 
-    OSN = 'osn', _('Общая система налогооблажения')
-    YSN = 'ysn', _('Упрощенная система налогооблажения')
-    PATENT = 'patent', _('Патентная система налогооблажения')
+    OSN = 'osn', _('Общая')
+    YSN = 'ysn', _('Упрощенная')
+    PATENT = 'patent', _('Патентная')

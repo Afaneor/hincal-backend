@@ -4,8 +4,6 @@ from django.utils.translation import gettext_lazy as _
 
 from server.apps.hincal.services.archive import (
     get_cost_accounting,
-    get_land_cadastral_value,
-    get_property_cadastral_value,
     get_registration_costs,
 )
 from server.apps.services.base_model import AbstractBaseModel
@@ -58,14 +56,6 @@ class Archive(AbstractBaseModel):
         _('Верхний уровень погрешности для поиска записей по налогам'),
         default=1.2,
     )
-    land_cadastral_value = models.JSONField(
-        _('Кадастровая стоимость земли'),
-        default=get_land_cadastral_value,
-    )
-    property_cadastral_value = models.JSONField(
-        _('Кадастровая стоимость имущества'),
-        default=get_property_cadastral_value,
-    )
     cost_accounting = models.JSONField(
         _('Стоимость услуг на ведение бухгалтерского учета'),
         default=get_cost_accounting,
@@ -73,26 +63,6 @@ class Archive(AbstractBaseModel):
     registration_costs = models.JSONField(
         _('Расходы на регистрацию бизнеса'),
         default=get_registration_costs,
-    )
-    avg_land_lease_costs = models.FloatField(
-        _('Средняя стоимость аренды земли'),
-        default=50,
-    )
-    avg_land_purchase_costs = models.FloatField(
-        _('Средняя стоимость покупки земли'),
-        default=100,
-    )
-    avg_property_lease_costs = models.FloatField(
-        _('Средняя стоимость аренды недвижимости'),
-        default=100,
-    )
-    avg_property_purchase_costs = models.FloatField(
-        _('Средняя стоимость покупки недвижимости'),
-        default=200,
-    )
-    avg_property_repair_costs = models.FloatField(
-        _('Средняя стоимость капитального строительства недвижимости'),
-        default=100,
     )
     is_actual = models.BooleanField(
         _('Актуальные данные в архиве или нет'),

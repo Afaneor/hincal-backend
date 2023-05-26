@@ -98,14 +98,14 @@ class Migration(migrations.Migration):
                 (
                     'land_cadastral_value',
                     models.JSONField(
-                        default=server.apps.hincal.services.archive.get_land_cadastral_value,
+                        default={},
                         verbose_name='Кадастровая стоимость земли',
                     ),
                 ),
                 (
                     'property_cadastral_value',
                     models.JSONField(
-                        default=server.apps.hincal.services.archive.get_property_cadastral_value,
+                        default={},
                         verbose_name='Кадастровая стоимость имущества',
                     ),
                 ),

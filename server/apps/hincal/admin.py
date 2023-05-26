@@ -7,7 +7,7 @@ from server.apps.hincal.models import (
     Statistic,
     Report,
     Sector,
-    SubSector,
+    SubSector, TerritorialLocation,
 )
 
 
@@ -206,3 +206,27 @@ class SubSectorAdmin(admin.ModelAdmin[SubSector]):
         'name',
         'slug',
     )
+
+
+@admin.register(TerritorialLocation)
+class TerritorialLocationAdmin(admin.ModelAdmin[TerritorialLocation]):
+    """Территориальное расположение."""
+
+    list_display = (
+        'id',
+        'shot_name',
+        'full_name',
+        'slug',
+    )
+    search_fields = (
+        'slug',
+        'shot_name',
+        'full_name',
+    )
+    ordering = (
+        'id',
+        'shot_name',
+        'full_name',
+        'slug',
+    )
+

@@ -116,24 +116,24 @@ class ReportContextDataClass:
 
         # Расходы аренды/покупки земли.
         land_area = self.avg_land_tax_by_business_indicators / self.archive.land_tax_rate
-        self.avg_land_lease_costs = (
-            land_area * self.archive.avg_land_lease_costs
-        )
-        self.avg_land_purchase_costs = (
-            land_area * self.archive.avg_land_purchase_costs
-        )
+        # self.avg_land_lease_costs = (
+        #     land_area * self.archive.avg_land_lease_costs
+        # )
+        # self.avg_land_purchase_costs = (
+        #     land_area * self.archive.avg_land_purchase_costs
+        # )
 
         # Расходы аренды/покупки/ремонта на объекты недвижимости.
         property_area = self.avg_property_tax_by_business_indicators / self.archive.property_tax_rate
-        self.property_lease_costs = (
-            property_area * self.archive.avg_property_lease_costs
-        )
-        self.property_purchase_costs = (
-            property_area * self.archive.avg_property_purchase_costs
-        )
-        self.property_repair_costs = (
-            property_area * self.archive.avg_property_repair_costs
-        )
+        # self.property_lease_costs = (
+        #     property_area * self.archive.avg_property_lease_costs
+        # )
+        # self.property_purchase_costs = (
+        #     property_area * self.archive.avg_property_purchase_costs
+        # )
+        # self.property_repair_costs = (
+        #     property_area * self.archive.avg_property_repair_costs
+        # )
 
         # Итоговые возможные расходы по всему.
         self.all_possible_costs = (
@@ -148,8 +148,8 @@ class ReportContextDataClass:
             self.avg_other_taxes_by_business_indicators +
             self.avg_staff_pension_contributions_costs +
             self.avg_staff_medical_contributions_costs +
-            self.avg_land_lease_costs +
-            self.property_lease_costs +
+            # self.avg_land_lease_costs +
+            # self.property_lease_costs +
             self.equipment_costs +
             self.accounting_costs +
             self.registration_costs
@@ -161,17 +161,17 @@ class ReportContextDataClass:
             self.avg_staff_medical_contributions_costs
         )
         # Общие расходны на аренду земли и объектов недвижимости.
-        self.all_lp_lease_costs = (
-            self.avg_land_lease_costs +
-            self.property_lease_costs +
-            self.property_repair_costs
-        )
+        # self.all_lp_lease_costs = (
+        #     self.avg_land_lease_costs +
+        #     self.property_lease_costs +
+        #     self.property_repair_costs
+        # )
         # Общие расходны на покупку земли и объектов недвижимости.
-        self.all_lp_purchase_costs = (
-            self.avg_land_purchase_costs +
-            self.property_lease_costs +
-            self.property_repair_costs
-        )
+        # self.all_lp_purchase_costs = (
+        #     self.avg_land_purchase_costs +
+        #     self.property_lease_costs +
+        #     self.property_repair_costs
+        # )
         # Общие расходны на налоги по земле и объектам недвижимости.
         self.all_lp_tax_costs = (
             self.avg_property_tax_by_business_indicators +

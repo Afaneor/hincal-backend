@@ -21,11 +21,11 @@ class Post(AbstractBaseModel):
     text = models.TextField(
         _('Полное описание новости'),
     )
-    tags = TaggableManager(blank=True)
     is_published = models.BooleanField(
         _('Пост доступен для просмотра'),
         default=False,
     )
+    tags = TaggableManager(blank=True)
 
     class Meta(AbstractBaseModel.Meta):
         verbose_name = _('Запись в блоге')

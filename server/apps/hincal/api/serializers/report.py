@@ -2,12 +2,14 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from server.apps.hincal.models import Report, Equipment, Sector, SubSector
-from server.apps.hincal.services.enums import (
+from server.apps.hincal.models import (
+    Report,
+    Equipment,
+    Sector,
+    SubSector,
     TerritorialLocation,
-    TypeBusiness,
-    TypeTaxSystem,
 )
+from server.apps.hincal.services.enums import TypeBusiness, TypeTaxSystem
 from server.apps.hincal.services.validate_report import check_range
 from server.apps.services.serializers import ModelSerializerWithPermission
 
@@ -54,11 +56,11 @@ class CreateReportSerializer(serializers.Serializer):
         required=False,
         allow_null=True,
     )
-    territorial_locations = serializers.MultipleChoiceField(
-        choices=TerritorialLocation.choices,
+    territorial_locations = serializers.PrimaryKeyRelatedField(
+        queryset=TerritorialLocation.objects.all(),
+        many=True,
         required=False,
         allow_null=True,
-        allow_blank=True,
     )
     from_land_area = serializers.IntegerField(
         required=False,
@@ -92,21 +94,6 @@ class CreateReportSerializer(serializers.Serializer):
     other = serializers.JSONField(
         allow_null=True,
     )
-
-    def validate_territorial_locations(self, territorial_locations):
-        """Валидация районов расположения."""
-        for territorial_location in territorial_locations:
-            if territorial_location not in TerritorialLocation.values:
-                raise ValidationError(
-                    {'territorial_locations': [
-                        _(
-                            'Вы выбрали некорректное территориальное ' +
-                            'расположение',
-                        ),
-                    ]},
-                )
-        # Распаковка нужна для будущей сериализации в json.
-        return [*territorial_locations] if territorial_locations else territorial_locations
 
     def validate_type_tax_system(self, type_tax_system):
         """Валидация типа системы налогооблажения."""

@@ -2,12 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from server.apps.hincal.services.enums import (
-    BusinessSector,
-    BusinessSubSector,
-    TerritorialLocation,
-    TypeBusiness,
-)
+from server.apps.hincal.services.enums import TypeBusiness
 from server.apps.hincal.services.validators import inn_validator
 from server.apps.services.base_model import AbstractBaseModel
 
@@ -56,10 +51,12 @@ class Business(AbstractBaseModel):
         verbose_name=_('Подотрасль хозяйственной деятельности'),
         related_name='business',
     )
-    territorial_location = models.CharField(
-        _('Территориальное положение бизнеса'),
-        max_length=settings.MAX_STRING_LENGTH,
-        choices=TerritorialLocation.choices,
+    territorial_location = models.ForeignKey(
+        'hincal.TerritorialLocation',
+        on_delete=models.CASCADE,
+        verbose_name=_('Территориальное положение бизнеса'),
+        related_name='businesses',
+        null=True,
         blank=True,
     )
     # Основная информация по бизнесу.
@@ -169,12 +166,6 @@ class Business(AbstractBaseModel):
             models.CheckConstraint(
                 name='type_valid',
                 check=models.Q(type__in=[*TypeBusiness.values, '']),
-            ),
-            models.CheckConstraint(
-                name='territorial_location_valid',
-                check=models.Q(
-                    territorial_location__in=[*TerritorialLocation.values, '']
-                ),
             ),
         ]
 

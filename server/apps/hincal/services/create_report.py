@@ -4,19 +4,18 @@ from django.contrib.auth.models import AnonymousUser
 from django.db import models
 
 from server.apps.hincal.api.serializers import (
+    ArchiveForReportSerializer,
     BusinessForReportSerializer,
 )
-from server.apps.hincal.models import Archive, BusinessIndicator, Equipment, \
-    Business, \
-    Report, Sector
-from server.apps.hincal.services.enums import (
-    BusinessSector,
-    BusinessSubSector,
-    TerritorialLocation, TypeBusiness,
+from server.apps.hincal.models import (
+    Archive,
+    BusinessIndicator,
+    Equipment,
+    Business,
+    Report,
 )
-from server.apps.hincal.services.report_context import (
-    ReportContextDataClass,
-)
+from server.apps.hincal.services.enums import TypeBusiness
+from server.apps.hincal.services.report_context import ReportContextDataClass
 from server.apps.user.models import User
 
 
@@ -401,7 +400,7 @@ class ReportWithContext(object):
     def get_equipment_costs(self):
         """Получение стоимости оборудования."""
         if equipments := Equipment.objects.filter(
-            id__in=self.data.get('equipment'),
+            id__in=self.data.get('equipment', []),
         ).aggregate(
             equipment_costs=models.Sum('cost')
         ).get('equipment_costs'):
@@ -469,9 +468,8 @@ class ReportWithContext(object):
 
             archive=self.archive,
         )
-        correct_context = context.__dict__
-        correct_context.pop('archive')
 
+        # Объекты в начальных данных преобразуем в слова.
         initial_data = {}
         for key_data, value_data in self.data.items():
             if key_data == 'sectors':
@@ -486,17 +484,26 @@ class ReportWithContext(object):
                 initial_data.update(
                     {'equipments': [equipment.name for equipment in value_data]}
                 )
+            elif key_data == 'territorial_locations':
+                initial_data.update(
+                    {'territorial_locations': [territorial_location.full_name for territorial_location in value_data]}
+                )
             else:
                 initial_data.update({key_data: value_data})
-        # FIXME: Убрать когда перепишу все.
-        initial_data.pop('territorial_locations')
+        # Корректируем архив и начальные данные для успешной сериализации.
+        correct_context = context.__dict__
+        correct_context.update(
+            {'archive': ArchiveForReportSerializer(self.archive).data},
+        )
         correct_context.update({'initial_data': initial_data})
+
         self.report = Report.objects.create(
             user=self.user,
             initial_data=initial_data,
             context=correct_context,
         )
         self.create_tags()
+
         return self.report
 
     def get_avg_salary_of_staff(self):

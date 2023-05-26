@@ -14,7 +14,6 @@ class PostAdmin(admin.ModelAdmin[Post]):
     )
     search_fields = (
         'title',
-        'tags',
     )
     list_filter = (
         'is_published',

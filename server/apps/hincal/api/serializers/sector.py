@@ -15,7 +15,7 @@ class SectorSerializer(ModelSerializerWithPermission):
             'id',
             'name',
             'slug',
-            'possible_income_from_patent',
+            'possible_income',
             'avg_salary_of_staff',
             'tags',
             'permission_rules',

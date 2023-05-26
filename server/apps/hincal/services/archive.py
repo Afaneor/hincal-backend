@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from server.apps.hincal.services.enums import TypeBusiness
 
+
 def get_cost_accounting():
     """Обертка для сохранения информации в поле модели."""
     return CostAccounting().data
@@ -10,19 +11,6 @@ def get_cost_accounting():
 def get_registration_costs():
     """Обертка для сохранения информации в поле модели."""
     return RegistrationCosts().data
-
-    ZAO = 'zao', _('ЗАО')
-    ZELAO = 'zelao', _('ЗелАО')
-    NAO = 'nao', _('НАО')
-    SAO = 'sao', _('САО')
-    SWAO = 'swao', _('СВАО')
-    SZAO = 'szao', _('СЗАО')
-    TAO = 'tao', _('ТАО')
-    CAO = 'cao', _('ЦАО')
-    YUAO = 'yuao', _('ЮАО')
-    YUWAO = 'yuwao', _('ЮВАО')
-    YUZAO = 'yuzao', _('ЮЗАО')
-    OTHER = 'other', _('Другое')
 
 
 @dataclass

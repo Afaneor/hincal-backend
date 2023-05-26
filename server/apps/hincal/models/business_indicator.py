@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from server.apps.hincal.models import Archive
 from server.apps.services.base_model import AbstractBaseModel
 
 
@@ -67,3 +68,33 @@ class BusinessIndicator(AbstractBaseModel):
 
     def __str__(self):
         return f'{self.business}. Год - {self.year}'
+
+    @property
+    def actual_archive(self):
+        return Archive.objects.get(is_actual=True)
+
+    @property
+    def land_area(self) -> float:
+        """Возвращаем примерный размер земельного участка."""
+        if self.land_tax:
+            return (
+                self.land_tax /
+                (
+                    self.actual_archive.land_tax_rate *
+                    self.actual_archive.avg_land_cadastral_value
+                )
+            )
+        return 0.0
+
+    @property
+    def property_area(self) -> float:
+        """Возвращаем примерный размер имущества."""
+        if self.property_tax:
+            return (
+                self.property_tax /
+                (
+                    self.actual_archive.patent_tax_rate *
+                    self.actual_archive.avg_property_cadastral_value
+                )
+            )
+        return 0.0

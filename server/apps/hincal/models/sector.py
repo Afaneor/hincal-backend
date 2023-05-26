@@ -23,6 +23,10 @@ class Sector(AbstractBaseModel):
         _('Возможный доход по патентной системе налогообложения, тыс. руб.'),
         default=10000,
     )
+    possible_income = models.PositiveIntegerField(
+        _('Возможный доход, тыс. руб.'),
+        default=10000,
+    )
     avg_salary_of_staff = models.FloatField(
         _('Средняя заработная плата сотрудника, тыс. руб.'),
         default=100,

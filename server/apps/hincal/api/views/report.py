@@ -1,4 +1,5 @@
 import django_filters
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from server.apps.hincal.api.serializers import (
 )
 from server.apps.hincal.models import Report
 from server.apps.hincal.services.create_report import ReportWithContext
+from server.apps.hincal.services.report_file import ReportFile
 from server.apps.services.filters_mixins import (
     CreatedUpdatedDateFilterMixin,
     UserFilterMixin,
@@ -55,6 +57,7 @@ class ReportViewSet(RetrieveListDeleteViewSet):
     permission_type_map = {
         **RetrieveListDeleteViewSet.permission_type_map,
         'calculator': None,
+        'get_file': None,
     }
 
     def get_queryset(self):
@@ -100,3 +103,28 @@ class ReportViewSet(RetrieveListDeleteViewSet):
             data=ReportSerializer(report).data,
             status=status.HTTP_201_CREATED,
         )
+
+    @action(
+        ['GET'],
+        url_path='get-file',
+        detail=True,
+    )
+    def get_file(self, request, pk: int):
+        """Получить файл отчета.
+
+        Файл отчета.
+
+        Доступно: любому пользователю.
+        """
+        report_file = ReportFile(
+            document_format='docx',
+            report=self.get_object(),
+        )
+
+        return FileResponse(
+            report_file.generate(),
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            filename=report_file.get_filename(),
+            status=status.HTTP_200_OK,
+        )
+

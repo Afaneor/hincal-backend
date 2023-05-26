@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from server.apps.hincal.services.enums import TypeBusiness
+from server.apps.hincal.services.enums import TypeBusiness, TypeTaxSystem
 from server.apps.hincal.services.validators import inn_validator
 from server.apps.services.base_model import AbstractBaseModel
 
@@ -158,6 +158,12 @@ class Business(AbstractBaseModel):
         max_length=settings.MAX_STRING_LENGTH,
         blank=True,
     )
+    type_tax_system = models.CharField(
+        _('Тип системы налогооблажения'),
+        max_length=settings.MAX_STRING_LENGTH,
+        choices=TypeTaxSystem.choices,
+        default=TypeTaxSystem.OSN,
+    )
 
     class Meta(AbstractBaseModel.Meta):
         verbose_name = _('Бизнес')
@@ -166,6 +172,10 @@ class Business(AbstractBaseModel):
             models.CheckConstraint(
                 name='type_valid',
                 check=models.Q(type__in=[*TypeBusiness.values, '']),
+            ),
+            models.CheckConstraint(
+                name='type_tax_system_valid',
+                check=models.Q(type_tax_system__in=TypeTaxSystem.values),
             ),
         ]
 

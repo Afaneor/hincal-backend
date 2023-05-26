@@ -1,4 +1,4 @@
-from typing import Optional, Union, Set, Tuple, List
+from typing import Optional, Union
 
 from django.contrib.auth.models import AnonymousUser
 from django.db import models
@@ -31,33 +31,35 @@ class ReportWithContext(object):
 
     # Переменные, которые будут получены в ходе расчетов:
     # Среднее количество работников.
-    avg_number_of_staff = 0
+    avg_number_of_staff = 0.0
     # Средний размер заработной платы по отраслям.
-    avg_salary_of_staff = 0
+    avg_salary_of_staff = 0.0
     # Общий фонд заработной платы всех сотрудников.
-    all_salary = 0
+    all_salary = 0.0
     # Средний размер площади земельного участка.
-    avg_land_area = 0
+    avg_land_area = 0.0
     # Средняя кадастровая стоимость на землю.
-    avg_land_cadastral_value = 0
+    avg_land_cadastral_value = 0.0
     # Размер налога на землю.
-    avg_land_tax = 0
+    avg_land_tax = 0.0
     # Средний размер площади имущества.
-    avg_property_area = 0
+    avg_property_area = 0.0
     # Средняя кадастровая стоимость на имущество.
-    avg_property_cadastral_value = 0
+    avg_property_cadastral_value = 0.0
     # Размер налога на имущество.
-    avg_property_tax = 0
+    avg_property_tax = 0.0
     # Средний возможный доход по патентной системе.
-    possible_income_from_patent = 0
+    possible_income_from_patent = 0.0
+    # Средний возможный доход.
+    avg_possible_income = 0.0
     # Средний размер налога на патент.
-    avg_patent_tax = 0
+    avg_patent_tax = 0.0
     # Расходны на регистрацию.
-    avg_registration_costs = 0
+    avg_registration_costs = 0.0
     # Расходны на ведение бухгалтерского учета.
-    avg_accounting_costs = 0
+    avg_accounting_costs = 0.0
     # Расходны на оборудование.
-    equipments = 0
+    equipments = 0.0
 
     report: Report = None
 
@@ -138,20 +140,20 @@ class ReportWithContext(object):
     def get_value_by_territorial_locations(
         self,
         property_name: str,
-    ) -> Union[int, float]:
+    ) -> float:
         """Получение корректных числовых значений по переданным округам."""
         # Получаем территориальное расположение. Если передан список,
         # то проходимся по списку, берем все значения и берем их среднее.
         # В противном случае отдаем просто среднее значение по всем.
         if self.territorial_locations:
-            average_value = 0
+            average_value = 0.0
             # Из атрибута объекта берем нужную информацию по округу.
             for territorial_location in self.territorial_locations:
-                average_value += getattr(territorial_location, property_name, 0)
+                average_value += getattr(territorial_location, property_name, 0.0)
 
             return average_value / len(self.territorial_locations)
 
-        return getattr(self.archive, property_name, 0)
+        return getattr(self.archive, property_name, 0.0)
 
 
     def get_filter_with_correct_land_area(self) -> models.Q:
@@ -222,7 +224,7 @@ class ReportWithContext(object):
 
         if archive:
             if self.sectors:
-                average_value = 0
+                average_value = 0.0
                 for sector in self.sectors:
                     average_value += archive.get(sector)
 
@@ -230,7 +232,7 @@ class ReportWithContext(object):
 
             return archive.get('other')
 
-        return 0
+        return 0.0
 
     def get_business_indicators(self):
         """Получение корректных показателей для формирования отчета.
@@ -338,12 +340,12 @@ class ReportWithContext(object):
             [],
         )
 
-    def get_patent_costs(self) -> Union[float, int]:
+    def get_patent_costs(self) -> float:
         """Получить размер возможных налогов на патент.
 
-        Доступно только для ИП.
+        Доступно только для ИП. Для остальных лиц рассчитываем возможный доход.
         """
-        avg_possible_income = 0
+        avg_possible_income = 0.0
         if (
             self.data.get('need_patent') and
             self.data.get('type_business') == TypeBusiness.INDIVIDUAL
@@ -362,19 +364,27 @@ class ReportWithContext(object):
 
             return self.avg_patent_tax
 
-        return 0
+        for sector in self.sectors:
+            avg_possible_income += sector.possible_income
 
-    def get_registration_costs(self) -> Union[float, int]:
+        self.avg_possible_income = (
+            avg_possible_income /
+            len(self.sectors)
+        )
+
+        return 0.0
+
+    def get_registration_costs(self) -> float:
         """Получить расходны на регистрации."""
         if self.data.get('need_registration'):
             self.avg_registration_costs = self.archive.registration_costs.get(
                 self.data.get('type_business', 'other'),
-                0,
+                0.0,
             )
 
             return self.avg_registration_costs
 
-        return 0
+        return 0.0
 
     def get_accounting_costs(self):
         """Получить расходны на ведение бухгалтерского учета."""
@@ -397,12 +407,12 @@ class ReportWithContext(object):
 
             return self.avg_accounting_costs
 
-        return 0
+        return 0.0
 
     def get_equipment_costs(self):
         """Получение стоимости оборудования."""
         if equipments := Equipment.objects.filter(
-            id__in=self.data.get('equipment', []),
+            id__in=self.data.get('equipments', []),
         ).aggregate(
             equipment_costs=models.Sum('cost')
         ).get('equipment_costs'):
@@ -410,7 +420,7 @@ class ReportWithContext(object):
 
             return self.equipments
 
-        return 0
+        return 0.0
 
     def formation_report(self):
         """Формирование контекста."""
@@ -433,20 +443,20 @@ class ReportWithContext(object):
         ).first()
         context = ReportContextDataClass(
             # Информация по бизнесу.
-            business=BusinessForReportSerializer(business).data if business else {},
+            business=business if business else None,
             # Исходные данные.
             initial_data=self.data,
 
             # Показатели других бизнесов, которые есть в БД.
-            avg_number_of_staff_by_business_indicators=avg_business_indicator.get('avg_number_of_staff'),
-            avg_salary_of_staff_by_business_indicators=avg_business_indicator.get('avg_salary_of_staff'),
-            avg_taxes_to_the_budget_by_business_indicators=avg_business_indicator.get('avg_taxes_to_the_budget'),
-            avg_income_tax_by_business_indicators=avg_business_indicator.get('avg_income_tax'),
-            avg_property_tax_by_business_indicators=avg_business_indicator.get('avg_property_tax'),
-            avg_land_tax_by_business_indicators=avg_business_indicator.get('avg_land_tax'),
-            avg_personal_income_tax_by_business_indicators=avg_business_indicator.get('avg_personal_income_tax'),
-            avg_transport_tax_by_business_indicators=avg_business_indicator.get('avg_transport_tax'),
-            avg_other_taxes_by_business_indicators=avg_business_indicator.get('avg_other_taxes'),
+            avg_number_of_staff_bi=avg_business_indicator.get('avg_number_of_staff'),
+            avg_salary_of_staff_bi=avg_business_indicator.get('avg_salary_of_staff'),
+            avg_taxes_to_the_budget_bi=avg_business_indicator.get('avg_taxes_to_the_budget'),
+            avg_income_tax_bi=avg_business_indicator.get('avg_income_tax'),
+            avg_property_tax_bi=avg_business_indicator.get('avg_property_tax'),
+            avg_land_tax_bi=avg_business_indicator.get('avg_land_tax'),
+            avg_personal_income_tax_bi=avg_business_indicator.get('avg_personal_income_tax'),
+            avg_transport_tax_bi=avg_business_indicator.get('avg_transport_tax'),
+            avg_other_taxes_bi=avg_business_indicator.get('avg_other_taxes'),
 
             # Рассчитанные показатели на основе простой математике.
             avg_number_of_staff_math=self.avg_number_of_staff,
@@ -463,7 +473,9 @@ class ReportWithContext(object):
             avg_property_tax_math=self.avg_property_tax,
 
             avg_patent_tax_math=self.avg_patent_tax,
+            avg_possible_income_math=self.avg_possible_income,
 
+            # Общие расходы.
             equipment_costs=self.get_equipment_costs(),
             accounting_costs=self.get_accounting_costs(),
             registration_costs=self.get_registration_costs(),
@@ -510,7 +522,7 @@ class ReportWithContext(object):
 
     def get_avg_salary_of_staff(self):
         """Получение среднего размера зп исходя из отрасли."""
-        avg_salary_of_staff = 0
+        avg_salary_of_staff = 0.0
         for sector in self.sectors:
             avg_salary_of_staff += sector.avg_salary_of_staff
 

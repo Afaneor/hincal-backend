@@ -36,6 +36,14 @@ class Archive(AbstractBaseModel):
         _('Размер налоговой ставки по патенту'),
         default=0.06,
     )
+    osn_tax_rate = models.FloatField(
+        _('Размер налоговой ставки по общей системе налогооблажения'),
+        default=0.2,
+    )
+    ysn_tax_rate = models.FloatField(
+        _('Размер налоговой ставки по упрощенной системе налогооблажения'),
+        default=0.06,
+    )
     personal_income_rate = models.FloatField(
         _('Размер НДФЛ'),
         default=0.013,
@@ -47,6 +55,10 @@ class Archive(AbstractBaseModel):
     medical_contributions_rate = models.FloatField(
         _('Размер ставки для медицинских отчислений'),
         default=0.051,
+    )
+    disability_contributions_rate = models.FloatField(
+        _('Размер ставки для по нетрудоспособности'),
+        default=0.029,
     )
     lower_tax_margin_error = models.FloatField(
         _('Нижний уровень погрешности для поиска записей по налогам'),
@@ -68,10 +80,28 @@ class Archive(AbstractBaseModel):
         _('Средняя кадастровая стоимость на землю, тыс. руб.'),
         default=17.23389,
     )
+    avg_land_lease_costs = models.FloatField(
+        _('Средняя стоимость на аренду земли, тыс. руб.'),
+        default=60,
+    )
+    avg_land_purchase_costs = models.FloatField(
+        _('Средняя стоимость на покупку земли, тыс. руб.'),
+        default=100,
+    )
     avg_property_cadastral_value = models.FloatField(
         _('Средняя кадастровая стоимость на имуществу, тыс. руб.'),
         default=17.23389,
     )
+    avg_property_lease_costs = models.FloatField(
+        _('Средняя стоимость на аренду имущества, тыс. руб.'),
+        default=100,
+    )
+    avg_property_purchase_costs = models.FloatField(
+        _('Средняя стоимость на покупку  имуществу, тыс. руб.'),
+        default=200,
+    )
+
+
     is_actual = models.BooleanField(
         _('Актуальные данные в архиве или нет'),
         default=True

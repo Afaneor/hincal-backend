@@ -14,7 +14,6 @@ class SupportAdmin(admin.ModelAdmin[Support]):
     )
     search_fields = (
         'title',
-        'tags',
     )
     list_filter = (
         'is_actual',
@@ -36,7 +35,6 @@ class OfferAdmin(admin.ModelAdmin[Offer]):
     )
     search_fields = (
         'title',
-        'tags',
     )
     ordering = (
         'id',

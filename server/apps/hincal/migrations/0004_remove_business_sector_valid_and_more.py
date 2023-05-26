@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             model_name='archive',
             name='average_salary',
             field=models.JSONField(
-                default=server.apps.hincal.services.archive.get_average_salary,
+                default={},
                 verbose_name='Средняя заработная плата по секторам',
             ),
         ),

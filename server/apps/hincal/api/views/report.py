@@ -13,7 +13,8 @@ from server.apps.services.filters_mixins import (
     CreatedUpdatedDateFilterMixin,
     UserFilterMixin,
 )
-from server.apps.services.views import RetrieveListCreateDeleteViewSet
+from server.apps.services.views import RetrieveListCreateDeleteViewSet, \
+    RetrieveListDeleteViewSet
 
 
 class ReportFilter(
@@ -36,7 +37,7 @@ class ReportFilter(
         )
 
 
-class ReportViewSet(RetrieveListCreateDeleteViewSet):
+class ReportViewSet(RetrieveListDeleteViewSet):
     """Отчет."""
 
     serializer_class = ReportSerializer
@@ -78,10 +79,9 @@ class ReportViewSet(RetrieveListCreateDeleteViewSet):
         serializer_class=CreateReportSerializer,
     )
     def calculator(self, request):
-        """Авторизация пользователя.
+        """Расчет расходов.
 
-        Общее описание: пользователь с указанными данными авторизуется с
-        помощью сессии.
+        Калькулятор для расчета расходов.
 
         Доступно: любому пользователю.
         """
@@ -92,9 +92,7 @@ class ReportViewSet(RetrieveListCreateDeleteViewSet):
             data=serializer.validated_data,
         ).formation_report()
 
-        headers = self.get_success_headers(serializer.data)
         return Response(
             data=ReportSerializer(report).data,
             status=status.HTTP_201_CREATED,
-            headers=headers,
         )

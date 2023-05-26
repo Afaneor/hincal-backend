@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
                 (
                     'possible_income_from_patent',
                     models.JSONField(
-                        default=server.apps.hincal.services.archive.get_possible_income_from_patent,
+                        default={},
                         verbose_name='Возможный доход для ИП по патентной системе',
                     ),
                 ),

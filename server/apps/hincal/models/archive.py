@@ -3,11 +3,9 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from server.apps.hincal.services.archive import (
-    get_average_salary,
     get_cost_accounting,
     get_land_cadastral_value,
     get_property_cadastral_value,
-    get_possible_income_from_patent,
     get_registration_costs,
 )
 from server.apps.services.base_model import AbstractBaseModel
@@ -72,10 +70,6 @@ class Archive(AbstractBaseModel):
         _('Стоимость услуг на ведение бухгалтерского учета'),
         default=get_cost_accounting,
     )
-    possible_income_from_patent = models.JSONField(
-        _('Возможный доход для ИП по патентной системе'),
-        default=get_possible_income_from_patent,
-    )
     registration_costs = models.JSONField(
         _('Расходы на регистрацию бизнеса'),
         default=get_registration_costs,
@@ -88,7 +82,6 @@ class Archive(AbstractBaseModel):
         _('Средняя стоимость покупки земли'),
         default=100,
     )
-
     avg_property_lease_costs = models.FloatField(
         _('Средняя стоимость аренды недвижимости'),
         default=100,
@@ -101,11 +94,6 @@ class Archive(AbstractBaseModel):
         _('Средняя стоимость капитального строительства недвижимости'),
         default=100,
     )
-    average_salary = models.JSONField(
-        _('Средняя заработная плата по секторам'),
-        default=get_average_salary,
-    )
-
     is_actual = models.BooleanField(
         _('Актуальные данные в архиве или нет'),
         default=True

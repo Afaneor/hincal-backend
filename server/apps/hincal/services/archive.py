@@ -18,19 +18,10 @@ def get_cost_accounting():
     return CostAccounting().data
 
 
-def get_possible_income_from_patent():
-    """Обертка для сохранения информации в поле модели."""
-    return PossibleIncomeFromPatent().data
-
-
 def get_registration_costs():
     """Обертка для сохранения информации в поле модели."""
     return RegistrationCosts().data
 
-
-def get_average_salary():
-    """Обертка для сохранения информации в поле модели."""
-    return AverageSalary().data
 
 @dataclass
 class LandCadastralValue:
@@ -112,76 +103,10 @@ class CostAccounting:
 
 
 @dataclass
-class PossibleIncomeFromPatent:
-    """Возможный доход по патентной системе, тыс. руб. Закон № 53."""
-
-    data = {
-        BusinessSector.FOOD_INDUSTRY: 10000,
-        BusinessSector.RADIO_ELECTRONICS_AND_INSTRUMENTATION: 10000,
-        BusinessSector.AVIATION_INDUSTRY: 10000,
-        BusinessSector.AUTOMOTIVE_INDUSTRY: 10000,
-        BusinessSector.GENERAL_MECHANICAL_ENGINEERING: 10000,
-        BusinessSector.LIGHT_INDUSTRY: 10000,
-        BusinessSector.PRODUCTION_OF_PETROLEUM_PRODUCTS: 10000,
-        BusinessSector.CHEMICAL_INDUSTRY: 10000,
-        BusinessSector.PRODUCTION_OF_BUILDING_MATERIALS: 10000,
-        BusinessSector.PRODUCTION_FOR_MILITARY: 10000,
-        BusinessSector.PHARMACEUTICAL_INDUSTRY: 10000,
-        BusinessSector.FUEL_AND_ENERGY_COMPLEX: 10000,
-        BusinessSector.MEDICAL_INDUSTRY: 10000,
-        BusinessSector.CABLE_INDUSTRY: 10000,
-        BusinessSector.WOODWORKING: 10000,
-        BusinessSector.METALLURGY_AND_METALWORKING: 10000,
-        BusinessSector.PRINTING_ACTIVITY: 10000,
-        BusinessSector.PRODUCTION_OF_OTHER_CONSUMER_GOODS: 10000,
-        BusinessSector.BEVERAGE_PRODUCTION: 10000,
-        BusinessSector.SCIENTIFIC_ACTIVITY: 10000,
-        BusinessSector.MACHINE_TOOL_INDUSTRY: 10000,
-        BusinessSector.SHIPBUILDING: 10000,
-        BusinessSector.PRODUCTION_OF_RAILWAY_TRANSPORT: 10000,
-        BusinessSector.MANUFACTURE_OF_CONSUMER_ELECTRONICS: 10000,
-        BusinessSector.OTHER: 10000,
-    }
-
-
-@dataclass
 class RegistrationCosts:
     """Расходы на регистрацию, тыс. руб."""
 
     data = {
         TypeBusiness.LEGAL: 40,
         TypeBusiness.INDIVIDUAL: 0.8,
-    }
-
-
-@dataclass
-class AverageSalary:
-    """Размер средней заработной платы по секторам, тыс. руб."""
-
-    data = {
-        BusinessSector.FOOD_INDUSTRY: 10000,
-        BusinessSector.RADIO_ELECTRONICS_AND_INSTRUMENTATION: 10000,
-        BusinessSector.AVIATION_INDUSTRY: 10000,
-        BusinessSector.AUTOMOTIVE_INDUSTRY: 10000,
-        BusinessSector.GENERAL_MECHANICAL_ENGINEERING: 10000,
-        BusinessSector.LIGHT_INDUSTRY: 10000,
-        BusinessSector.PRODUCTION_OF_PETROLEUM_PRODUCTS: 10000,
-        BusinessSector.CHEMICAL_INDUSTRY: 10000,
-        BusinessSector.PRODUCTION_OF_BUILDING_MATERIALS: 10000,
-        BusinessSector.PRODUCTION_FOR_MILITARY: 10000,
-        BusinessSector.PHARMACEUTICAL_INDUSTRY: 10000,
-        BusinessSector.FUEL_AND_ENERGY_COMPLEX: 10000,
-        BusinessSector.MEDICAL_INDUSTRY: 10000,
-        BusinessSector.CABLE_INDUSTRY: 10000,
-        BusinessSector.WOODWORKING: 10000,
-        BusinessSector.METALLURGY_AND_METALWORKING: 10000,
-        BusinessSector.PRINTING_ACTIVITY: 10000,
-        BusinessSector.PRODUCTION_OF_OTHER_CONSUMER_GOODS: 10000,
-        BusinessSector.BEVERAGE_PRODUCTION: 10000,
-        BusinessSector.SCIENTIFIC_ACTIVITY: 10000,
-        BusinessSector.MACHINE_TOOL_INDUSTRY: 10000,
-        BusinessSector.SHIPBUILDING: 10000,
-        BusinessSector.PRODUCTION_OF_RAILWAY_TRANSPORT: 10000,
-        BusinessSector.MANUFACTURE_OF_CONSUMER_ELECTRONICS: 10000,
-        BusinessSector.OTHER: 10000,
     }

@@ -136,16 +136,16 @@ class RetrieveListUpdateViewSet(  # noqa: WPS215
     }
 
 
-class RetrieveListUpdateDeleteViewSet(  # noqa: WPS215
+class RetrieveListDeleteViewSet(  # noqa: WPS215
     ViewSetSerializerMixin,
     AutoPermissionViewSetMixin,
     NestedViewSetMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
     GenericViewSet,
 ):
-    """ViewSet с возможностью просмотра/изменения/удаления."""
+    """ViewSet с возможностью просмотра/удаления."""
 
     permission_type_map = {
         **AutoPermissionViewSetMixin.permission_type_map,

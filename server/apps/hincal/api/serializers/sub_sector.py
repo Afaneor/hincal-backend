@@ -1,16 +1,16 @@
-from server.apps.hincal.models import Equipment
+from server.apps.hincal.models import SubSector
 from server.apps.services.serializers import ModelSerializerWithPermission
 
 
-class EquipmentSerializer(ModelSerializerWithPermission):
-    """Сериалайзер оборудования."""
+class SubSectorSerializer(ModelSerializerWithPermission):
+    """Сериалайзер подотрасли."""
 
     class Meta(object):
-        model = Equipment
+        model = SubSector
         fields = (
             'id',
             'name',
-            'cost',
+            'slug',
             'permission_rules',
             'created_at',
             'updated_at',

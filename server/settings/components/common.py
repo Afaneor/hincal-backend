@@ -63,6 +63,7 @@ INSTALLED_APPS: Tuple[str, ...] = (
 )
 
 MIDDLEWARE: Tuple[str, ...] = (
+    'corsheaders.middleware.CorsMiddleware',
     # Content Security Policy:
     'csp.middleware.CSPMiddleware',
 
@@ -70,7 +71,6 @@ MIDDLEWARE: Tuple[str, ...] = (
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

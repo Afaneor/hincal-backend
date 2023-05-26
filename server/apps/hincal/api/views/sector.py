@@ -1,7 +1,7 @@
 import django_filters
 
-from server.apps.hincal.api.serializers import EquipmentSerializer
-from server.apps.hincal.models import Equipment
+from server.apps.hincal.api.serializers import SectorSerializer
+from server.apps.hincal.models import Sector
 from server.apps.services.filters_mixins import (
     CreatedUpdatedDateFilterMixin,
     UserFilterMixin,
@@ -9,37 +9,39 @@ from server.apps.services.filters_mixins import (
 from server.apps.services.views import BaseReadOnlyViewSet
 
 
-class EquipmentFilter(
+class SectorFilter(
     UserFilterMixin,
     CreatedUpdatedDateFilterMixin,
     django_filters.FilterSet,
 ):
-    """Фильтр отчетов."""
+    """Фильтр отраслей."""
 
     name = django_filters.CharFilter(lookup_expr='icontains')
+    slug = django_filters.CharFilter(lookup_expr='icontains')
 
     class Meta(object):
-        model = Equipment
+        model = Sector
         fields = (
             'id',
             'name',
-            'cost',
+            'slug',
         )
 
 
-class EquipmentViewSet(BaseReadOnlyViewSet):
-    """Оборудование. Просмотр."""
+class SectorViewSet(BaseReadOnlyViewSet):
+    """Отрасль. Просмотр."""
 
-    serializer_class = EquipmentSerializer
-    queryset = Equipment.objects.all()
+    serializer_class = SectorSerializer
+    queryset = Sector.objects.all()
     search_fields = (
         'name',
+        'slug',
     )
     ordering_fields = '__all__'
-    filterset_class = EquipmentFilter
+    filterset_class = SectorFilter
 
     def get_queryset(self):
-        """Выдача оборудования.
+        """Выдача отраслей.
 
         Все видят все оборудование.
         """

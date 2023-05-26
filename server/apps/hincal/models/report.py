@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from taggit.managers import TaggableManager
 
 from server.apps.services.base_model import AbstractBaseModel
 
@@ -21,6 +22,7 @@ class Report(AbstractBaseModel):
     context = models.JSONField(
         _('Данные для формирования отчета'),
     )
+    tags = TaggableManager(blank=True)
 
     class Meta(AbstractBaseModel.Meta):
         verbose_name = _('Отчет')

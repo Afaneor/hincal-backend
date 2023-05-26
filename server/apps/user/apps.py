@@ -12,5 +12,6 @@ class UserConfig(AppConfig):
     def ready(self):
         """Подключение роутера и прав происходит при подключении app."""
         super().ready()
+        import server.apps.user.api.routers
         import server.apps.user.permissions
-        from server.apps.user.api import routers
+

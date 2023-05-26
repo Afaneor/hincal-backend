@@ -26,15 +26,20 @@ class Support(AbstractBaseModel):
         max_length=settings.MAX_STRING_LENGTH,
         blank=True,
     )
-    tags = TaggableManager(blank=True)
     site = models.URLField(
         _('Ссылка на сторонний ресурс с подробной информацией'),
+        blank=True,
+    )
+    extra_data = models.JSONField(
+        _('Дополнительные параметры'),
+        null=True,
         blank=True,
     )
     is_actual = models.BooleanField(
         _('Является ли меря поддержки актуальной'),
         default=False,
     )
+    tags = TaggableManager(blank=True)
 
     class Meta(AbstractBaseModel.Meta):
         verbose_name = _('Мера поддержки бизнеса')

@@ -1,7 +1,7 @@
 import django_filters
 
-from server.apps.blog.api.serializers import SupportSerializer
-from server.apps.blog.models import Support
+from server.apps.support.api.serializers import SupportSerializer
+from server.apps.support.models import Support
 from server.apps.services.filters_mixins import (
     CreatedUpdatedDateFilterMixin,
     TagFilterMixin,

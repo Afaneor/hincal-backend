@@ -1,5 +1,5 @@
 ---
-- model: blog.support
+- model: support.support
   pk: 1
   fields:
     title: Субсидии для работодателей за трудоустройство бывших участников СВО
@@ -12,7 +12,7 @@
     is_actual: true
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
-- model: blog.support
+- model: support.support
   pk: 2
   fields:
     title: Экспресс-займы для малого и среднего турбизнеса
@@ -22,7 +22,7 @@
     amount: До 30 млн. рублей
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
-- model: blog.support
+- model: support.support
   pk: 3
   fields:
     title: Программа продвижения предпринимателей от Ozon и Минэкономразвития России
@@ -34,7 +34,7 @@
     amount: До 70 000 показов объявлений
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
-- model: blog.support
+- model: support.support
   pk: 4
   fields:
     title: Антикризисные программы льготного кредитования
@@ -44,7 +44,7 @@
     amount: До 2 млрд рублей
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
-- model: blog.support
+- model: support.support
   pk: 5
   fields:
     title: Cубсидии за трудоустройство молодёжи
@@ -55,7 +55,7 @@
     amount: ''
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
-- model: blog.support
+- model: support.support
   pk: 6
   fields:
     title: Новые меры поддержки экспортеров
@@ -68,7 +68,7 @@
     amount: Не более 300 тыс. рублей
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
-- model: blog.support
+- model: support.support
   pk: 7
   fields:
     title: Мораторий на проверки предприятий и предпринимателей
@@ -79,7 +79,7 @@
     amount: ''
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
-- model: blog.support
+- model: support.support
   pk: 8
   fields:
     title: Грант участникам инновационного кластера на территории города Москвы на возмещение затрат в целях реализации комплексных инновационных проектов (КИП – собственные средства)
@@ -90,7 +90,7 @@
     is_actual: true
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
-- model: blog.support
+- model: support.support
   pk: 9
   fields:
     title: 'Для франчайзи: субсидии на уплату процентов по кредитам на приобретение оборудования и развитие хозяйственной деятельности'
@@ -104,7 +104,7 @@
     is_actual: true
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
-- model: blog.support
+- model: support.support
   pk: 10
   fields:
     title: 'Экспортёрам: субсидии на патентование за рубежом'

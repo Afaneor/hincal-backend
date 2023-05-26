@@ -1,6 +1,6 @@
 from taggit.serializers import TagListSerializerField
 
-from server.apps.blog.models import Support
+from server.apps.support.models import Support
 
 from server.apps.services.serializers import ModelSerializerWithPermission
 
@@ -17,9 +17,11 @@ class SupportSerializer(ModelSerializerWithPermission):
             'preview_image',
             'title',
             'text',
-            'tags',
+            'amount',
             'site',
+            'extra_data',
             'is_actual',
+            'tags',
             'created_at',
             'updated_at',
             'permission_rules',

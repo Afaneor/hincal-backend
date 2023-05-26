@@ -1,6 +1,5 @@
-from server.apps.blog.permissions import post, support
+from server.apps.blog.permissions import post
 
 __all__ = [
     'post',
-    'support',
 ]

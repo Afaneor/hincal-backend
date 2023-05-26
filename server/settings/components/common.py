@@ -49,6 +49,7 @@ INSTALLED_APPS: Tuple[str, ...] = (
     'server.apps.hincal',
     'server.apps.blog',
     'server.apps.user',
+    'server.apps.support',
 
     # documentation
     'drf_yasg',

@@ -20,7 +20,7 @@ class ResetPasswordRequestSerializer(serializers.Serializer):
         """Валидность email для восстановления пароля."""
         email = self.initial_data.get('email', None)
         self.check_email(email)
-        return True
+        return super().is_valid(raise_exception=raise_exception)
 
     def check_email(self, email) -> None:
         """Проверяем, что пользователь с такой почтой существует."""
@@ -38,7 +38,7 @@ class ResetPasswordConfirmSerializer(serializers.Serializer):
     password1 = serializers.CharField(required=True)
     password2 = serializers.CharField(required=True)
 
-    def is_valid(self, raise_exception=False):
+    def is_valid(self, raise_exception=False)  -> bool:
         """Валидация корректности пароля."""
         password1 = self.initial_data.get('password1')
         password2 = self.initial_data.get('password2')
@@ -63,7 +63,7 @@ class ChangePasswordSerializer(serializers.Serializer):
             {'password': [_('Вы ввели некорректный пароль')]},
         )
 
-    def is_valid(self, raise_exception=False):
+    def is_valid(self, raise_exception=False)  -> bool:
         """Валидация корректности пароля."""
         password1 = self.initial_data.get('password1')
         password2 = self.initial_data.get('password2')

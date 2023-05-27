@@ -2,7 +2,7 @@ import datetime
 from dataclasses import dataclass, field
 
 from server.apps.hincal.models import Archive, Business, Equipment
-from server.apps.hincal.services.enums import TypeTaxSystem
+from server.apps.hincal.services.enums import TypeTaxSystem, TextForReport
 
 
 def get_correct_data(entity, property_name):
@@ -22,15 +22,6 @@ class ReportContextDataClass:
     business: Business = None
     # Исходные данные, которые ввел пользователь в калькуляторе.
     initial_data: dict = None
-
-    # Генерация текста из ChatGPT.
-    chat_gpt_page_2: str = ''
-    chat_gpt_page_3: str = ''
-    chat_gpt_page_4: str = ''
-    chat_gpt_page_5: str = ''
-    chat_gpt_page_6: str = ''
-    chat_gpt_page_7: str = ''
-    chat_gpt_page_8: str = ''
 
     # Средние показатели расходов по другим бизнесам, которые есть в БД.
     avg_number_of_staff_bi: float = 0
@@ -56,9 +47,11 @@ class ReportContextDataClass:
     avg_land_tax_math: float = 0
 
     # Расходы по имуществу.
-    avg_property_area_math: float = 0
+    property_area_math: float = 0
     avg_property_cadastral_value_math: float = 0
     avg_property_tax_math: float = 0
+    avg_capital_construction_costs_math: float = 0
+    type_capital_construction: str = ''
 
     # Средний размер налога на патент.
     avg_patent_tax_math: float = 0
@@ -71,10 +64,13 @@ class ReportContextDataClass:
     accounting_costs: float = 0
     # Расходы на регистрацию.
     registration_costs: float = 0
+    # Прочие расходы
+    other_costs: float = 0
+    other_costs_str: str = ''
 
     # ВЫЧИСЛЯЕМЫЕ ПОЛЯ.
     # Итоговые возможные расходы по всему.
-    all_possible_costsbi: float = field(init=False)
+    all_possible_costs_bi: float = field(init=False)
     all_possible_costs_math: float = field(init=False)
     # Общие расходны на сотрудников.
     all_staff_costs: float = field(init=False)
@@ -126,7 +122,7 @@ class ReportContextDataClass:
         # налог на прибыль, землю, имущество, транспорт, другие налоги,
         # патентную систему, бухгалтерию, оборудование, регистрацию.
         # FIXME налог уплачивается на год. А расходы на зп, бух. учет. на месяц
-        self.all_possible_costsbi = (
+        self.all_possible_costs_bi = (
             self.avg_salary_of_staff_bi +
             self.avg_personal_income_tax_bi +
             self.avg_staff_pension_contributions_costs_bi +
@@ -139,7 +135,8 @@ class ReportContextDataClass:
             self.avg_other_taxes_bi +
             self.equipment_costs +
             self.accounting_costs +
-            self.registration_costs
+            self.registration_costs +
+            self.other_costs
         )
         # Все расходы на сотрудника: з.п. сотрудников + НДФЛ + страховые взносы
         self.all_staff_costs_bi = (
@@ -168,7 +165,8 @@ class ReportContextDataClass:
         # Все расходы на сервисы.
         self.all_services_costs_bi = (
             self.accounting_costs +
-            self.registration_costs
+            self.registration_costs +
+            self.other_costs
         )
 
         # ОБЩИЕ РАСХОДЫ СОГЛАСНО МАТЕМАТИКЕ.
@@ -223,7 +221,8 @@ class ReportContextDataClass:
             self.avg_land_tax_math +
             self.equipment_costs +
             self.accounting_costs +
-            self.registration_costs
+            self.registration_costs +
+            self.other_costs
         )
 
         # Все расходы на сотрудника: з.п. сотрудников + НДФЛ + страховые взносы
@@ -234,8 +233,7 @@ class ReportContextDataClass:
             self.avg_staff_medical_contributions_costs_math +
             self.avg_staff_disability_contributions_costs_math
         )
-        # Все расходы на землю и имущество: налог на землю, налог на имущество,
-        # налог на транспорт.
+        # Все расходы на землю и имущество: налог на землю, налог на имущество.
         self.all_lp_lease_costs_math = (
             self.avg_property_tax_math +
             self.avg_land_tax_math
@@ -251,7 +249,8 @@ class ReportContextDataClass:
         # Все расходы на сервисы.
         self.all_services_costs_math = (
             self.accounting_costs +
-            self.registration_costs
+            self.registration_costs +
+            self.other_costs
         )
 
         # СТРАНИЦА 5.
@@ -289,6 +288,21 @@ class ReportContextDataClass:
         )
         self.avg_land_purchase_value = (
             avg_land_purchase_costs / len_territorial_locations
+        )
+
+        # Общая стоимость аренды/покупки имущества на год.
+        self.avg_property_lease_costs = (
+            self.avg_property_lease_value * self.property_area_math * 12
+        )
+        self.avg_property_purchase_costs = (
+            self.avg_property_purchase_value * self.property_area_math * 12
+        )
+        # Средняя стоимость аренды/покупки земли.
+        self.avg_land_lease_costs = (
+            self.avg_land_lease_value * self.avg_land_area_math * 12
+        )
+        self.avg_land_purchase_costs = (
+            self.avg_land_purchase_value * self.avg_land_area_math * 12
         )
 
         # Страница 6.
@@ -335,16 +349,24 @@ class ReportContextDataClass:
             'land_area': get_correct_data(indicator, 'land_area'),
             'building_area': get_correct_data(indicator, 'building_area'),
 
-            # Слова ищ ChatGpt.
-            'chat_gpt_page_3': self.chat_gpt_page_3,
-            'chat_gpt_page_4': self.chat_gpt_page_4,
-            'chat_gpt_page_5': self.chat_gpt_page_5,
-            'chat_gpt_page_6': self.chat_gpt_page_6,
-            'chat_gpt_page_7': self.chat_gpt_page_7,
-            'chat_gpt_page_8': self.chat_gpt_page_8,
+            # Слова из ChatGpt.
+            'chat_gpt_page_1': '',
+            'chat_gpt_page_2': '',
+            'chat_gpt_page_3': '',
+            'chat_gpt_page_4': '',
+            'chat_gpt_page_5': '',
+            'chat_gpt_page_6': '',
+
+            # Стандартные слова.
+            'page_1': TextForReport.PAGE_1,
+            'page_2': TextForReport.PAGE_2,
+            'page_3': TextForReport.PAGE_3,
+            'page_4': TextForReport.PAGE_4,
+            'page_5': TextForReport.PAGE_5,
+            'page_6': TextForReport.PAGE_6,
 
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ВОЗМОЖНЫХ ЗАТРАТ НА ОСНОВЕ БД.
-            'all_possible_costs_bi': self.all_possible_costsbi,
+            'all_possible_costs_bi': self.all_possible_costs_bi,
             'all_staff_costs_bi': self.all_staff_costs_bi,
             'all_lp_lease_costs_bi': self.all_lp_lease_costs_bi,
             'equipment_costs_bi': self.equipment_costs,
@@ -381,27 +403,35 @@ class ReportContextDataClass:
             
             # Стоимость кв.м. аренды имущества.
             'avg_property_lease_value': self.avg_property_lease_value,
+            # Общая стоимость по аренде.
+            'avg_property_lease_costs': self.avg_property_lease_costs,
             # Общие расходы по аренде имущества.
-            'all_property_lease_costs': self.avg_property_lease_value * self.avg_property_area_math,
+            'all_property_lease_costs': self.avg_property_lease_value * self.property_area_math,
             
             # Стоимость кв.м. покупки.
             'avg_property_purchase_value': self.avg_property_purchase_value,
+            # Общая стоимость по покупке.
+            'avg_property_purchase_costs': self.avg_property_purchase_costs,
             # Налог на недвижимость.
             'avg_property_tax': self.avg_property_tax_math,
             # Общие расходы по покупке имущества.
             'all_property_purchase_costs': (
                 self.avg_property_purchase_value * 
-                self.avg_property_area_math + 
+                self.property_area_math +
                 self.avg_property_tax_math
             ),
 
             # Стоимость кв.м. аренды земли.
             'avg_land_lease_value': self.avg_land_lease_value,
+            # Общая стоимость по аренде.
+            'avg_land_lease_costs': self.avg_land_lease_costs,
             # Общие расходы по аренде земли.
             'all_land_lease_costs': self.avg_land_lease_value * self.avg_land_area_math,
 
             # Стоимость кв.м. покупки земли.
             'avg_land_purchase_value': self.avg_land_purchase_value,
+            # Общая стоимость по покупке.
+            'avg_land_purchase_costs': self.avg_land_purchase_costs,
             # Налог на землю.
             'avg_land_tax': self.avg_land_tax_math,
             # Общие расходы по покупке земли.
@@ -416,4 +446,11 @@ class ReportContextDataClass:
             'equipments': data_by_equipments,
 
             # 7 Страница. Предложения по бизнесу (исходя из сферы).
+            'offers_and_wishes': '',
+
+            'other_costs': (
+                self.other_costs_str +
+                '\n' +
+                f'Общие расходы составили: {self.other_costs} тыс. руб.'
+            )
         }

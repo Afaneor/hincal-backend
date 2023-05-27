@@ -77,6 +77,8 @@ httpx = "^0.24.1"
 docxtpl = "^0.16.7"
 beautifulsoup4 = "^4.12.2"
 lxml = "^4.9.2"
+openai = "^0.27.7"
+tiktoken = "^0.4.0"
 
 [tool.poetry.dev-dependencies]
 django-coverage-plugin = "^3.0"  # https://github.com/nedbat/django_coverage_plugin

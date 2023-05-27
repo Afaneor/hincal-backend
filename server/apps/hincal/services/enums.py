@@ -1,3 +1,5 @@
+from enum import Enum
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -17,86 +19,53 @@ class TypeBusinessForCalculator(models.TextChoices):
     INDIVIDUAL = 'individual', _('Индивидуальный предприниматель')
 
 
-class BusinessSector(models.TextChoices):
-    """Отрасль хозяйственной деятельности"""
-
-    FOOD_INDUSTRY = 'food_industry', _('Пищевая промышленность')
-    RADIO_ELECTRONICS_AND_INSTRUMENTATION = 'radio_electronics_and_instrumentation', _('Радиоэлектроника и приборостроение')
-    AVIATION_INDUSTRY = 'aviation_industry', _('Авиационная промышленность')
-    AUTOMOTIVE_INDUSTRY = 'automotive_industry', _('Автомобильная промышленность')
-    GENERAL_MECHANICAL_ENGINEERING = 'general_mechanical_engineering', _('Общее машиностроение')
-    LIGHT_INDUSTRY = 'light_industry', _('Легкая промышленность')
-    PRODUCTION_OF_PETROLEUM_PRODUCTS = 'production_of_petroleum_products', _('Производство кокса и нефтепродуктов')
-    CHEMICAL_INDUSTRY = 'chemical_industry', _('Химическая промышленность')
-    PRODUCTION_OF_BUILDING_MATERIALS = 'production_of_building_materials', _('Производство строительных материалов')
-    PRODUCTION_FOR_MILITARY = 'production_for_military', _('Производство оружия, боеприпасов, спецхимии, военных машин')
-    PHARMACEUTICAL_INDUSTRY = 'pharmaceutical_industry', _('Фармацевтическая промышленность')
-    FUEL_AND_ENERGY_COMPLEX = 'fuel_and_energy_complex', _('Топливно-энергетический комплекс')
-    MEDICAL_INDUSTRY = 'medical_industry', _('Медицинская промышленность')
-    CABLE_INDUSTRY = 'cable_industry', _('Кабельная промышленность')
-    WOODWORKING = 'woodworking', _('Деревообрабатывающая')
-    METALLURGY_AND_METALWORKING = 'metallurgy_and_metalworking', _('Металлургия и металлообработка')
-    PRINTING_ACTIVITY = 'printing_activity', _('Полиграфическая деятельность')
-    PRODUCTION_OF_OTHER_CONSUMER_GOODS = 'production_of_other_consumer_goods', _('Производство прочих товаров народного потребления')
-    BEVERAGE_PRODUCTION = 'beverage_production', _('Производство напитков')
-    SCIENTIFIC_ACTIVITY = 'scientific_activity', _('Научная деятельность')
-    MACHINE_TOOL_INDUSTRY = 'machine_tool_industry', _('Станкоинструментальная промышленность')
-    SHIPBUILDING = 'shipbuilding', _('Судостроение')
-    PRODUCTION_OF_RAILWAY_TRANSPORT = 'production_of_railway_transport', _('Производство ж/д транспорта')
-    MANUFACTURE_OF_CONSUMER_ELECTRONICS = 'manufacture_of_consumer_electronics', _('Производство бытовой электроники и электрических приборов')
-    ADDITIVE_TECHNOLOGIES = 'additive_technologies', _('Аддитивные технологии')
-    OTHER = 'other', _('Иные сектора')
-
-
-class BusinessSubSector(models.TextChoices):
-    """Подотрасль хозяйственной деятельности"""
-
-    DAIRY_INDUSTRY = 'dairy_industry', _('Молочная отрасль')
-    INSTRUMENTATION = 'instrumentation', _('Приборостроение')
-    MEAT_INDUSTRY = 'meat_industry', _('Мясная отрасль')
-    CONFECTIONERY_INDUSTRY = 'confectionery_industry', _('Кондитерская отрасль')
-    MANUFACTURE_OF_OTHER_GENERAL = 'manufacture_of_other_general', _('Производство прочих машин и оборудования общего назначения')
-    BAKERY_INDUSTRY = 'bakery_industry', _('Хлебопекарная отрасль')
-    PRODUCTION_OF_RAILWAY_TRANSPORT = 'production_of_railway_transport', _('Производство ж/д транспорта')
-    FISHING_INDUSTRY = 'fishing_industry', _('Рыбная отрасль')
-    PRODUCTION_OF_GENERAL_PURPOSE_EQUIPMENT = 'production_of_general_purpose_equipment', _('Производство машин и оборудования общего назначения')
-    PRODUCTION_OF_CANNED_FRUITS_AND_VEGETABLES = 'production_of_canned_fruits_and_vegetables', _('Производство плодоовощных консервов')
-    ELECTRICAL_ENGINEERING = 'electrical_engineering', _('Электротехника')
-    PRODUCTION_OF_OTHER_SPECIAL_PURPOSE_MACHINES = 'production_of_other_special_purpose_machines', _('Производство прочих машин специального назначения')
-    MACHINE_TOOL_INDUSTRY = 'machine_tool_industry', _('Станкоинструментальная промышленность')
-    MICROELECTRONICS = 'microelectronics', _('Микроэлектроника')
-    MILLING_AND_CEREAL_INDUSTRY = 'milling_and_cereal_industry', _('Мукомольно-крупяная отрасль')
-    OTHER = 'other', _('Иные подсектора')
-    BEVERAGE_PRODUCTION = 'beverage_production', _('Производство напитков')
-    ANIMAL_FEED = 'animal_feed', _('Корма для животных')
-    ELECTRICAL_ENGINEERING_AND_SHIPBUILDING = 'electrical_engineering_and_shipbuilding', _('Электротехника/Судостроение')
-    SUGAR_INDUSTRY = 'sugar_industry', _('Сахарная отрасль')
-    PRODUCTION_OF_EQUIPMENT_FOR_AGRICULTURE_AND_FORESTRY = 'production_of_equipment_for_agriculture_and_forestry', _('Производство машин и оборудования для сельского и лесного хозяйства')
-    FAT_AND_OIL_INDUSTRY = 'fat_and_oil_industry', _('Масложировая отрасль')
-    METALWORKING = 'metalworking', _('Металлообработка')
-
-
-class TerritorialLocation(models.TextChoices):
-    """Территориально расположение бизнеса по Москве (округа)."""
-
-    WAO = 'wao', _('ВАО')
-    ZAO = 'zao', _('ЗАО')
-    ZELAO = 'zelao', _('ЗелАО')
-    NAO = 'nao', _('НАО')
-    SAO = 'sao', _('САО')
-    SWAO = 'swao', _('СВАО')
-    SZAO = 'szao', _('СЗАО')
-    TAO = 'tao', _('ТАО')
-    CAO = 'cao', _('ЦАО')
-    YUAO = 'yuao', _('ЮАО')
-    YUWAO = 'yuwao', _('ЮВАО')
-    YUZAO = 'yuzao', _('ЮЗАО')
-    OTHER = 'other', _('Другое')
-
-
 class TypeTaxSystem(models.TextChoices):
     """Тип системы налогооблажения."""
 
     OSN = 'osn', _('Общая')
     YSN = 'ysn', _('Упрощенная')
     PATENT = 'patent', _('Патентная')
+
+class TextForReport(str, Enum):
+
+    PAGE_1 = (
+        'Помните о том, что контроль расходов важен для промышленного ' +
+        'предприятия, так как позволяет сократить издержки и повысить ' +
+        'прибыльность, а также улучшить финансовую устойчивость компании.'
+    )
+    PAGE_2 = (
+        'Кроме перечисленного расходы на персонал, могут включать в себя ' +
+        'расходы на обучение сотрудников, медицинское страхование, ' +
+        'компенсацию затрат на проезд и проживание в командировках, выплаты ' +
+        'по материальной помощи и т.д.'
+    )
+    PAGE_3 = (
+        'Выбор между приобретением и арендой земли и имущества зависит ' +
+        'от конкретных обстоятельств и потребностей предприятия. ' +
+        'Приобретение позволяет обладать недвижимостью и землей на ' +
+        'постоянной основе, однако требует значительных капиталовложений. ' +
+        'Аренда позволяет экономить на начальных вложениях, однако ' +
+        'может быть менее выгодной в долгосрочной перспективе.'
+    )
+    PAGE_4 = (
+        'Опытные инвесторы часто забывают учитывать расходы на ремонт ' +
+        'и обслуживание недвижимости и оборудования, коммунальные услуги, ' +
+        'страхование. Также могут быть упущены расходы на ' +
+        'маркетинг и продвижение продукции, на консультационные услуги' +
+        'и другие расходы, связанные с политической и экономической ' +
+        'ситуацией в регионе и стране.'
+    )
+    PAGE_5 = (
+        'Оборудование, необходимое для промышленного предприятия, может ' +
+        'включать в себя станки, краны, подъемники, транспортные средства, ' +
+        'компьютеры и программное обеспечение, оборудование для обработки ' +
+        'материалов и т.д.'
+    )
+    PAGE_6 = (
+        'Наша команда хочет пожелать вам провести тщательный анализ рынка и ' +
+        'конкурентов, убедиться в перспективности инвестирования, ' +
+        'приготовиться к долгосрочным вложениям и рискам, обращаться ' +
+        'за советом к опытным инвесторам и консультантам. ' +
+        'Используйте данный отчет, как еще один удобный источник получения ' +
+        'информации'
+    )

@@ -14,6 +14,7 @@ from server.apps.hincal.models import (
     Business,
     Report,
 )
+from server.apps.hincal.tasks import create_chat_gpt
 from server.apps.hincal.services.enums import TypeBusiness
 from server.apps.hincal.services.report_context import ReportContextDataClass
 from server.apps.user.models import User
@@ -26,40 +27,46 @@ class ReportWithContext(object):
 
     # Верхний и нижний уровни погрешности. Уменьшаем или увеличиваем
     # переданные показатели.
-    LOWER_MARGIN_ERROR = 0.8
-    UPPER_MARGIN_ERROR = 1.2
+    LOWER_MARGIN_ERROR = 0.85
+    UPPER_MARGIN_ERROR = 1.15
 
     # Переменные, которые будут получены в ходе расчетов:
     # Среднее количество работников.
-    avg_number_of_staff = 0.0
+    avg_number_of_staff: float = 0.0
     # Средний размер заработной платы по отраслям.
-    avg_salary_of_staff = 0.0
+    avg_salary_of_staff: float = 0.0
     # Общий фонд заработной платы всех сотрудников.
-    all_salary = 0.0
+    all_salary: float = 0.0
     # Средний размер площади земельного участка.
-    avg_land_area = 0.0
+    avg_land_area: float = 0.0
     # Средняя кадастровая стоимость на землю.
-    avg_land_cadastral_value = 0.0
+    avg_land_cadastral_value: float = 0.0
     # Размер налога на землю.
-    avg_land_tax = 0.0
+    avg_land_tax: float = 0.0
     # Средний размер площади имущества.
-    avg_property_area = 0.0
+    property_area: float = 0.0
     # Средняя кадастровая стоимость на имущество.
-    avg_property_cadastral_value = 0.0
+    avg_property_cadastral_value: float = 0.0
     # Размер налога на имущество.
-    avg_property_tax = 0.0
+    avg_property_tax_math: float = 0.0
+    # Расходны на капитальное строительство.
+    avg_capital_construction_costs_math: float = 0.0
     # Средний возможный доход по патентной системе.
-    possible_income_from_patent = 0.0
+    possible_income_from_patent: float = 0.0
     # Средний возможный доход.
-    avg_possible_income = 0.0
+    avg_possible_income: float = 0.0
     # Средний размер налога на патент.
-    avg_patent_tax = 0.0
+    avg_patent_tax: float = 0.0
     # Расходны на регистрацию.
-    avg_registration_costs = 0.0
+    avg_registration_costs: float = 0.0
     # Расходны на ведение бухгалтерского учета.
-    avg_accounting_costs = 0.0
+    avg_accounting_costs: float = 0.0
     # Расходны на оборудование.
-    equipments = 0.0
+    equipments: float = 0.0
+    # Другие расходы представленные в виде строки.
+    other_costs_str = ''
+    # Список типов имущества.
+    type_capital_construction = ''
 
     report: Report = None
 
@@ -72,7 +79,7 @@ class ReportWithContext(object):
         self.user = user if user.is_authenticated else None
         self.data = data
 
-        self.sectors = data.get('sectors')
+        self.sector = data.get('sector')
         self.territorial_locations = self.data.get('territorial_locations')
 
     @property
@@ -86,18 +93,17 @@ class ReportWithContext(object):
 
     def create_tags(self) -> None:
         """Прикрепление тегов к отчету."""
-        for sector in self.sectors:
-            self.report.tags.add(
-                sector.name,
-                *sector.tags.values_list('name', flat=True),
-            )
+        self.report.tags.add(
+            self.sector.name,
+            *self.sector.tags.values_list('name', flat=True),
+        )
 
         self.report.save()
 
     def get_filter_with_correct_sector(self) -> models.Q:
         """Получение фильтра с корректным сектором."""
-        if self.sectors:
-            return models.Q(business__sector__in=self.sectors)
+        if self.sector:
+            return models.Q(business__sector=self.sector)
         else:
             return models.Q()
 
@@ -105,8 +111,8 @@ class ReportWithContext(object):
         """Получение фильтра с корректным подсектором."""
         # Если выбран подсектор, то ищем совпадения и по сектору и
         # по подсектору. Иначе ищем по всем доступным.
-        if sub_sectors := self.data.get('sub_sectors'):
-            return models.Q(business__sub_sector__in=sub_sectors)
+        if sub_sector := self.data.get('sub_sector'):
+            return models.Q(business__sub_sector__in=sub_sector)
         else:
             return models.Q()
 
@@ -185,53 +191,38 @@ class ReportWithContext(object):
 
     def get_filter_with_correct_property_area(self) -> models.Q:
         """Получение фильтра с корректной площадью объектов."""
-        from_property_area = self.data.get('from_property_area', None)
-        to_property_area = self.data.get('to_property_area', from_property_area)
+        properties = self.data.get('properties', None)
         # Если не передан размер имущества, то ищем по всем доступным. Поскольку
         # данных по имуществу нет, то переводим размер имущества в размер налога
         # на имущество.
-        if from_property_area and to_property_area:
-            # Средний размер площади имущества.
-            self.avg_property_area = (from_property_area + to_property_area) / 2
+        if properties:
+            for property_name, property_value in properties[0].items():
+                self.property_area += property_value
+                self.type_capital_construction += (
+                    f'{property_name}: {property_value}\n'
+                )
             # Средняя кадастровая стоимость на имущество.
             self.avg_property_cadastral_value = self.get_value_by_territorial_locations(
                     property_name='avg_property_cadastral_value',
                 )
             # Размер налога на имущество.
-            self.avg_property_tax = (
-                self.avg_property_area *
+            self.avg_property_tax_math = (
+                self.property_area *
                 self.avg_property_cadastral_value *
                 self.archive.property_tax_rate
             )
+            # Расходны на капитальное строительство.
+            self.avg_capital_construction_costs_math = (
+                self.property_area *
+                self.archive.avg_capital_construction_costs_math
+            )
 
             return models.Q(
-                models.Q(property_tax__gte=self.avg_property_tax * self.archive.lower_tax_margin_error) &
-                models.Q(property_tax__lte=self.avg_property_tax * self.archive.upper_tax_margin_error)
+                models.Q(property_tax__gte=self.avg_property_tax_math * self.archive.lower_tax_margin_error) &
+                models.Q(property_tax__lte=self.avg_property_tax_math * self.archive.upper_tax_margin_error)
             )
 
         return models.Q()
-
-    def get_value_by_sector(
-        self,
-        property_name: str,
-    ):
-        """Получение корректных числовых значений.
-
-        Получаем корректные числовые значения по отрасли деятельности.
-        """
-        archive = getattr(self.archive, property_name, None)
-
-        if archive:
-            if self.sectors:
-                average_value = 0.0
-                for sector in self.sectors:
-                    average_value += archive.get(sector)
-
-                return average_value / len(self.sectors)
-
-            return archive.get('other')
-
-        return 0.0
 
     def get_business_indicators(self):
         """Получение корректных показателей для формирования отчета.
@@ -349,27 +340,16 @@ class ReportWithContext(object):
             self.data.get('need_patent') and
             self.data.get('type_business') == TypeBusiness.INDIVIDUAL
         ):
-            for sector in self.sectors:
-                avg_possible_income += sector.possible_income_from_patent
+            if self.sector:
 
-            self.possible_income_from_patent = (
-                avg_possible_income /
-                len(self.sectors)
-            )
-            self.avg_patent_tax = (
-                self.possible_income_from_patent *
-                self.archive.patent_tax_rate
-            )
+                self.avg_patent_tax = (
+                    self.sector.possible_income_from_patent *
+                    self.archive.patent_tax_rate
+                )
 
-            return self.avg_patent_tax
+                return self.avg_patent_tax
 
-        for sector in self.sectors:
-            avg_possible_income += sector.possible_income
-
-        self.avg_possible_income = (
-            avg_possible_income /
-            len(self.sectors)
-        )
+        self.avg_possible_income = self.sector.possible_income
 
         return 0.0
 
@@ -459,7 +439,7 @@ class ReportWithContext(object):
 
             # Рассчитанные показатели на основе простой математике.
             avg_number_of_staff_math=self.avg_number_of_staff,
-            avg_salary_of_staff_math=self.get_avg_salary_of_staff(),
+            avg_salary_of_staff_math=self.sector.avg_salary_of_staff,
             all_salary=self.get_all_salary(),
             avg_personal_income_tax_math=self.get_avg_personal_income_tax(),
 
@@ -467,9 +447,11 @@ class ReportWithContext(object):
             avg_land_cadastral_value_math=self.avg_land_cadastral_value,
             avg_land_tax_math=self.avg_land_tax,
 
-            avg_property_area_math=self.avg_property_area,
+            property_area_math=self.property_area,
             avg_property_cadastral_value_math=self.avg_property_cadastral_value,
-            avg_property_tax_math=self.avg_property_tax,
+            avg_property_tax_math=self.avg_property_tax_math,
+            avg_capital_construction_costs_math=self.avg_capital_construction_costs_math,
+            type_capital_construction=self.type_capital_construction,
 
             avg_patent_tax_math=self.avg_patent_tax,
             avg_possible_income_math=self.avg_possible_income,
@@ -478,6 +460,8 @@ class ReportWithContext(object):
             equipment_costs=self.get_equipment_costs(),
             accounting_costs=self.get_accounting_costs(),
             registration_costs=self.get_registration_costs(),
+            other_costs=self.get_other_costs(),
+            other_costs_str=self.other_costs_str,
 
             archive=self.archive,
         )
@@ -485,15 +469,7 @@ class ReportWithContext(object):
         # Объекты в начальных данных преобразуем в слова.
         initial_data = {}
         for key_data, value_data in self.data.items():
-            if key_data == 'sectors':
-                initial_data.update(
-                    {'sectors': [sector.name for sector in value_data]}
-                )
-            elif key_data == 'sub_sectors':
-                initial_data.update(
-                    {'sub_sectors': [sub_sector.name for sub_sector in value_data]}
-                )
-            elif key_data == 'equipments':
+            if key_data == 'equipments':
                 initial_data.update(
                     {'equipments': [equipment.name for equipment in value_data]}
                 )
@@ -508,6 +484,9 @@ class ReportWithContext(object):
         correct_context.update(
             {'archive': ArchiveForReportSerializer(self.archive).data},
         )
+        correct_context.update(
+            {'business': BaseBusinessSerializer(business).data},
+        )
         correct_context.update({'initial_data': initial_data})
 
         self.report = Report.objects.create(
@@ -516,27 +495,34 @@ class ReportWithContext(object):
             context=correct_context,
             total_investment_amount_bi=correct_context.get('all_possible_costsbi'),
             total_investment_amount_math=correct_context.get('all_possible_costs_math'),
-            sector=self.sectors.first()
+            sector=self.sector,
         )
+        # Получение рекомендаций из ChatGPT.
+        create_chat_gpt.apply_async(
+            kwargs={
+                'sector': self.sector.name,
+                'report_id': self.report.id,
+            },
+        )
+        # Создание тегов.
         self.create_tags()
 
         return self.report
 
-    def get_avg_salary_of_staff(self):
-        """Получение среднего размера зп исходя из отрасли."""
-        avg_salary_of_staff = 0.0
-        for sector in self.sectors:
-            avg_salary_of_staff += sector.avg_salary_of_staff
-
-        self.avg_salary_of_staff = avg_salary_of_staff / len(self.sectors)
-
-        return self.avg_salary_of_staff
-
     def get_all_salary(self):
         """Общий размер заработной платы."""
-        self.all_salary = self.avg_number_of_staff * self.avg_salary_of_staff
+        self.all_salary = self.avg_number_of_staff * self.avg_salary_of_staff * 12
         return self.all_salary
 
     def get_avg_personal_income_tax(self):
         """Размер НДФЛ."""
         return self.all_salary * self.archive.personal_income_rate
+
+    def get_other_costs(self):
+        """Прочие общие расходы."""
+        other_costs = 0
+        for key_dict, value_dict in self.data.get('other').items():
+            other_costs += value_dict
+            self.other_costs_str += f'{key_dict}: {value_dict} тыс. руб\n'
+        return other_costs
+

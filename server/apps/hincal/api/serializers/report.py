@@ -85,14 +85,12 @@ class CreateReportSerializer(serializers.Serializer):
         choices=TypeBusinessForCalculator.choices,
         required=True,
     )
-    sectors = serializers.PrimaryKeyRelatedField(
+    sector = serializers.PrimaryKeyRelatedField(
         queryset=Sector.objects.all(),
-        many=True,
         required=True,
     )
-    sub_sectors = serializers.PrimaryKeyRelatedField(
+    sub_sector = serializers.PrimaryKeyRelatedField(
         queryset=SubSector.objects.all(),
-        many=True,
         required=False,
         allow_null=True,
     )
@@ -118,13 +116,9 @@ class CreateReportSerializer(serializers.Serializer):
         required=False,
         allow_null=True,
     )
-    from_property_area = serializers.IntegerField(
-        required=False,
+    properties = serializers.JSONField(
         allow_null=True,
-    )
-    to_property_area = serializers.IntegerField(
         required=False,
-        allow_null=True,
     )
     equipments = serializers.PrimaryKeyRelatedField(
         queryset=Equipment.objects.all(),
@@ -174,12 +168,6 @@ class CreateReportSerializer(serializers.Serializer):
             attrs=attrs,
             from_name_value='from_land_area',
             to_name_value='to_land_area',
-        )
-        # Проверка диапазона по имуществу.
-        attrs = check_range(
-            attrs=attrs,
-            from_name_value='from_property_area',
-            to_name_value='to_property_area',
         )
 
         return attrs

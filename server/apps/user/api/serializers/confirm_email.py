@@ -13,7 +13,7 @@ class ConfirmEmailRequestSerializer(serializers.Serializer):
 
     user: Optional[User] = None
 
-    def is_valid(self, raise_exception=False) -> bool:
+    def is_valid(self, raise_exception=False)  -> bool:
         """Валидность email для восстановления пароля."""
         email = self.initial_data.get('email', None)
         self.check_email(email)

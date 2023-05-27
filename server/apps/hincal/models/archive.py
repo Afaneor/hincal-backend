@@ -62,11 +62,11 @@ class Archive(AbstractBaseModel):
     )
     lower_tax_margin_error = models.FloatField(
         _('Нижний уровень погрешности для поиска записей по налогам'),
-        default=0.8,
+        default=0.85,
     )
     upper_tax_margin_error = models.FloatField(
         _('Верхний уровень погрешности для поиска записей по налогам'),
-        default=1.2,
+        default=1.15,
     )
     cost_accounting = models.JSONField(
         _('Стоимость услуг на ведение бухгалтерского учета'),
@@ -100,7 +100,10 @@ class Archive(AbstractBaseModel):
         _('Средняя стоимость на покупку  имуществу, тыс. руб.'),
         default=200,
     )
-
+    avg_capital_construction_costs = models.FloatField(
+        _('Затраты на капитальное строительство, тыс. руб.'),
+        default=100,
+    )
 
     is_actual = models.BooleanField(
         _('Актуальные данные в архиве или нет'),

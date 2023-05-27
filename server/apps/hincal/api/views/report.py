@@ -10,13 +10,15 @@ from server.apps.hincal.api.serializers import (
 )
 from server.apps.hincal.models import Report
 from server.apps.hincal.services.create_report import ReportWithContext
+from server.apps.hincal.services.offers_and_wishes_for_report import (
+    add_offers_and_wishes_in_context,
+)
 from server.apps.hincal.services.report_file import ReportFile
 from server.apps.services.filters_mixins import (
     CreatedUpdatedDateFilterMixin,
     UserFilterMixin,
 )
-from server.apps.services.views import RetrieveListCreateDeleteViewSet, \
-    RetrieveListDeleteViewSet
+from server.apps.services.views import RetrieveListDeleteViewSet
 
 
 class ReportFilter(
@@ -78,6 +80,16 @@ class ReportViewSet(RetrieveListDeleteViewSet):
         return queryset.filter(
             report__in=user.reports.all()
         )
+
+    def retrieve(self, request, *args, **kwargs):
+        """Обогащаем context необходимымы данными."""
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        add_offers_and_wishes_in_context(
+            report=instance,
+            data=serializer.data,
+        )
+        return Response(serializer.data)
 
     @action(
         ['POST'],

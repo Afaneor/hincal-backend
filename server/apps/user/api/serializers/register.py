@@ -12,7 +12,11 @@ class RegisterSerializer(serializers.Serializer):
 
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
-    middle_name = serializers.CharField(required=False)
+    middle_name = serializers.CharField(
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+    )
     email = serializers.EmailField(required=True)
     inn = serializers.CharField(required=True)
     password1 = serializers.CharField(required=True)

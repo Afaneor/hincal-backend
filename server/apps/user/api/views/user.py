@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ParseError, ValidationError
+from rest_framework.exceptions import ParseError, NotFound
 from rest_framework.response import Response
 
 from server.apps.services.views import RetrieveListUpdateViewSet
@@ -113,10 +113,9 @@ class UserViewSet(RetrieveListUpdateViewSet):
             login(
                 request,
                 serializer.user,
-                backend='django.contrib.auth.backends.ModelBackend',
             )
         except Exception:
-            raise ValidationError(
+            raise NotFound(
                 _('Пользователь с указанными данными не найден'),
             )
 

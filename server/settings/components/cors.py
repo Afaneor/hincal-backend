@@ -6,11 +6,12 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:9000',
     'http://localhost:3000',
     'http://192.168.21.141:8080',
+    'https://hincal.pavlin.tech'
 ]
 CORS_ALLOW_ALL_ORIGINS = config(
     'CORS_ALLOW_ALL_ORIGINS',
     cast=bool,
-    default=True,
+    default=False,
 )
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -47,10 +48,12 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8080',
     'http://127.0.0.1:9000',
     'http://localhost:3000',
+    'https://hincal.pavlin.tech'
 ]
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8000',
     'http://localhost:8080',
     'http://192.168.21.141:8080',
+    'https://hincal.pavlin.tech'
 ]

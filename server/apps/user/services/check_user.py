@@ -9,7 +9,7 @@ def get_django_user(email: str) -> User:
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        raise NotFound(_('Пользователь не найден'))
+        raise NotFound(_('Пользователь с указанными данными не найден'))
     return user
 
 

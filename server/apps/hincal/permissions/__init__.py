@@ -5,7 +5,6 @@ from server.apps.hincal.permissions import (
     equipment,
     report,
     sector,
-    statistic,
     sub_sector,
     territorial_location,
 )
@@ -17,7 +16,6 @@ __all__ = [
     'equipment',
     'report',
     'sector',
-    'statistic',
     'sub_sector',
     'territorial_location',
 ]

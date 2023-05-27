@@ -74,7 +74,7 @@ class ReportContextDataClass:
 
     # ВЫЧИСЛЯЕМЫЕ ПОЛЯ.
     # Итоговые возможные расходы по всему.
-    all_possible_costs_db: float = field(init=False)
+    all_possible_costsbi: float = field(init=False)
     all_possible_costs_math: float = field(init=False)
     # Общие расходны на сотрудников.
     all_staff_costs: float = field(init=False)
@@ -126,7 +126,7 @@ class ReportContextDataClass:
         # налог на прибыль, землю, имущество, транспорт, другие налоги,
         # патентную систему, бухгалтерию, оборудование, регистрацию.
         # FIXME налог уплачивается на год. А расходы на зп, бух. учет. на месяц
-        self.all_possible_costs_db = (
+        self.all_possible_costsbi = (
             self.avg_salary_of_staff_bi +
             self.avg_personal_income_tax_bi +
             self.avg_staff_pension_contributions_costs_bi +
@@ -344,7 +344,7 @@ class ReportContextDataClass:
             'chat_gpt_page_8': self.chat_gpt_page_8,
 
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ВОЗМОЖНЫХ ЗАТРАТ НА ОСНОВЕ БД.
-            'all_possible_costs_bi': self.all_possible_costs_db,
+            'all_possible_costs_bi': self.all_possible_costsbi,
             'all_staff_costs_bi': self.all_staff_costs_bi,
             'all_lp_lease_costs_bi': self.all_lp_lease_costs_bi,
             'equipment_costs_bi': self.equipment_costs,

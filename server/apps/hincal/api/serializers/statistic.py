@@ -1,25 +1,65 @@
-from server.apps.hincal.api.serializers import BaseSectorSerializer
-from server.apps.hincal.models import Statistic
-from server.apps.services.serializers import ModelSerializerWithPermission
-from server.apps.user.api.serializers import BaseInfoUserSerializer
+from rest_framework import serializers
 
 
-class StatisticSerializer(ModelSerializerWithPermission):
-    """Общая статистика по системе и для пользователя."""
+class AllStatisticSerializer(serializers.Serializer):
+    """Общая статистика по системе."""
 
-    user = BaseInfoUserSerializer()
-    popular_sector = BaseSectorSerializer()
+    popular_sector = serializers.ListSerializer(
+        child=serializers.DictField(),
+        required=False,
+        allow_null=True,
+    )
+    average_investment_amount_bi = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )
+    average_investment_amount_math = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )
+    total_investment_amount_bi = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )
+    total_investment_amount_math = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )
+    number_of_reports = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )
+    number_of_business = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )
 
-    class Meta(object):
-        model = Statistic
-        fields = (
-            'id',
-            'user',
-            'popular_sector',
-            'average_investment_amount',
-            'total_investment_amount',
-            'amount_of_use_of_the_calculator',
-            'permission_rules',
-            'created_at',
-            'updated_at',
-        )
+
+class UserStatisticSerializer(serializers.Serializer):
+    """Общая статистика по пользователю."""
+
+    popular_sector = serializers.ListSerializer(
+        child=serializers.DictField(),
+        required=False,
+        allow_null=True,
+    )
+    average_investment_amount_bi = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )
+    average_investment_amount_math = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )
+    total_investment_amount_bi = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )
+    total_investment_amount_math = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )
+    number_of_reports = serializers.FloatField(
+        required=False,
+        allow_null=True,
+    )

@@ -1,63 +1,66 @@
-import django_filters
-from django.db import models
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
+from rest_framework_extensions.mixins import NestedViewSetMixin
+from rules.contrib.rest_framework import AutoPermissionViewSetMixin
 
-from server.apps.hincal.api.serializers import StatisticSerializer
-from server.apps.hincal.models import Statistic
-
-from server.apps.services.filters_mixins import UserFilterMixin
-from server.apps.services.views import BaseReadOnlyViewSet
-
-
-class StatisticFilter(UserFilterMixin, django_filters.FilterSet):
-    """Фильтр статистики."""
-
-    class Meta(object):
-        model = Statistic
-        fields = (
-            'id',
-            'user',
-            'user_email',
-            'user_username',
-            'user_first_name',
-            'user_last_name',
-            'user_middle_name',
-        )
+from server.apps.hincal.api.serializers import (
+    AllStatisticSerializer,
+    UserStatisticSerializer,
+)
+from server.apps.hincal.services.statistic import (
+    get_all_statistics,
+    get_user_statistics,
+)
 
 
-class StatisticViewSet(BaseReadOnlyViewSet):
+class StatisticViewSet(
+    AutoPermissionViewSetMixin,
+    NestedViewSetMixin,
+    GenericViewSet,
+):
     """Общая статистика по системе и для пользователя."""
 
-    serializer_class = StatisticSerializer
-    queryset = Statistic.objects.select_related('user')
-    search_fields = (
-        'user_email',
-        'user_username',
-        'user_first_name',
-        'user_last_name',
-        'user_middle_name',
+    permission_type_map = {
+        **AutoPermissionViewSetMixin.permission_type_map,
+        'all': None,
+        'user': None,
+        'metadata': None,
+    }
+
+    @action(
+        ['GET'],
+        url_path='all',
+        detail=False,
+        serializer_class=AllStatisticSerializer,
     )
-    ordering_fields = '__all__'
-    filterset_class = StatisticFilter
+    def all(self, request):
+        """Получить общую статистику по системе."""
+        serializer = self.get_serializer(data=get_all_statistics())
+        serializer.is_valid(raise_exception=True)  # noqa: WPS204
 
-    def get_queryset(self):
-        """Выдача статистики.
-
-        Суперпользователь видит всю статистику.
-        Остальные видят свою статистику и общую (user=None).
-        """
-        queryset = super().get_queryset()
-        user = self.request.user
-
-        if user.is_superuser:
-            return queryset
-
-        if user.is_authenticated:
-            return queryset.filter(
-                models.Q(user=user) |
-                models.Q(user__isnull=True)
-            )
-
-        return queryset.filter(
-            models.Q(user__isnull=True)
+        return Response(
+            data=serializer.data,
+            status=status.HTTP_200_OK,
         )
 
+    @action(
+        ['GET'],
+        url_path='user',
+        detail=False,
+        serializer_class=UserStatisticSerializer,
+    )
+    def user(self, request):
+        """Получить статистику по пользователю."""
+        if request.user.is_authenticated:
+            serializer = self.get_serializer(
+                data=get_user_statistics(user=request.user),
+            )
+            serializer.is_valid(raise_exception=True)  # noqa: WPS204
+
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_200_OK,
+            )
+        return Response(status=status.HTTP_403_FORBIDDEN)

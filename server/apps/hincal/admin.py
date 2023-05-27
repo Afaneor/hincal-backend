@@ -4,7 +4,6 @@ from server.apps.hincal.models import (
     Business,
     BusinessIndicator,
     Equipment,
-    Statistic,
     Report,
     Sector,
     SubSector, TerritorialLocation,
@@ -81,25 +80,6 @@ class BusinessAdmin(admin.ModelAdmin[Business]):
         'type',
         'sector',
         'sub_sector',
-    )
-
-
-@admin.register(Statistic)
-class StatisticAdmin(admin.ModelAdmin[Statistic]):
-    """Общая статистика по системе и для пользователя."""
-
-    list_display = (
-        'id',
-        'user',
-    )
-    search_fields = (
-        'user__email',
-        'user__first_name',
-        'user_last_name',
-    )
-    ordering = (
-        'id',
-        'user',
     )
 
 

@@ -514,6 +514,9 @@ class ReportWithContext(object):
             user=self.user,
             initial_data=initial_data,
             context=correct_context,
+            total_investment_amount_bi=correct_context.get('all_possible_costsbi'),
+            total_investment_amount_math=correct_context.get('all_possible_costs_math'),
+            sector=self.sectors.first()
         )
         self.create_tags()
 

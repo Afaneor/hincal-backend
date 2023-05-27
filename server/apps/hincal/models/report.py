@@ -22,6 +22,21 @@ class Report(AbstractBaseModel):
     context = models.JSONField(
         _('Данные для формирования отчета'),
     )
+    total_investment_amount_bi = models.FloatField(
+        _('Общая сумма инвестирований из БД'),
+        null=True,
+    )
+    total_investment_amount_math = models.FloatField(
+        _('Общая сумма инвестирований, рассчитанная математически'),
+        null=True,
+    )
+    sector = models.ForeignKey(
+        'hincal.Sector',
+        on_delete=models.CASCADE,
+        verbose_name=_('Отрасль хозяйственной деятельности'),
+        related_name='reports',
+        null=True,
+    )
     tags = TaggableManager(blank=True)
 
     class Meta(AbstractBaseModel.Meta):

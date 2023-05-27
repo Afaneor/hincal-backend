@@ -56,31 +56,40 @@ services:
     depends_on:
       - web
 
-  # Celery worker
-#  celery:
-#    image: "swr.ru-moscow-1.hc.sbercloud.ru/hincal/hincal-backend:latest"
-#    command: celery -A server.celery worker -l info
-#    env_file: .env
-#    healthcheck:
-#      test: celery -A server.celery inspect ping -d celery@$$HOSTNAME
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#    networks:
-#      - webnet
-#
-#  # Celery Beat
-#  beat:
-#    image: "swr.ru-moscow-1.hc.sbercloud.ru/hincal/hincal-backend:latest"
-#    command: celery -A server.celery beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-#    env_file: .env
-#    healthcheck:
-#      test: celery -A server.celery inspect ping
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#    networks:
-#      - webnet
+#   Celery worker
+  celery:
+    image: "swr.ru-moscow-1.hc.sbercloud.ru/hincal/hincal-backend:latest"
+    command: celery -A server.celery worker -l info
+    env_file: .env
+    healthcheck:
+      test: celery -A server.celery inspect ping -d celery@$$HOSTNAME
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - webnet
+
+  # Celery Beat
+  beat:
+    image: "swr.ru-moscow-1.hc.sbercloud.ru/hincal/hincal-backend:latest"
+    command: celery -A server.celery beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file: .env
+    healthcheck:
+      test: celery -A server.celery inspect ping
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - webnet
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - webnet
 
 networks:
   # Network for your internals, use it by default:

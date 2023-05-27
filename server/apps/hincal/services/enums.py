@@ -26,6 +26,16 @@ class TypeTaxSystem(models.TextChoices):
     YSN = 'ysn', _('Упрощенная')
     PATENT = 'patent', _('Патентная')
 
+
+class PropertyType(models.TextChoices):
+    """Типы зданий"""
+
+    WORKSHOP_BUILDING = 'workshop_building', _('Здание цеха')
+    WAREHOUSE_SPACE = 'warehouse_space', _('Складское помещение')
+    ADMINISTRATIVE_BUILDING = 'administrative_building', _('Административное здание')
+    OTHER = 'other', _('Другие типы')
+
+
 class TextForReport(str, Enum):
 
     PAGE_1 = (

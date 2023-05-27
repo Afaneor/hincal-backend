@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import ParseError, ValidationError
 from rest_framework.response import Response
 
 from server.apps.services.views import RetrieveListUpdateViewSet
@@ -109,7 +109,16 @@ class UserViewSet(RetrieveListUpdateViewSet):
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)  # noqa: WPS204
-        login(request, serializer.user)
+        try:
+            login(
+                request,
+                serializer.user,
+                backend='django.contrib.auth.backends.ModelBackend',
+            )
+        except Exception:
+            raise ValidationError(
+                _('Пользователь с указанными данными не найден'),
+            )
 
         return Response(status=status.HTTP_200_OK)
 

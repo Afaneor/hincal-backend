@@ -15,7 +15,7 @@ from server.apps.hincal.models import (
     Report,
 )
 from server.apps.hincal.tasks import create_chat_gpt
-from server.apps.hincal.services.enums import TypeBusiness
+from server.apps.hincal.services.enums import TypeBusiness, PropertyType
 from server.apps.hincal.services.report_context import ReportContextDataClass
 from server.apps.user.models import User
 
@@ -160,7 +160,6 @@ class ReportWithContext(object):
 
         return getattr(self.archive, property_name, 0.0)
 
-
     def get_filter_with_correct_land_area(self) -> models.Q:
         """Получение фильтра с корректной площадью земельного участка."""
         from_land_area = self.data.get('from_land_area', None)
@@ -199,7 +198,7 @@ class ReportWithContext(object):
             for property_name, property_value in properties[0].items():
                 self.property_area += property_value
                 self.type_capital_construction += (
-                    f'{property_name}: {property_value}\n'
+                    f'{getattr(PropertyType, property_name.upper(), property_name).label}: {property_value}\n'
                 )
             # Средняя кадастровая стоимость на имущество.
             self.avg_property_cadastral_value = self.get_value_by_territorial_locations(

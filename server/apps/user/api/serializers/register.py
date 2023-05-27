@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from server.apps.hincal.services.validators import inn_validator
 from server.apps.user.models import User
 
 
@@ -14,13 +15,17 @@ class RegisterSerializer(serializers.Serializer):
     last_name = serializers.CharField(required=True)
     middle_name = serializers.CharField(
         required=False,
-        allow_null=True,
         allow_blank=True,
     )
     email = serializers.EmailField(required=True)
     inn = serializers.CharField(required=True)
     password1 = serializers.CharField(required=True)
     password2 = serializers.CharField(required=True)
+
+    def validate_inn(self, inn: str):
+        """Валидация ИНН."""
+        inn_validator(inn)
+        return inn
 
     def is_valid(self, raise_exception=False) -> bool:
         """Проверка валидности данных для регистрации пользователя."""
@@ -66,4 +71,4 @@ class RegisterSerializer(serializers.Serializer):
         try:
             validate_password(str(password1))
         except DjangoValidationError as exc:
-            raise ValidationError(exc)
+            raise ValidationError(exc.messages)

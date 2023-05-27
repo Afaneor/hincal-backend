@@ -9,7 +9,7 @@ def create_new_user(data: dict) -> User:
         email=data.get('email'),
         first_name=data.get('first_name'),
         last_name=data.get('last_name'),
-        middle_name=data.get('middle_name'),
+        middle_name=data.get('middle_name', ''),
     )
 
     # Устанавливаем пароль.

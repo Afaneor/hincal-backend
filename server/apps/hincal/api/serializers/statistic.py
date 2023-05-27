@@ -1,3 +1,4 @@
+from server.apps.hincal.api.serializers import BaseSectorSerializer
 from server.apps.hincal.models import Statistic
 from server.apps.services.serializers import ModelSerializerWithPermission
 from server.apps.user.api.serializers import BaseInfoUserSerializer
@@ -7,6 +8,7 @@ class StatisticSerializer(ModelSerializerWithPermission):
     """Общая статистика по системе и для пользователя."""
 
     user = BaseInfoUserSerializer()
+    popular_sector = BaseSectorSerializer()
 
     class Meta(object):
         model = Statistic

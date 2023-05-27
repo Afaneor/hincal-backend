@@ -3,7 +3,7 @@ from server.apps.hincal.api.serializers.archive import (
     ArchiveSerializer,
 )
 from server.apps.hincal.api.serializers.business import (
-    BusinessForReportSerializer,
+    BaseBusinessSerializer,
     BusinessSerializer,
 )
 from server.apps.hincal.api.serializers.equipment import EquipmentSerializer
@@ -14,7 +14,10 @@ from server.apps.hincal.api.serializers.report import (
     CreateReportSerializer,
     ReportSerializer,
 )
-from server.apps.hincal.api.serializers.sector import SectorSerializer
+from server.apps.hincal.api.serializers.sector import (
+    BaseSectorSerializer,
+    SectorSerializer,
+)
 from server.apps.hincal.api.serializers.statistic import StatisticSerializer
 from server.apps.hincal.api.serializers.sub_sector import SubSectorSerializer
 from server.apps.hincal.api.serializers.territorial_location import (
@@ -25,8 +28,9 @@ from server.apps.hincal.api.serializers.territorial_location import (
 __all__ = [
     'ArchiveSerializer',
     'ArchiveForReportSerializer',
-    'BusinessForReportSerializer',
+    'BaseBusinessSerializer',
     'SubSectorSerializer',
+    'BaseSectorSerializer',
     'SectorSerializer',
     'BusinessSerializer',
     'EquipmentSerializer',

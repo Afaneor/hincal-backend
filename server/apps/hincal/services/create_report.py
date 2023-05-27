@@ -5,7 +5,7 @@ from django.db import models
 
 from server.apps.hincal.api.serializers import (
     ArchiveForReportSerializer,
-    BusinessForReportSerializer,
+    BaseBusinessSerializer,
 )
 from server.apps.hincal.models import (
     Archive,

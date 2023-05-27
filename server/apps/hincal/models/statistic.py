@@ -17,10 +17,11 @@ class Statistic(AbstractBaseModel):
         db_index=True,
         null=True,
     )
-    popular_sector = models.CharField(
-        _('Популярная отрасль для инвестирования'),
-        max_length=settings.MAX_STRING_LENGTH,
-        blank=True,
+    popular_sector = models.ForeignKey(
+        'hincal.Sector',
+        on_delete=models.CASCADE,
+        verbose_name=_('Популярная отрасль хозяйственной деятельности'),
+        related_name='statistics',
     )
     average_investment_amount = models.FloatField(
         _('Средняя сумма инвестирования'),

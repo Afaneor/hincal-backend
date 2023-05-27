@@ -6,7 +6,6 @@ from server.apps.hincal.models import TerritorialLocation
 from server.apps.support.models import Area
 
 
-
 class Command(BaseCommand):
     """Добавление данных в Area."""
 
@@ -23,7 +22,7 @@ class Command(BaseCommand):
         soup = BeautifulSoup(response.text, 'lxml')
         technopark_items = soup.find_all('a', class_='technopark__item')
 
-        # Формируем объекты Area
+        # Формируем объекты Area.
         for technopark_item in technopark_items:
             territorial_location = TerritorialLocation.objects.get(
                 shot_name__iexact=technopark_item.find('div', class_='fs-14 mb-1').find('b').next_sibling.replace('\r\n', '').strip(),

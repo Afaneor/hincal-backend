@@ -1,5 +1,6 @@
-from rest_framework import serializers
-
+from server.apps.hincal.api.serializers.territorial_location import (
+    BaseTerritorialLocationSerializer,
+)
 from server.apps.hincal.models import Business
 from server.apps.services.serializers import ModelSerializerWithPermission
 
@@ -10,6 +11,8 @@ class BusinessSerializer(ModelSerializerWithPermission):
     Компании и ИП получаются из DaData.
     Физическое лицо заполняет данные руками.
     """
+
+    territorial_location = BaseTerritorialLocationSerializer()
 
     class Meta(object):
         model = Business
@@ -47,8 +50,10 @@ class BusinessSerializer(ModelSerializerWithPermission):
         )
 
 
-class BusinessForReportSerializer(ModelSerializerWithPermission):
+class BaseBusinessSerializer(ModelSerializerWithPermission):
     """Информация о бизнесе для отчета."""
+
+    territorial_location = BaseTerritorialLocationSerializer()
 
     class Meta(object):
         model = Business

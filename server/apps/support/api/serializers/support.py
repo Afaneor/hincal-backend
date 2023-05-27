@@ -26,3 +26,20 @@ class SupportSerializer(ModelSerializerWithPermission):
             'updated_at',
             'permission_rules',
         )
+
+
+class BaseSupportSerializer(ModelSerializerWithPermission):
+    """Сериалайзер мер поддержки для других сериалайзеров."""
+
+    class Meta(object):
+        model = Support
+        fields = (
+            'id',
+            'preview_image',
+            'title',
+            'text',
+            'amount',
+            'site',
+            'extra_data',
+            'is_actual',
+        )

@@ -84,7 +84,6 @@ class ReportWithContext(object):
             )
         return ReportWithContext._archive  # noqa: WPS437
 
-    # FIXME: Проверить логику.
     def create_tags(self) -> None:
         """Прикрепление тегов к отчету."""
         for sector in self.sectors:

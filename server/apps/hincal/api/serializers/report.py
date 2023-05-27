@@ -1,6 +1,7 @@
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from taggit.serializers import TagListSerializerField
 
 from server.apps.hincal.models import (
     Report,
@@ -16,10 +17,21 @@ from server.apps.hincal.services.enums import (
 )
 from server.apps.hincal.services.validate_report import check_range
 from server.apps.services.serializers import ModelSerializerWithPermission
+from server.apps.support.api.serializers import (
+    BaseAreaSerializer,
+    BaseOfferSerializer,
+    BaseSupportSerializer,
+)
+from server.apps.support.models import Area, Offer, Support
 
 
 class ReportSerializer(ModelSerializerWithPermission):
     """Отчет."""
+
+    areas = serializers.SerializerMethodField()
+    supports = serializers.SerializerMethodField()
+    offers = serializers.SerializerMethodField()
+    tags = TagListSerializerField()
 
     class Meta(object):
         model = Report
@@ -28,10 +40,42 @@ class ReportSerializer(ModelSerializerWithPermission):
             'user',
             'initial_data',
             'context',
+            'areas',
+            'supports',
+            'offers',
+            'tags',
             'permission_rules',
             'created_at',
             'updated_at',
         )
+
+    def get_areas(self, report: Report):
+        """Получаем возможные доступные площадки."""
+        return BaseAreaSerializer(
+            Area.objects.filter(
+                tags__in=report.tags.all()
+            )[0:4],
+            many=True,
+        ).data
+
+    def get_supports(self, report: Report):
+        """Получаем возможные меры поддержки."""
+        return BaseSupportSerializer(
+            Support.objects.filter(
+                tags__in=report.tags.all(),
+                is_actual=True
+            )[0:4],
+            many=True,
+        ).data
+
+    def get_offers(self, report: Report):
+        """Получаем возможные партнерские предложения по инвестированию."""
+        return BaseOfferSerializer(
+            Offer.objects.filter(
+                tags__in=report.tags.all(),
+            )[0:4],
+            many=True,
+        ).data
 
 
 class CreateReportSerializer(serializers.Serializer):

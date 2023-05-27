@@ -7,7 +7,7 @@ from server.apps.services.base_model import AbstractBaseModel
 
 
 class Offer(AbstractBaseModel):
-    """Предложения"""
+    """Партнерское предложение по инвестированию."""
 
     title = models.CharField(
         _('Заголовок'),

@@ -4,7 +4,6 @@ import httpx
 from django.conf import settings
 from rest_framework import status
 
-from server.apps.hincal.services.enums import TerritorialLocation
 from server.apps.services.exception import ApiError
 
 

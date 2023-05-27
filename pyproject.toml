@@ -75,6 +75,8 @@ django-stubs = "^1.13"  # https://github.com/typeddjango/django-stubs
 drf-yasg = "^1.21.5"   # https://github.com/axnsan12/drf-yasg/
 httpx = "^0.24.1"
 docxtpl = "^0.16.7"
+beautifulsoup4 = "^4.12.2"
+lxml = "^4.9.2"
 
 [tool.poetry.dev-dependencies]
 django-coverage-plugin = "^3.0"  # https://github.com/nedbat/django_coverage_plugin

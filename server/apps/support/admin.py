@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from server.apps.support.models import Offer, Support
+from server.apps.support.models import Area, Offer, Support
 
 
 @admin.register(Support)
@@ -39,4 +39,30 @@ class OfferAdmin(admin.ModelAdmin[Offer]):
     ordering = (
         'id',
         'title',
+    )
+
+
+@admin.register(Area)
+class AreaAdmin(admin.ModelAdmin[Area]):
+    """Класс админки для площадок."""
+
+    list_display = (
+        'id',
+        'title',
+        'territorial_location',
+        'site',
+    )
+    search_fields = (
+        'title',
+        'territorial_location',
+        'site',
+    )
+    list_filter = (
+        'territorial_location',
+    )
+    ordering = (
+        'id',
+        'title',
+        'territorial_location',
+        'site',
     )

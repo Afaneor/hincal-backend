@@ -18,6 +18,7 @@ from server.apps.hincal.api.serializers.sector import SectorSerializer
 from server.apps.hincal.api.serializers.statistic import StatisticSerializer
 from server.apps.hincal.api.serializers.sub_sector import SubSectorSerializer
 from server.apps.hincal.api.serializers.territorial_location import (
+    BaseTerritorialLocationSerializer,
     TerritorialLocationSerializer,
 )
 
@@ -33,5 +34,6 @@ __all__ = [
     'BusinessIndicatorSerializer',
     'CreateReportSerializer',
     'ReportSerializer',
+    'BaseTerritorialLocationSerializer',
     'TerritorialLocationSerializer',
 ]

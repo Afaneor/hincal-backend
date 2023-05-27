@@ -2,7 +2,11 @@
 from django.utils.translation import gettext_lazy as _
 from rest_framework.routers import APIRootView
 
-from server.apps.support.api.views import OfferViewSet, SupportViewSet
+from server.apps.support.api.views import (
+    AreaViewSet,
+    OfferViewSet,
+    SupportViewSet,
+)
 from server.apps.services.custom_router.api_router import ApiRouter
 
 
@@ -18,3 +22,4 @@ router.APIRootView = SupportAPIRootView
 
 router.register('supports', SupportViewSet, 'supports')
 router.register('offers', OfferViewSet, 'offers')
+router.register('areas', AreaViewSet, 'areas')

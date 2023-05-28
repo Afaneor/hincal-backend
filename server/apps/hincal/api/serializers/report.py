@@ -119,6 +119,7 @@ class CreateReportSerializer(serializers.Serializer):
     properties = serializers.JSONField(
         allow_null=True,
         required=False,
+        default=[],
     )
     equipments = serializers.PrimaryKeyRelatedField(
         queryset=Equipment.objects.all(),
@@ -136,6 +137,7 @@ class CreateReportSerializer(serializers.Serializer):
     other = serializers.JSONField(
         allow_null=True,
         required=False,
+        default=[],
     )
 
     def validate_type_tax_system(self, type_tax_system):

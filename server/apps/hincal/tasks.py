@@ -40,20 +40,20 @@ def create_chat_gpt(self, sector: str, report_id: int) -> None:
     chat_gpt_page_5 = TextForReport.PAGE_5
     chat_gpt_page_6 = TextForReport.PAGE_6
 
-    for index, answer in enumerate(answers):
+    for en_index, answer in enumerate(answers):
         if answer == '':
             continue
-        elif answer[0] == 1 or index == 1:
+        elif answer[0] == 1 or en_index == 1:
             chat_gpt_page_1 = answer + '\n * Сгенерировано ChatGPT'
-        elif answer[0] == 2 or index == 3:
+        elif answer[0] == 2 or en_index == 3:
             chat_gpt_page_2 = answer + '\n * Сгенерировано ChatGPT'
-        elif answer[0] == 3 or index == 5:
+        elif answer[0] == 3 or en_index == 5:
             chat_gpt_page_3 = answer + '\n * Сгенерировано ChatGPT'
-        elif answer[0] == 4 or index == 7:
+        elif answer[0] == 4 or en_index == 7:
             chat_gpt_page_4 = answer + '\n * Сгенерировано ChatGPT'
-        elif answer[0] == 5 or index == 9:
+        elif answer[0] == 5 or en_index == 9:
             chat_gpt_page_5 = answer + '\n * Сгенерировано ChatGPT'
-        elif answer[0] == 6 or index == 11:
+        elif answer[0] == 6 or en_index == 11:
             chat_gpt_page_6 = 'Пожелание от ChatGPT: ' + answer[2:-1]
 
     report_context = report.context

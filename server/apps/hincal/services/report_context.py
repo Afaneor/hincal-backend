@@ -308,10 +308,14 @@ class ReportContextDataClass:
         # Страница 6.
         data_by_equipments = ''
         all_equipment_coasts = 0.0
+        # Нужно для понимая вводил ли пользователь оборудование.
+        flag = ''
         if self.equipment_costs:
             equipments = Equipment.objects.filter(
-                id__in=self.initial_data.get('equipments', []),
+                id__in=[equipment.id for equipment in self.initial_data.get('equipments', [])]
             )
+            flag = 'user'
+
         else:
             if self.business:
                 tags = [
@@ -325,12 +329,19 @@ class ReportContextDataClass:
             equipments = Equipment.objects.filter(
                 tags__name__in=tags,
             )
+            flag = 'auto'
 
         for en_index, equipment in enumerate(equipments):
             if en_index < 5:
-                data_by_equipments += f'{equipment.name} -- {equipment.cost}\n'
+                data_by_equipments += f'{equipment.name}: {equipment.cost} тыс. руб.\n'
             all_equipment_coasts += equipment.cost
-        data_by_equipments += f'Общая сумма оборудования: {all_equipment_coasts} тыс. руб.\n'
+        data_by_equipments += f'Общая сумма оборудования: {all_equipment_coasts} тыс. руб.\n\n'
+        if flag == 'auto':
+            data_by_equipments += (
+                'Выше приведен список примерного оборудования и его '
+                'стоимости для вашей отрасли. Общая стоимость оборудования '
+                'не учитывалась в расходах.\n\n'
+            )
 
         if self.business:
             indicator = self.business.business_indicators.first()

@@ -9,14 +9,14 @@ def check_range(attrs: dict, from_name_value: str, to_name_value: str):
 
     if from_value and to_value:
         if from_value > to_value:
-            ValidationError(
+            raise ValidationError(
                 {from_name_value:
                      [_('Значение от должны быть меньше, чем значение до')]
                  },
             )
         # Показатели между собой могут различаться не более чем на 20 %
-        if (from_value // to_value) > 0.75:
-            ValidationError(
+        if (from_value / to_value) < 0.75:
+            raise ValidationError(
                 {from_name_value:
                     [
                         _(

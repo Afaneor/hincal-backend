@@ -198,7 +198,7 @@ class ReportWithContext(object):
             for property_name, property_value in properties[0].items():
                 self.property_area += property_value
                 self.type_capital_construction += (
-                    f'{getattr(PropertyType, property_name.upper(), property_name).label}: {property_value}\n'
+                    f'{getattr(PropertyType, property_name.upper(), property_name).label}: {property_value} кв. м\n'
                 )
             # Средняя кадастровая стоимость на имущество.
             self.avg_property_cadastral_value = self.get_value_by_territorial_locations(
@@ -213,7 +213,7 @@ class ReportWithContext(object):
             # Расходны на капитальное строительство.
             self.avg_capital_construction_costs_math = (
                 self.property_area *
-                self.archive.avg_capital_construction_costs_math
+                self.archive.avg_capital_construction_costs
             )
 
             return models.Q(
@@ -390,7 +390,7 @@ class ReportWithContext(object):
     def get_equipment_costs(self):
         """Получение стоимости оборудования."""
         if equipments := Equipment.objects.filter(
-            id__in=self.data.get('equipments', []),
+            id__in=[equipment.id for equipment in self.data.get('equipments', [])],
         ).aggregate(
             equipment_costs=models.Sum('cost')
         ).get('equipment_costs'):
@@ -476,6 +476,8 @@ class ReportWithContext(object):
                 initial_data.update(
                     {'territorial_locations': [territorial_location.full_name for territorial_location in value_data]}
                 )
+            elif key_data == 'sector':
+                initial_data.update({'sector': value_data.name})
             else:
                 initial_data.update({key_data: value_data})
         # Корректируем архив и начальные данные для успешной сериализации.
@@ -484,7 +486,7 @@ class ReportWithContext(object):
             {'archive': ArchiveForReportSerializer(self.archive).data},
         )
         correct_context.update(
-            {'business': BaseBusinessSerializer(business).data},
+            {'business': BaseBusinessSerializer(business).data if business else {}},
         )
         correct_context.update({'initial_data': initial_data})
 
@@ -492,7 +494,7 @@ class ReportWithContext(object):
             user=self.user,
             initial_data=initial_data,
             context=correct_context,
-            total_investment_amount_bi=correct_context.get('all_possible_costsbi'),
+            total_investment_amount_bi=correct_context.get('all_possible_costs_bi'),
             total_investment_amount_math=correct_context.get('all_possible_costs_math'),
             sector=self.sector,
         )
@@ -520,8 +522,9 @@ class ReportWithContext(object):
     def get_other_costs(self):
         """Прочие общие расходы."""
         other_costs = 0
-        for key_dict, value_dict in self.data.get('other').items():
-            other_costs += value_dict
-            self.other_costs_str += f'{key_dict}: {value_dict} тыс. руб\n'
+        if other := self.data.get('other'):
+            for key_dict, value_dict in other[0].items():
+                other_costs += value_dict
+                self.other_costs_str += f'{key_dict}: {value_dict} тыс. руб\n'
         return other_costs
 

@@ -73,11 +73,11 @@ django-taggit = "^4.0.0"  # https://github.com/jazzband/django-taggit/
 xlrd = "^2.0.1"  # https://github.com/python-excel/xlrd/
 django-stubs = "^1.13"  # https://github.com/typeddjango/django-stubs
 drf-yasg = "^1.21.5"   # https://github.com/axnsan12/drf-yasg/
-httpx = "^0.24.1"
-docxtpl = "^0.16.7"
-beautifulsoup4 = "^4.12.2"
-lxml = "^4.9.2"
-openai = "^0.27.7"
+httpx = "^0.24.1"  # https://github.com/encode/httpx
+docxtpl = "^0.16.7"  # https://pypi.org/project/docxtpl/
+beautifulsoup4 = "^4.12.2"  # https://pypi.org/project/beautifulsoup4/
+lxml = "^4.9.2"  # https://pypi.org/project/lxml/
+openai = "^0.27.7"  # https://github.com/openai/openai-python
 tiktoken = "^0.4.0"
 
 [tool.poetry.dev-dependencies]

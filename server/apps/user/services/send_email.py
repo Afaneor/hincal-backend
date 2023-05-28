@@ -1,5 +1,7 @@
 from allauth.account.utils import user_pk_to_url_str, user_username
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import send_mail
+from django.template.loader import get_template
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from allauth import account
@@ -28,15 +30,21 @@ def send_confirm_email(  # noqa: WPS210, C901
     url_without_api = url.replace('api/user/users/', '')
 
     context = {
-        'current_site': get_current_site(request),
         'user': user,
         'activate_url': url_without_api,
-        'request': request,
         'year': now().year,
+        'company': 'HInCal',
     }
+    name_template = 'email/confirm_email.html'
+    template = get_template(name_template).render(context)
     try:
-        account.adapter.get_adapter(request).send_mail(
-            'account/email/email_confirmation', user.email, context,
+        send_mail(
+            subject=_('Регистрация в HInCal!'),  # type: ignore
+            message=None,  # type: ignore
+            from_email=None,
+            recipient_list=[user.email],
+            fail_silently=False,
+            html_message=template,
         )
     except Exception:
         raise SendEmailError(

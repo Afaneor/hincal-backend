@@ -88,12 +88,15 @@ class ReportWithContext(object):
             user__isnull=False
         ).first()
         self.report = Report.objects.create(user=self.user)
-        create_chat_gpt.apply_async(
-            kwargs={
-                'sector': self.sector.name,
-                'report_id': self.report.id,
-            },
-        )
+        try:
+            create_chat_gpt.apply_async(
+                kwargs={
+                    'sector': self.sector.name,
+                    'report_id': self.report.id,
+                },
+            )
+        except Exception:
+            pass
 
     @property
     def archive(self):

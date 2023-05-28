@@ -259,6 +259,17 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
         correct_land_area = self.get_filter_with_correct_land_area()
         correct_property_area = self.get_filter_with_correct_property_area()
         correct_location = self.get_filter_with_correct_location()
+        correct_business_indicators = models.Q(
+            average_number_of_staff__gte=0,
+            average_salary_of_staff__gte=0,
+            taxes_to_the_budget__gte=0,
+            income_tax__gte=0,
+            property_tax__gte=0,
+            land_tax__gte=0,
+            personal_income_tax__gte=0,
+            transport_tax__gte=0,
+            other_taxes__gte=0,
+        )
         if (
             business_indicators := BusinessIndicator.objects.filter(
                 models.Q(
@@ -267,7 +278,8 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                     correct_staff &
                     correct_land_area &
                     correct_property_area &
-                    correct_location,
+                    correct_location &
+                    correct_business_indicators,
                 ),
             )
         ):
@@ -290,7 +302,8 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                     correct_sub_sector &
                     correct_staff &
                     correct_land_area &
-                    correct_property_area,
+                    correct_property_area &
+                    correct_business_indicators,
                 ),
             )
         ):
@@ -305,7 +318,8 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                     correct_sector &
                     correct_sub_sector &
                     correct_staff &
-                    correct_land_area,
+                    correct_land_area &
+                    correct_business_indicators,
                 ),
             )
         ):
@@ -319,8 +333,9 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 models.Q(
                     correct_sector &
                     correct_sub_sector &
-                    correct_staff,
-                )
+                    correct_staff &
+                    correct_business_indicators,
+                ),
             )
         ):
             return (
@@ -332,7 +347,8 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
             business_indicators := BusinessIndicator.objects.filter(
                 models.Q(
                     correct_sector &
-                    correct_sub_sector,
+                    correct_sub_sector &
+                    correct_business_indicators,
                 ),
             )
         ):
@@ -341,9 +357,14 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 ['sector', 'sub_sector'],
             )
 
-        if business_indicators := BusinessIndicator.objects.filter(correct_sector):
+        if business_indicators := BusinessIndicator.objects.filter(
+            models.Q(
+                correct_sector &
+                correct_business_indicators,
+            ),
+        ):
             return (
-                business_indicators,
+                business_indicators
                 ['sector'],
             )
 

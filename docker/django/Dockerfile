@@ -41,6 +41,9 @@ RUN apt-get update && apt-get upgrade -y \
     gettext \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
+    python3-dev \
+    gcc \
+    libc-dev \
     # Web static server
     nginx \
     # Defining build-time-only dependencies:

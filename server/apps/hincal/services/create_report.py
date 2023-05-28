@@ -149,8 +149,8 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
         if from_staff and to_staff:
             self.avg_number_of_staff = (from_staff + to_staff) / 2
             return models.Q(
-                models.Q(average_number_of_staff__gte=self.data.get('from_staff') * self.LOWER_MARGIN_ERROR) &
-                models.Q(average_number_of_staff__lte=self.data.get('to_staff') * self.UPPER_MARGIN_ERROR)
+                models.Q(average_number_of_staff__gte=self.data.get('from_staff', 1) * self.LOWER_MARGIN_ERROR) &
+                models.Q(average_number_of_staff__lte=self.data.get('to_staff',1) * self.UPPER_MARGIN_ERROR)
             )
         return models.Q()
 

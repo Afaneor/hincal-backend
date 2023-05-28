@@ -43,6 +43,7 @@ INSTALLED_APPS: Tuple[str, ...] = (
     'allauth.account',
     'rules',
     'taggit',
+    'django_celery_beat',
 
     # Your apps go here:
     'server.apps.hincal',

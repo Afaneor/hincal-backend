@@ -124,7 +124,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
             for territorial_location in self.territorial_locations:
                 avg_value = getattr(self.sector, property_name).get(territorial_location.slug)
                 return avg_value / len(self.territorial_locations)
-        return getattr(self.sector, property_name).get('other)')
+        return getattr(self.sector, property_name).get('other')
 
     def get_filter_with_correct_sector(self) -> models.Q:
         """Получение фильтра с корректным сектором."""

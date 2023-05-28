@@ -118,6 +118,14 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
         self.report.save()
 
+    def get_correct_data_for_sector(self, property_name):
+        """Получаем данные по сектору исходя из территориального положения."""
+        if self.territorial_locations:
+            for territorial_location in self.territorial_locations:
+                avg_value = getattr(self.sector, property_name).get(territorial_location.slug)
+                return avg_value / len(self.territorial_locations)
+        return getattr(self.sector, property_name).get('other)')
+
     def get_filter_with_correct_sector(self) -> models.Q:
         """Получение фильтра с корректным сектором."""
         return models.Q(business__sector=self.sector)
@@ -354,13 +362,13 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
             self.data.get('type_business') == TypeBusiness.INDIVIDUAL
         ):
             self.avg_patent_tax = (
-                self.sector.possible_income_from_patent.get(self.sector.slug) *
+                self.get_correct_data_for_sector(property_name='possible_income_from_patent') *
                 self.archive.patent_tax_rate
             )
 
             return self.avg_patent_tax
 
-        self.avg_possible_income = self.sector.possible_income_on_market.get(self.sector.slug)
+        self.avg_possible_income = self.get_correct_data_for_sector(property_name='possible_income_on_market')
 
         return 0.0
 
@@ -471,7 +479,9 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
             # Рассчитанные показатели на основе простой математике.
             avg_number_of_staff_math=self.avg_number_of_staff,
-            avg_salary_of_staff_math=self.sector.average_salary_of_staff.get(self.territorial_locations.slug) * self.MONTH,
+            avg_salary_of_staff_math=self.get_correct_data_for_sector(
+                property_name='average_salary_of_staff',
+            ) * self.MONTH,
             all_salary=self.get_all_salary(),
             avg_personal_income_tax_math=self.get_avg_personal_income_tax(),
 

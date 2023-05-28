@@ -18,9 +18,11 @@ class Report(AbstractBaseModel):
     )
     initial_data = models.JSONField(
         _('Исходные данные по которым был сформирован отчет'),
+        null=True,
     )
     context = models.JSONField(
         _('Данные для формирования отчета'),
+        null=True,
     )
     total_investment_amount_bi = models.FloatField(
         _('Общая сумма инвестирований из БД'),

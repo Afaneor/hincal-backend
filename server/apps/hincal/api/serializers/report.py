@@ -134,7 +134,7 @@ class CreateReportSerializer(serializers.Serializer):
     need_accounting = serializers.BooleanField(default=False)
     need_registration = serializers.BooleanField(default=False)
 
-    other = serializers.JSONField(
+    others = serializers.JSONField(
         allow_null=True,
         required=False,
         default=[],

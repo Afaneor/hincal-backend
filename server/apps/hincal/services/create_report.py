@@ -43,7 +43,7 @@ class ReportWithContext(object):
     avg_land_cadastral_value: float = 0.0
     # Размер налога на землю.
     avg_land_tax: float = 0.0
-    # Средний размер площади имущества.
+    # Размер площади имущества.
     property_area: float = 0.0
     # Средняя кадастровая стоимость на имущество.
     avg_property_cadastral_value: float = 0.0
@@ -63,8 +63,10 @@ class ReportWithContext(object):
     avg_accounting_costs: float = 0.0
     # Расходны на оборудование.
     equipments: float = 0.0
+    # Строковые представление данных об оборудовании.
+    data_by_equipments_costs: str = ''
     # Другие расходы представленные в виде строки.
-    other_costs_str = ''
+    others_costs_str = ''
     # Список типов имущества.
     type_capital_construction = ''
 
@@ -81,6 +83,17 @@ class ReportWithContext(object):
 
         self.sector = data.get('sector')
         self.territorial_locations = self.data.get('territorial_locations')
+        self.business = Business.objects.filter(
+            user=self.user,
+            user__isnull=False
+        ).first()
+        self.report = Report.objects.create(user=self.user)
+        create_chat_gpt.apply_async(
+            kwargs={
+                'sector': self.sector.name,
+                'report_id': self.report.id,
+            },
+        )
 
     @property
     def archive(self):
@@ -195,10 +208,12 @@ class ReportWithContext(object):
         # данных по имуществу нет, то переводим размер имущества в размер налога
         # на имущество.
         if properties:
-            for property_name, property_value in properties[0].items():
-                self.property_area += property_value
+            for property in properties:
+                cost = property.get('cost')
+                name = property.get('name')
+                self.property_area += cost
                 self.type_capital_construction += (
-                    f'{getattr(PropertyType, property_name.upper(), property_name).label}: {property_value} кв. м\n'
+                    f"{getattr(PropertyType, name.upper(), name).label}: {name} кв. м\n"
                 )
             # Средняя кадастровая стоимость на имущество.
             self.avg_property_cadastral_value = self.get_value_by_territorial_locations(
@@ -334,7 +349,6 @@ class ReportWithContext(object):
 
         Доступно только для ИП. Для остальных лиц рассчитываем возможный доход.
         """
-        avg_possible_income = 0.0
         if (
             self.data.get('need_patent') and
             self.data.get('type_business') == TypeBusiness.INDIVIDUAL
@@ -389,16 +403,41 @@ class ReportWithContext(object):
 
     def get_equipment_costs(self):
         """Получение стоимости оборудования."""
-        if equipments := Equipment.objects.filter(
-            id__in=[equipment.id for equipment in self.data.get('equipments', [])],
-        ).aggregate(
-            equipment_costs=models.Sum('cost')
-        ).get('equipment_costs'):
-            self.equipments = equipments
+        equipments = Equipment.objects.filter(
+            id__in=[
+                equipment.id for equipment in self.data.get('equipments', [])
+            ],
+        )
+        
+        if equipments:
+            flag = 'user'
+        else:
+            if self.business:
+                tags = [
+                    self.business.sector,
+                    self.business.sub_sector,
+                    self.business.type,
+                    self.business.okved,
+                ]
+            else:
+                tags = ['all']
 
-            return self.equipments
+            equipments = Equipment.objects.filter(tags__name__in=tags)
+            flag = 'auto'
 
-        return 0.0
+        for en_index, equipment in enumerate(equipments):
+            if en_index < 5:
+                self.data_by_equipments_costs += f'{equipment.name}: {equipment.cost} тыс. руб.\n'
+            self.equipments += equipment.cost
+        self.data_by_equipments_costs += f'Общая сумма оборудования: {self.equipments} тыс. руб.\n\n'
+        
+        if flag == 'auto':
+            self.data_by_equipments_costs += (
+                'Выше приведен список примерного оборудования и его ' +
+                'стоимости для вашей отрасли, согласно имеющейся информации\n\n'
+            )
+
+        return self.equipments
 
     def formation_report(self):
         """Формирование контекста."""
@@ -415,13 +454,9 @@ class ReportWithContext(object):
             avg_other_taxes=models.Avg('other_taxes'),
         )
 
-        business = Business.objects.filter(
-            user=self.user,
-            user__isnull=False
-        ).first()
         context = ReportContextDataClass(
             # Информация по бизнесу.
-            business=business if business else None,
+            business=self.business if self.business else None,
             # Исходные данные.
             initial_data=self.data,
 
@@ -457,10 +492,11 @@ class ReportWithContext(object):
 
             # Общие расходы.
             equipment_costs=self.get_equipment_costs(),
-            accounting_costs=self.get_accounting_costs(),
+            data_by_equipments_costs=self.data_by_equipments_costs,
+            accounting_costs=self.get_accounting_costs() * 12,
             registration_costs=self.get_registration_costs(),
-            other_costs=self.get_other_costs(),
-            other_costs_str=self.other_costs_str,
+            others_costs=self.get_others_costs(),
+            others_costs_str=self.others_costs_str,
 
             archive=self.archive,
         )
@@ -483,28 +519,21 @@ class ReportWithContext(object):
         # Корректируем архив и начальные данные для успешной сериализации.
         correct_context = context.__dict__
         correct_context.update(
-            {'archive': ArchiveForReportSerializer(self.archive).data},
-        )
-        correct_context.update(
-            {'business': BaseBusinessSerializer(business).data if business else {}},
-        )
-        correct_context.update({'initial_data': initial_data})
-
-        self.report = Report.objects.create(
-            user=self.user,
-            initial_data=initial_data,
-            context=correct_context,
-            total_investment_amount_bi=correct_context.get('all_possible_costs_bi'),
-            total_investment_amount_math=correct_context.get('all_possible_costs_math'),
-            sector=self.sector,
-        )
-        # Получение рекомендаций из ChatGPT.
-        create_chat_gpt.apply_async(
-            kwargs={
-                'sector': self.sector.name,
-                'report_id': self.report.id,
+            {
+                'archive': ArchiveForReportSerializer(self.archive).data,
+                'business': BaseBusinessSerializer(self.business).data if self.business else {},
+                'initial_data': initial_data,
             },
         )
+        correct_context.update(self.report.context if self.report.context else {})
+
+        self.report.initial_data = initial_data
+        self.report.context = correct_context
+        self.report.total_investment_amount_bi = correct_context.get('all_possible_costs_bi')
+        self.report.total_investment_amount_math = correct_context.get('all_possible_costs_math')
+        self.report.sector = self.sector
+        self.report.save()
+
         # Создание тегов.
         self.create_tags()
 
@@ -519,12 +548,13 @@ class ReportWithContext(object):
         """Размер НДФЛ."""
         return self.all_salary * self.archive.personal_income_rate
 
-    def get_other_costs(self):
+    def get_others_costs(self):
         """Прочие общие расходы."""
-        other_costs = 0
-        if other := self.data.get('other'):
-            for key_dict, value_dict in other[0].items():
-                other_costs += value_dict
-                self.other_costs_str += f'{key_dict}: {value_dict} тыс. руб\n'
-        return other_costs
-
+        others_costs = 0
+        if others := self.data.get('others'):
+            for other in others:
+                name = other.get('name')
+                cost = other.get('cost')
+                others_costs += cost
+                self.others_costs_str += f'{name}: {cost} тыс. руб\n'
+        return others_costs

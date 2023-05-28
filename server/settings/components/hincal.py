@@ -12,10 +12,12 @@ DADATA_API_URL = config(
 DADATA_TIMEOUT_SEC = 5
 
 
-USERS_PASSWORD_RESET_REVERSE_URL = (
-    'api:user:users-reset-password-process'  # noqa: S105
-)
+USERS_PASSWORD_RESET_REVERSE_URL = 'api:user:users-reset-password-process'
 
-USERS_CONFIRM_EMAIL_REVERSE_URL = (
-    'api:user:users-confirm-email-process'
+USERS_CONFIRM_EMAIL_REVERSE_URL = 'api:user:users-confirm-email-process'
+
+OPENAI_API_KEY = config(
+    'OPENAI_API_KEY',
+    default='',
+    cast=str
 )

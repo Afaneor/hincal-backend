@@ -22,6 +22,8 @@ class ReportContextDataClass:
     business: Business = None
     # Исходные данные, которые ввел пользователь в калькуляторе.
     initial_data: dict = None
+    # Информация о налогах, ставках и т.д.
+    archive: Archive = None
 
     # Средние показатели расходов по другим бизнесам, которые есть в БД.
     avg_number_of_staff_bi: float = 0
@@ -60,41 +62,15 @@ class ReportContextDataClass:
 
     # Расходы на оборудование.
     equipment_costs: float = 0
+    # Строковые представление данных об оборудовании.
+    data_by_equipments_costs: str = ''
     # Расходы на бухгалтерские услуги.
     accounting_costs: float = 0
     # Расходы на регистрацию.
     registration_costs: float = 0
     # Прочие расходы
-    other_costs: float = 0
-    other_costs_str: str = ''
-
-    # ВЫЧИСЛЯЕМЫЕ ПОЛЯ.
-    # Итоговые возможные расходы по всему.
-    all_possible_costs_bi: float = field(init=False)
-    all_possible_costs_math: float = field(init=False)
-    # Общие расходны на сотрудников.
-    all_staff_costs: float = field(init=False)
-    # Общие расходны на аренду земли и объектов недвижимости.
-    all_lp_lease_costs: float = field(init=False)
-    # Общие налоги на сотрудников, землю и объекты недвижимости.
-    all_tax_costs: float = field(init=False)
-    # Общие расходы на услуги.
-    all_services_costs: float = field(init=False)
-
-    avg_income_tax_math: float = field(init=False)
-
-    # Расходы на з.п./налоги/взносы персонала.
-    avg_staff_tax_costs: float = field(init=False)
-    avg_staff_pension_contributions_costs: float = field(init=False)
-    avg_staff_medical_contributions_costs: float = field(init=False)
-
-    # Расходы аренды/покупки земли.
-    avg_land_lease_costs: float = field(init=False)
-    avg_land_purchase_costs: float = field(init=False)
-
-    context_for_file: dict = field(init=False)
-
-    archive: Archive = None
+    others_costs: float = 0
+    others_costs_str: str = ''
 
     def __post_init__(self):
         """Рассчитываем недостающие показатели."""
@@ -121,7 +97,6 @@ class ReportContextDataClass:
         # Все расходы: з.п. сотрудников + НДФЛ +страховые взносы +
         # налог на прибыль, землю, имущество, транспорт, другие налоги,
         # патентную систему, бухгалтерию, оборудование, регистрацию.
-        # FIXME налог уплачивается на год. А расходы на зп, бух. учет. на месяц
         self.all_possible_costs_bi = (
             self.avg_salary_of_staff_bi +
             self.avg_personal_income_tax_bi +
@@ -136,7 +111,7 @@ class ReportContextDataClass:
             self.equipment_costs +
             self.accounting_costs +
             self.registration_costs +
-            self.other_costs
+            self.others_costs
         )
         # Все расходы на сотрудника: з.п. сотрудников + НДФЛ + страховые взносы
         self.all_staff_costs_bi = (
@@ -166,7 +141,7 @@ class ReportContextDataClass:
         self.all_services_costs_bi = (
             self.accounting_costs +
             self.registration_costs +
-            self.other_costs
+            self.others_costs
         )
 
         # ОБЩИЕ РАСХОДЫ СОГЛАСНО МАТЕМАТИКЕ.
@@ -222,7 +197,7 @@ class ReportContextDataClass:
             self.equipment_costs +
             self.accounting_costs +
             self.registration_costs +
-            self.other_costs
+            self.others_costs
         )
 
         # Все расходы на сотрудника: з.п. сотрудников + НДФЛ + страховые взносы
@@ -250,7 +225,7 @@ class ReportContextDataClass:
         self.all_services_costs_math = (
             self.accounting_costs +
             self.registration_costs +
-            self.other_costs
+            self.others_costs
         )
 
         # СТРАНИЦА 5.
@@ -295,80 +270,43 @@ class ReportContextDataClass:
             self.avg_property_lease_value * self.property_area_math * 12
         )
         self.avg_property_purchase_costs = (
-            self.avg_property_purchase_value * self.property_area_math * 12
+            self.avg_property_purchase_value * self.property_area_math
         )
         # Средняя стоимость аренды/покупки земли.
         self.avg_land_lease_costs = (
             self.avg_land_lease_value * self.avg_land_area_math * 12
         )
         self.avg_land_purchase_costs = (
-            self.avg_land_purchase_value * self.avg_land_area_math * 12
+            self.avg_land_purchase_value * self.avg_land_area_math
         )
-
-        # Страница 6.
-        data_by_equipments = ''
-        all_equipment_coasts = 0.0
-        # Нужно для понимая вводил ли пользователь оборудование.
-        flag = ''
-        if self.equipment_costs:
-            equipments = Equipment.objects.filter(
-                id__in=[equipment.id for equipment in self.initial_data.get('equipments', [])]
-            )
-            flag = 'user'
-
-        else:
-            if self.business:
-                tags = [
-                    self.business.sector,
-                    self.business.sub_sector,
-                    self.business.type,
-                    self.business.okved,
-                ]
-            else:
-                tags = ['all']
-            equipments = Equipment.objects.filter(
-                tags__name__in=tags,
-            )
-            flag = 'auto'
-
-        for en_index, equipment in enumerate(equipments):
-            if en_index < 5:
-                data_by_equipments += f'{equipment.name}: {equipment.cost} тыс. руб.\n'
-            all_equipment_coasts += equipment.cost
-        data_by_equipments += f'Общая сумма оборудования: {all_equipment_coasts} тыс. руб.\n\n'
-        if flag == 'auto':
-            data_by_equipments += (
-                'Выше приведен список примерного оборудования и его '
-                'стоимости для вашей отрасли. Общая стоимость оборудования '
-                'не учитывалась в расходах.\n\n'
-            )
 
         if self.business:
             indicator = self.business.business_indicators.first()
         else:
             indicator = None
+
         self.context_for_file = {
-            # ИНФОРМАЦИЯ О ВАШЕЙ ОРГАНИЗАЦИИ.
+            # ИНФОРМАЦИЯ О ВАШЕЙ ОРГАНИЗАЦИИ, ЕСЛИ ЗАПРОС СДЕЛАЛ АВТОРИЗОВАННЫЙ
+            # ПОЛЬЗОВАТЕЛЬ, КОТОРЫЙ ИМЕЕТ КОМПАНИЮ
+            # Название сектора.
             'sector': get_correct_data(self.business, 'sector'),
+            # Правовая форма (ООО, ИП).
             'full_opf': get_correct_data(self.business, 'full_opf'),
+            # Количество сотрудников.
             'number_of_staff':
                 get_correct_data(indicator, 'average_number_of_staff'),
+            # Расположение.
             'territorial_location':
                 get_correct_data(self.business, 'territorial_location'),
+            # Тип системы налогооблажения.
             'type_tax_system':
                 get_correct_data(self.business, 'type_tax_system'),
+            # Примерное количество земли. кв.м.
             'land_area': get_correct_data(indicator, 'land_area'),
+            # Примерное количество имущества, кв.м.
             'building_area': get_correct_data(indicator, 'building_area'),
 
-            # Слова из ChatGpt.
-            'chat_gpt_page_1': '',
-            'chat_gpt_page_2': '',
-            'chat_gpt_page_3': '',
-            'chat_gpt_page_4': '',
-            'chat_gpt_page_5': '',
-            'chat_gpt_page_6': '',
-
-            # Стандартные слова.
+            # Стандартные слова. Для каждой страницы из отчета
             'page_1': TextForReport.PAGE_1,
             'page_2': TextForReport.PAGE_2,
             'page_3': TextForReport.PAGE_3,
@@ -376,40 +314,66 @@ class ReportContextDataClass:
             'page_5': TextForReport.PAGE_5,
             'page_6': TextForReport.PAGE_6,
 
-            # ИТОГОВЫЕ ЗНАЧЕНИЯ ВОЗМОЖНЫХ ЗАТРАТ НА ОСНОВЕ БД.
+            # ИТОГОВЫЕ ЗНАЧЕНИЯ ВОЗМОЖНЫХ ЗАТРАТ НА ОСНОВЕ БД. ДАННЫЕ ЗАТРАТЫ
+            # РАСЧИТыВАЮТСЯ НА ОСНОВЕ ДАННЫХ ИЗ БД.
+            # Все затраты.
             'all_possible_costs_bi': self.all_possible_costs_bi,
+            # Все затраты на персонал.
             'all_staff_costs_bi': self.all_staff_costs_bi,
+            # Все затраты на землю и имущество.
             'all_lp_lease_costs_bi': self.all_lp_lease_costs_bi,
+            # Все затраты на оборудование.
             'equipment_costs_bi': self.equipment_costs,
+            # Все затраты на налоги.
             'all_tax_costs_bi': self.all_tax_costs_bi,
+            # Все затраты на сервисы. Бух учет и т.д.
             'all_services_costs_bi': self.all_services_costs_bi,
 
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ВОЗМОЖНЫХ ЗАТРАТ НА ОСНОВЕ МАТЕМАТИКИ.
+            # ПРСОТО СЛОЖЕНИЕ, ВЫЧИТАНИЕ, УМНОЖЕНИЕ
+            # Все затраты.
             'all_possible_costs_math': self.all_possible_costs_math,
+            # Все затраты на персонал.
             'all_staff_costs_math': self.all_staff_costs_math,
+            # Все затраты на землю и имущество.
             'all_lp_lease_costs_math': self.all_lp_lease_costs_math,
+            # Все затраты на оборудование.
             'equipment_costs_math': self.equipment_costs,
+            # Все затраты на налоги.
             'all_tax_costs_math': self.all_services_costs_math,
+            # Все затраты на сервисы. Бух учет и т.д.
             'all_services_costs_math': self.all_services_costs_math,
 
             # 4 Страница. Анализ расходов на персонал.
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ЗАТРАТ НА ПЕРСОНАЛ НА ОСНОВЕ БД.
+            # Затраты на зп за год.
             'avg_salary_of_staff_bi': self.all_staff_costs_bi,
+            # Затраты на НДФЛ.
             'avg_personal_income_tax_bi': self.all_lp_lease_costs_bi,
+            # Затраты на отчисления по ПФР.
             'avg_staff_pension_contributions_costs_bi': self.equipment_costs,
+            # Затраты на отчисления по ОМС.
             'avg_staff_medical_contributions_costs_bi': self.all_tax_costs_bi,
+            # Затраты на отчисления по нетрудоспособности.
             'avg_staff_disability_contributions_costs_bi': self.all_services_costs_bi,
 
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ЗАТРАТ НА ПЕРСОНАЛ НА ОСНОВЕ МАТЕМАТИКИ.
+            # Затраты на зп за год.
             'avg_salary_of_staff_math': self.all_staff_costs_math,
+            # Затраты на НДФЛ.
             'avg_personal_income_tax_math': self.all_lp_lease_costs_math,
+            # Затраты на отчисления по ПФР.
             'avg_staff_pension_contributions_costs_math': self.equipment_costs,
+            # Затраты на отчисления по ОМС.
             'avg_staff_medical_contributions_costs_math': self.all_services_costs_math,
+            # Затраты на отчисления по нетрудоспособности.
             'avg_staff_disability_contributions_costs_math': self.all_services_costs_math,
 
             # 5 Страница. Сравнение цен имущества в аренду и в покупку.
             # Диапазон площади.
-            'property_range': f"{self.initial_data.get('from_property_area')} - {self.initial_data.get('to_property_area')}",
+            # Диапазон площади имущества кв.м.
+            'property_range': self.property_area_math,
+            # Диапазон площади земли кв.м.
             'land_range': f"{self.initial_data.get('from_land_area')} - {self.initial_data.get('to_land_area')}",
             
             # Стоимость кв.м. аренды имущества.
@@ -453,15 +417,15 @@ class ReportContextDataClass:
             ),
 
             # 6 Страница. Возможные неучитываемые расходы.
-            # Предложить оборудование.
-            'equipments': data_by_equipments,
+            # Другие расходы.
+            'others_costs': (
+                self.others_costs_str +
+                '\n' +
+                f'Общие расходы составили: {self.others_costs} тыс. руб.'
+            ),
+            # Информация по оборудованию.
+            'equipments': self.data_by_equipments_costs,
 
             # 7 Страница. Предложения по бизнесу (исходя из сферы).
             'offers_and_wishes': '',
-
-            'other_costs': (
-                self.other_costs_str +
-                '\n' +
-                f'Общие расходы составили: {self.other_costs} тыс. руб.'
-            )
         }

@@ -117,7 +117,7 @@ class ReportViewSet(RetrieveListDeleteViewSet):
         )
 
     @action(
-        ['GET'],
+        ['POST'],
         url_path='get-file',
         detail=True,
     )

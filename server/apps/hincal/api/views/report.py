@@ -135,8 +135,8 @@ class ReportViewSet(RetrieveListDeleteViewSet):
 
         return FileResponse(
             report_file.generate(),
-            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            filename=report_file.get_filename(),
+            content_type='application/pdf',
+            filename=report_file.get_file_name(),
             status=status.HTTP_200_OK,
         )
 

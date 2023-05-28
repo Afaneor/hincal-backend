@@ -21,3 +21,9 @@ OPENAI_API_KEY = config(
     default='',
     cast=str
 )
+
+PSPDFKIT_API_SECRET_KEY = config(
+    'PSPDFKIT_API_SECRET_KEY',
+    default='',
+    cast=str
+)

@@ -1,8 +1,10 @@
 import io
+import json
 
 from abc import ABC, abstractmethod
+
+import requests
 from django.conf import settings
-from django.utils.timezone import now
 
 from docxtpl import DocxTemplate
 from server.apps.hincal.models import Report
@@ -20,6 +22,7 @@ class AbstractRender(ABC):  # noqa: B024
         self,
         context: dict,  # type: ignore
         template_full_path: str,
+        file_name: str,
     ) -> io.BytesIO:
         """Рендеринг документа."""
         pass
@@ -32,14 +35,40 @@ class RenderDocx(AbstractRender):
         self,
         context: dict,  # type: ignore
         template_full_path: str,
+        file_name: str,
     ) -> io.BytesIO:
         """Рендеринг документа."""
-        template = DocxTemplate(template_full_path)
-        template.render(context)
-        buffer = io.BytesIO()
-        template.save(buffer)
-        buffer.seek(0)
-        return buffer
+        document = DocxTemplate(template_full_path)
+        document.render(context)
+        document.save(f'{settings.BASE_DIR}/media/{file_name}.docx')
+
+        # https://pspdfkit.com/api/pdf-generator-api
+        instructions = {'parts': [{'file': 'document'}]}
+
+        response = requests.request(
+            'POST',
+            'https://api.pspdfkit.com/build',
+            headers={'Authorization': f'Bearer {settings.PSPDFKIT_API_SECRET_KEY}'},
+            files={'document': open(f'{settings.BASE_DIR}/media/{file_name}.docx', 'rb')},
+            data={'instructions': json.dumps(instructions)},
+            stream=True
+        )
+
+        if response.ok:
+            with open(f'{settings.BASE_DIR}/media/{file_name}.pdf', 'wb') as fd:
+                for chunk in response.iter_content(chunk_size=8096):
+                    fd.write(chunk)
+        else:
+            # Если не доступно, то отправляем docx.
+            with open(f'{settings.BASE_DIR}/media/{file_name}.docx', 'rb') as file:
+                buffer = io.BytesIO(file.read())
+                buffer.seek(0)
+                return buffer
+        # Если доступно, то отправляем pdf.
+        with open(f'{settings.BASE_DIR}/media/{file_name}.pdf', 'rb') as file:
+            buffer = io.BytesIO(file.read())
+            buffer.seek(0)
+            return buffer
 
 
 class ReportFile(object):  # noqa: WPS214
@@ -67,16 +96,14 @@ class ReportFile(object):  # noqa: WPS214
             f'report.{self.document_format}'
         )
 
-    def get_filename(self) -> str:
+    def get_file_name(self) -> str:
         """Получение корректного названия документа."""
-        return 'Отчет_{date}.{document_format}'.format(
-            date=str(now()),
-            document_format=self.document_format,
-        )
+        return 'Отчет_{id}'.format(id=self.report.id)
 
     def generate(self) -> io.BytesIO:
         """Генерация документа."""
         return self._render_handlers.get(self.document_format).render(
             context=self.report.context.get('context_for_file'),
             template_full_path=self.get_template_full_path(),
+            file_name=self.get_file_name()
         )

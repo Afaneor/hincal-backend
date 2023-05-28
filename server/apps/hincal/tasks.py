@@ -81,19 +81,31 @@ def create_chat_gpt(self, sector: str, report_id: int) -> None:
         ):
             chat_gpt_page_6 = 'Пожелание от ChatGPT: ' + answer[2:-1]
 
-    report_context = report.context if report.context else {}
-    report_context.update(
-        {
-            'context_for_file': {
-                'chat_gpt_page_1': chat_gpt_page_1,
-                'chat_gpt_page_2': chat_gpt_page_2,
-                'chat_gpt_page_3': chat_gpt_page_3,
-                'chat_gpt_page_4': chat_gpt_page_4,
-                'chat_gpt_page_5': chat_gpt_page_5,
-                'chat_gpt_page_6': chat_gpt_page_6,
+    report_context = report.context
+    if report_context:
+        report_context.get('context_for_file').update(
+            {
+            'chat_gpt_page_1': chat_gpt_page_1,
+            'chat_gpt_page_2': chat_gpt_page_2,
+            'chat_gpt_page_3': chat_gpt_page_3,
+            'chat_gpt_page_4': chat_gpt_page_4,
+            'chat_gpt_page_5': chat_gpt_page_5,
+            'chat_gpt_page_6': chat_gpt_page_6,
             },
-        },
-    )
+        )
+    else:
+        report_context.update(
+            {
+                'context_for_file': {
+                    'chat_gpt_page_1': chat_gpt_page_1,
+                    'chat_gpt_page_2': chat_gpt_page_2,
+                    'chat_gpt_page_3': chat_gpt_page_3,
+                    'chat_gpt_page_4': chat_gpt_page_4,
+                    'chat_gpt_page_5': chat_gpt_page_5,
+                    'chat_gpt_page_6': chat_gpt_page_6,
+                },
+            },
+        )
 
     report.context = report_context
     report.save()

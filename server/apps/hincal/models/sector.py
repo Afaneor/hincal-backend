@@ -3,6 +3,11 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from taggit.managers import TaggableManager
 
+from server.apps.hincal.services.archive import (
+    get_average_salary_of_staff,
+    get_possible_income_from_patent,
+    get_possible_income_on_market,
+)
 from server.apps.services.base_model import AbstractBaseModel
 
 
@@ -19,17 +24,17 @@ class Sector(AbstractBaseModel):
         max_length=settings.MAX_STRING_LENGTH,
         unique=True,
     )
-    possible_income_from_patent = models.PositiveIntegerField(
+    possible_income_from_patent = models.JSONField(
         _('Возможный доход по патентной системе налогообложения, тыс. руб.'),
-        default=10000,
+        default=get_possible_income_from_patent,
     )
-    possible_income = models.PositiveIntegerField(
+    possible_income_on_market = models.JSONField(
         _('Возможный доход, тыс. руб.'),
-        default=10000,
+        default=get_possible_income_on_market,
     )
-    avg_salary_of_staff = models.FloatField(
+    average_salary_of_staff = models.JSONField(
         _('Средняя заработная плата сотрудника, тыс. руб.'),
-        default=100,
+        default=get_average_salary_of_staff,
     )
     tags = TaggableManager(blank=True)
 

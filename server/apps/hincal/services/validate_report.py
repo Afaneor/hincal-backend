@@ -17,15 +17,16 @@ def check_range(attrs: dict, from_name_value: str, to_name_value: str):
         # Показатели между собой могут различаться не более чем на 20 %
         if (from_value / to_value) < 0.75:
             raise ValidationError(
-                {from_name_value:
-                    [
-                        _(
-                            'Граничный значения не должны различаться' +
-                            ' друг от друга более, чем на 25%',
-                        ),
-                    ],
+                {
+                    from_name_value:
+                        [
+                            _(
+                                'Граничный значения не должны различаться' +
+                                ' друг от друга более, чем на 25%',
+                            ),
+                        ],
                 },
-            )
+                )
 
     if from_value and not to_value:
         attrs.update({to_name_value: attrs.get(from_name_value)})

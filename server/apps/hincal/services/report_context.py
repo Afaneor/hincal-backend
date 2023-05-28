@@ -237,14 +237,15 @@ class ReportContextDataClass:
         avg_land_purchase_costs = 0.0
 
         territorial_locations = self.initial_data.get('territorial_locations')
-        len_territorial_locations = len(territorial_locations) if len(territorial_locations) != 0 else 1
         if territorial_locations:
+            len_territorial_locations = len(territorial_locations)
             for territorial_location in territorial_locations:
                 avg_property_lease_costs += territorial_location.avg_property_lease_costs
                 avg_property_purchase_costs += territorial_location.avg_property_purchase_costs
                 avg_land_lease_costs += territorial_location.avg_land_lease_costs
                 avg_land_purchase_costs += territorial_location.avg_land_purchase_costs
         else:
+            len_territorial_locations = 0
             avg_property_lease_costs += self.archive.avg_property_lease_costs
             avg_property_purchase_costs += self.archive.avg_property_purchase_costs
             avg_land_lease_costs += self.archive.avg_land_lease_costs

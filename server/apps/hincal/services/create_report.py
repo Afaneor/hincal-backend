@@ -471,7 +471,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
             # Рассчитанные показатели на основе простой математике.
             avg_number_of_staff_math=self.avg_number_of_staff,
-            avg_salary_of_staff_math=self.sector.average_salary_of_staff.get(self.sector.slug) * self.MONTH,
+            avg_salary_of_staff_math=self.sector.average_salary_of_staff.get(self.territorial_locations.slug) * self.MONTH,
             all_salary=self.get_all_salary(),
             avg_personal_income_tax_math=self.get_avg_personal_income_tax(),
 

@@ -1,13 +1,12 @@
 from django.db import models
 
 
-from server.apps.hincal.models import Report, Business
+from server.apps.hincal.models import Business, Report
 from server.apps.user.models import User
 
 
 def get_all_statistics():
     """Получить общую статистику по системе."""
-
     business = Business.objects.all()
     reports = Report.objects.all().aggregate(
         average_investment_amount_bi=models.Avg('total_investment_amount_bi'),
@@ -25,12 +24,15 @@ def get_all_statistics():
     return {
         'popular_sector': list(popular_reports),
         'average_investment_amount_bi': reports.get(
-            'average_investment_amount_bi'),
+            'average_investment_amount_bi',
+        ),
         'average_investment_amount_math': reports.get(
-            'average_investment_amount_math'),
+            'average_investment_amount_math',
+        ),
         'total_investment_amount_bi': reports.get('total_investment_amount_bi'),
         'total_investment_amount_math': reports.get(
-            'total_investment_amount_math'),
+            'total_investment_amount_math',
+        ),
         'number_of_reports': reports.get('number_of_reports'),
         'number_of_business': business.count(),
     }
@@ -55,11 +57,14 @@ def get_user_statistics(user: User):
     return {
         'popular_sector': list(popular_reports),
         'average_investment_amount_bi': reports.get(
-            'average_investment_amount_bi'),
+            'average_investment_amount_bi',
+        ),
         'average_investment_amount_math': reports.get(
-            'average_investment_amount_math'),
+            'average_investment_amount_math',
+        ),
         'total_investment_amount_bi': reports.get('total_investment_amount_bi'),
         'total_investment_amount_math': reports.get(
-            'total_investment_amount_math'),
+            'total_investment_amount_math',
+        ),
         'number_of_reports': reports.get('number_of_reports'),
     }

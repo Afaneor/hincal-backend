@@ -15,7 +15,7 @@ class AbstractRender(ABC):  # noqa: B024
 
     def __init__(self, *args, **kwargs) -> None:  # noqa: B027
         """Инициализируем переменные для работы."""
-        pass
+        pass  # noqa: WPS420
 
     @abstractmethod
     def render(
@@ -25,7 +25,7 @@ class AbstractRender(ABC):  # noqa: B024
         file_name: str,
     ) -> io.BytesIO:
         """Рендеринг документа."""
-        pass
+        pass  # noqa: WPS420
 
 
 class RenderDocx(AbstractRender):
@@ -51,7 +51,7 @@ class RenderDocx(AbstractRender):
             headers={'Authorization': f'Bearer {settings.PSPDFKIT_API_SECRET_KEY}'},
             files={'document': open(f'{settings.BASE_DIR}/media/{file_name}.docx', 'rb')},
             data={'instructions': json.dumps(instructions)},
-            stream=True
+            stream=True,
         )
 
         if response.ok:
@@ -105,5 +105,5 @@ class ReportFile(object):  # noqa: WPS214
         return self._render_handlers.get(self.document_format).render(
             context=self.report.context.get('context_for_file'),
             template_full_path=self.get_template_full_path(),
-            file_name=self.get_file_name()
+            file_name=self.get_file_name(),
         )

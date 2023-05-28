@@ -33,12 +33,12 @@ def create_chat_gpt(self, sector: str, report_id: int) -> None:
         max_tokens=2048,
     )
     answers = response.choices[0].message.content
-    chat_gpt_page_1 = TextForReport.PAGE_1
-    chat_gpt_page_2 = TextForReport.PAGE_2
-    chat_gpt_page_3 = TextForReport.PAGE_3
-    chat_gpt_page_4 = TextForReport.PAGE_4
-    chat_gpt_page_5 = TextForReport.PAGE_5
-    chat_gpt_page_6 = TextForReport.PAGE_6
+    chat_gpt_page_1 = TextForReport.PAGE_ONE
+    chat_gpt_page_2 = TextForReport.PAGE_TWO
+    chat_gpt_page_3 = TextForReport.PAGE_THREE
+    chat_gpt_page_4 = TextForReport.PAGE_FOUR
+    chat_gpt_page_5 = TextForReport.PAGE_FIVE
+    chat_gpt_page_6 = TextForReport.PAGE_SIX
 
     answer_split = answers.split('#')
     for en_index, answer in enumerate(answer_split):

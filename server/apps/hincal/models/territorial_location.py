@@ -25,28 +25,28 @@ class TerritorialLocation(AbstractBaseModel):
 
     avg_land_cadastral_value = models.FloatField(
         _('Средняя кадастровая стоимость на землю, тыс. руб.'),
-        default=17.23389,
+        default=18.23389,
     )
     avg_land_lease_costs = models.FloatField(
         _('Средняя стоимость на аренду земли, тыс. руб.'),
-        default=60,
+        default=1.432,
     )
     avg_land_purchase_costs = models.FloatField(
         _('Средняя стоимость на покупку земли, тыс. руб.'),
-        default=100,
+        default=91.4233,
     )
 
     avg_property_cadastral_value = models.FloatField(
         _('Средняя кадастровая стоимость на имуществу, тыс. руб.'),
-        default=17.23389,
+        default=57.23389,
     )
     avg_property_lease_costs = models.FloatField(
         _('Средняя стоимость на аренду имущества, тыс. руб.'),
-        default=100,
+        default=2.6314,
     )
     avg_property_purchase_costs = models.FloatField(
         _('Средняя стоимость на покупку  имуществу, тыс. руб.'),
-        default=200,
+        default=252.231,
     )
     extra_data = models.JSONField(
         _('Дополнительные параметры'),

@@ -15,12 +15,12 @@ from server.apps.hincal.models import (
     Report,
 )
 from server.apps.hincal.tasks import create_chat_gpt
-from server.apps.hincal.services.enums import TypeBusiness, PropertyType
+from server.apps.hincal.services.enums import PropertyType, TypeBusiness
 from server.apps.hincal.services.report_context import ReportContextDataClass
 from server.apps.user.models import User
 
 
-class ReportWithContext(object):
+class ReportWithContext(object):  # noqa: WPS214, WPS230
     """Формирование context для отчета."""
 
     _archive: Archive = None
@@ -29,6 +29,8 @@ class ReportWithContext(object):
     # переданные показатели.
     LOWER_MARGIN_ERROR = 0.85
     UPPER_MARGIN_ERROR = 1.15
+    # Количеством месяцев в году, необходимо для некоторых расчетов
+    MONTH = 12
 
     # Переменные, которые будут получены в ходе расчетов:
     # Среднее количество работников.
@@ -74,18 +76,18 @@ class ReportWithContext(object):
 
     def __init__(
         self,
-        data: dict,
+        data: dict,  # noqa: WPS110
         user: Optional[Union[User, AnonymousUser]],
     ):
         """Инициализация переменных для работы."""
         self.user = user if user.is_authenticated else None
-        self.data = data
+        self.data = data  # noqa: WPS110
 
         self.sector = data.get('sector')
         self.territorial_locations = self.data.get('territorial_locations')
         self.business = Business.objects.filter(
             user=self.user,
-            user__isnull=False
+            user__isnull=False,
         ).first()
         self.report = Report.objects.create(user=self.user)
         try:
@@ -96,7 +98,7 @@ class ReportWithContext(object):
                 },
             )
         except Exception:
-            pass
+            pass  # noqa: WPS420
 
     @property
     def archive(self):
@@ -118,10 +120,7 @@ class ReportWithContext(object):
 
     def get_filter_with_correct_sector(self) -> models.Q:
         """Получение фильтра с корректным сектором."""
-        if self.sector:
-            return models.Q(business__sector=self.sector)
-        else:
-            return models.Q()
+        return models.Q(business__sector=self.sector)
 
     def get_filter_with_correct_sub_sector(self) -> models.Q:
         """Получение фильтра с корректным подсектором."""
@@ -129,8 +128,7 @@ class ReportWithContext(object):
         # по подсектору. Иначе ищем по всем доступным.
         if sub_sector := self.data.get('sub_sector'):
             return models.Q(business__sub_sector__in=sub_sector)
-        else:
-            return models.Q()
+        return models.Q()
 
     def get_filter_with_correct_staff(self) -> models.Q:
         """Получение фильтра с корректным персоналом.
@@ -153,10 +151,9 @@ class ReportWithContext(object):
         # Если локация не передана, ищем по всем доступным.
         if self.territorial_locations:
             return models.Q(
-                business__territorial_location__in=self.territorial_locations
+                business__territorial_location__in=self.territorial_locations,
             )
-        else:
-            return models.Q()
+        return models.Q()
 
     def get_value_by_territorial_locations(
         self,
@@ -199,7 +196,7 @@ class ReportWithContext(object):
 
             return models.Q(
                 models.Q(land_tax__gte=self.avg_land_tax * self.archive.lower_tax_margin_error) &
-                models.Q(land_tax__lte=self.avg_land_tax * self.archive.upper_tax_margin_error)
+                models.Q(land_tax__lte=self.avg_land_tax * self.archive.upper_tax_margin_error),
             )
 
         return models.Q()
@@ -211,17 +208,17 @@ class ReportWithContext(object):
         # данных по имуществу нет, то переводим размер имущества в размер налога
         # на имущество.
         if properties:
-            for property in properties:
-                cost = property.get('cost')
-                name = property.get('name')
+            for init_property in properties:
+                cost = init_property.get('cost')
+                name = init_property.get('name')
                 self.property_area += cost
                 self.type_capital_construction += (
-                    f"{getattr(PropertyType, name.upper(), name).label}: {name} кв. м\n"
+                    f'{getattr(PropertyType, name.upper(), name).label}: {name} кв. м\n'
                 )
             # Средняя кадастровая стоимость на имущество.
             self.avg_property_cadastral_value = self.get_value_by_territorial_locations(
-                    property_name='avg_property_cadastral_value',
-                )
+                property_name='avg_property_cadastral_value',
+            )
             # Размер налога на имущество.
             self.avg_property_tax_math = (
                 self.property_area *
@@ -236,12 +233,12 @@ class ReportWithContext(object):
 
             return models.Q(
                 models.Q(property_tax__gte=self.avg_property_tax_math * self.archive.lower_tax_margin_error) &
-                models.Q(property_tax__lte=self.avg_property_tax_math * self.archive.upper_tax_margin_error)
+                models.Q(property_tax__lte=self.avg_property_tax_math * self.archive.upper_tax_margin_error),
             )
 
         return models.Q()
 
-    def get_business_indicators(self):
+    def get_business_indicators(self):  # noqa: WPS212
         """Получение корректных показателей для формирования отчета.
 
         Здесь мы ищем в бд реальный существующий бизнес, который подходит под
@@ -257,13 +254,13 @@ class ReportWithContext(object):
         if (
             business_indicators := BusinessIndicator.objects.filter(
                 models.Q(
-                    correct_sector &
+                    correct_sector &  # noqa: WPS204
                     correct_sub_sector &
                     correct_staff &
                     correct_land_area &
                     correct_property_area &
-                    correct_location
-                )
+                    correct_location,
+                ),
             )
         ):
             return (
@@ -275,7 +272,7 @@ class ReportWithContext(object):
                     'land_area',
                     'property_area',
                     'location',
-                ]
+                ],
             )
 
         if (
@@ -285,8 +282,8 @@ class ReportWithContext(object):
                     correct_sub_sector &
                     correct_staff &
                     correct_land_area &
-                    correct_property_area
-                )
+                    correct_property_area,
+                ),
             )
         ):
             return (
@@ -300,8 +297,8 @@ class ReportWithContext(object):
                     correct_sector &
                     correct_sub_sector &
                     correct_staff &
-                    correct_land_area
-                )
+                    correct_land_area,
+                ),
             )
         ):
             return (
@@ -314,7 +311,7 @@ class ReportWithContext(object):
                 models.Q(
                     correct_sector &
                     correct_sub_sector &
-                    correct_staff
+                    correct_staff,
                 )
             )
         ):
@@ -327,8 +324,8 @@ class ReportWithContext(object):
             business_indicators := BusinessIndicator.objects.filter(
                 models.Q(
                     correct_sector &
-                    correct_sub_sector
-                )
+                    correct_sub_sector,
+                ),
             )
         ):
             return (
@@ -356,16 +353,14 @@ class ReportWithContext(object):
             self.data.get('need_patent') and
             self.data.get('type_business') == TypeBusiness.INDIVIDUAL
         ):
-            if self.sector:
+            self.avg_patent_tax = (
+                self.sector.possible_income_from_patent.get(self.sector.slug) *
+                self.archive.patent_tax_rate
+            )
 
-                self.avg_patent_tax = (
-                    self.sector.possible_income_from_patent *
-                    self.archive.patent_tax_rate
-                )
+            return self.avg_patent_tax
 
-                return self.avg_patent_tax
-
-        self.avg_possible_income = self.sector.possible_income
+        self.avg_possible_income = self.sector.possible_income_on_market.get(self.sector.slug)
 
         return 0.0
 
@@ -386,7 +381,7 @@ class ReportWithContext(object):
         if self.data.get('need_accounting'):
             accounting_costs = self.archive.cost_accounting.get(
                 self.data.get('type_business', 'other'),
-                {}
+                {},
             )
             # Получаем словарь с верхней и нижней границей.
             accounting_costs_range = accounting_costs.get(
@@ -411,7 +406,7 @@ class ReportWithContext(object):
                 equipment.id for equipment in self.data.get('equipments', [])
             ],
         )
-        
+
         if equipments:
             flag = 'user'
         else:
@@ -433,7 +428,7 @@ class ReportWithContext(object):
                 self.data_by_equipments_costs += f'{equipment.name}: {equipment.cost} тыс. руб.\n'
             self.equipments += equipment.cost
         self.data_by_equipments_costs += f'Общая сумма оборудования: {self.equipments} тыс. руб.\n\n'
-        
+
         if flag == 'auto':
             self.data_by_equipments_costs += (
                 'Выше приведен список примерного оборудования и его ' +
@@ -476,7 +471,7 @@ class ReportWithContext(object):
 
             # Рассчитанные показатели на основе простой математике.
             avg_number_of_staff_math=self.avg_number_of_staff,
-            avg_salary_of_staff_math=self.sector.avg_salary_of_staff,
+            avg_salary_of_staff_math=self.sector.avg_salary_of_staff.get(self.sector.slug),
             all_salary=self.get_all_salary(),
             avg_personal_income_tax_math=self.get_avg_personal_income_tax(),
 
@@ -496,7 +491,7 @@ class ReportWithContext(object):
             # Общие расходы.
             equipment_costs=self.get_equipment_costs(),
             data_by_equipments_costs=self.data_by_equipments_costs,
-            accounting_costs=self.get_accounting_costs() * 12,
+            accounting_costs=self.get_accounting_costs() * self.MONTH,
             registration_costs=self.get_registration_costs(),
             others_costs=self.get_others_costs(),
             others_costs_str=self.others_costs_str,
@@ -509,11 +504,19 @@ class ReportWithContext(object):
         for key_data, value_data in self.data.items():
             if key_data == 'equipments':
                 initial_data.update(
-                    {'equipments': [equipment.name for equipment in value_data]}
+                    {
+                        'equipments':
+                            [equipment.name for equipment in value_data],
+                    },
                 )
             elif key_data == 'territorial_locations':
                 initial_data.update(
-                    {'territorial_locations': [territorial_location.full_name for territorial_location in value_data]}
+                    {
+                        'territorial_locations': [
+                            territorial_location.full_name
+                            for territorial_location in value_data
+                        ],
+                    },
                 )
             elif key_data == 'sector':
                 initial_data.update({'sector': value_data.name})
@@ -532,8 +535,12 @@ class ReportWithContext(object):
 
         self.report.initial_data = initial_data
         self.report.context = correct_context
-        self.report.total_investment_amount_bi = correct_context.get('all_possible_costs_bi')
-        self.report.total_investment_amount_math = correct_context.get('all_possible_costs_math')
+        self.report.total_investment_amount_bi = correct_context.get(
+            'all_possible_costs_bi',
+        )
+        self.report.total_investment_amount_math = correct_context.get(
+            'all_possible_costs_math',
+        )
         self.report.sector = self.sector
         self.report.save()
 
@@ -544,7 +551,11 @@ class ReportWithContext(object):
 
     def get_all_salary(self):
         """Общий размер заработной платы."""
-        self.all_salary = self.avg_number_of_staff * self.avg_salary_of_staff * 12
+        self.all_salary = (
+            self.avg_number_of_staff *
+            self.sector.avg_salary_of_staff.get(self.sector.slug) *
+            self.MONTH
+        )
         return self.all_salary
 
     def get_avg_personal_income_tax(self):

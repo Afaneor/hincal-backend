@@ -1,7 +1,7 @@
 import datetime
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from server.apps.hincal.models import Archive, Business, Equipment
+from server.apps.hincal.models import Archive, Business
 from server.apps.hincal.services.enums import TypeTaxSystem, TextForReport
 
 
@@ -307,12 +307,12 @@ class ReportContextDataClass:
             'building_area': get_correct_data(indicator, 'building_area'),
 
             # Стандартные слова. Для каждой страницы из отчета
-            'page_1': TextForReport.PAGE_1,
-            'page_2': TextForReport.PAGE_2,
-            'page_3': TextForReport.PAGE_3,
-            'page_4': TextForReport.PAGE_4,
-            'page_5': TextForReport.PAGE_5,
-            'page_6': TextForReport.PAGE_6,
+            'page_1': TextForReport.PAGE_ONE,
+            'page_2': TextForReport.PAGE_TWO,
+            'page_3': TextForReport.PAGE_THREE,
+            'page_4': TextForReport.PAGE_FOUR,
+            'page_5': TextForReport.PAGE_FIVE,
+            'page_6': TextForReport.PAGE_SIX,
 
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ВОЗМОЖНЫХ ЗАТРАТ НА ОСНОВЕ БД. ДАННЫЕ ЗАТРАТЫ
             # РАСЧИТыВАЮТСЯ НА ОСНОВЕ ДАННЫХ ИЗ БД.
@@ -355,7 +355,8 @@ class ReportContextDataClass:
             # Затраты на отчисления по ОМС.
             'avg_staff_medical_contributions_costs_bi': self.all_tax_costs_bi,
             # Затраты на отчисления по нетрудоспособности.
-            'avg_staff_disability_contributions_costs_bi': self.all_services_costs_bi,
+            'avg_staff_disability_contributions_costs_bi':
+                self.all_services_costs_bi,
 
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ЗАТРАТ НА ПЕРСОНАЛ НА ОСНОВЕ МАТЕМАТИКИ.
             # Затраты на зп за год.
@@ -365,9 +366,11 @@ class ReportContextDataClass:
             # Затраты на отчисления по ПФР.
             'avg_staff_pension_contributions_costs_math': self.equipment_costs,
             # Затраты на отчисления по ОМС.
-            'avg_staff_medical_contributions_costs_math': self.all_services_costs_math,
+            'avg_staff_medical_contributions_costs_math':
+                self.all_services_costs_math,
             # Затраты на отчисления по нетрудоспособности.
-            'avg_staff_disability_contributions_costs_math': self.all_services_costs_math,
+            'avg_staff_disability_contributions_costs_math':
+                self.all_services_costs_math,
 
             # 5 Страница. Сравнение цен имущества в аренду и в покупку.
             # Диапазон площади.
@@ -375,14 +378,16 @@ class ReportContextDataClass:
             'property_range': self.property_area_math,
             # Диапазон площади земли кв.м.
             'land_range': f"{self.initial_data.get('from_land_area')} - {self.initial_data.get('to_land_area')}",
-            
+
             # Стоимость кв.м. аренды имущества.
             'avg_property_lease_value': self.avg_property_lease_value,
             # Общая стоимость по аренде.
             'avg_property_lease_costs': self.avg_property_lease_costs,
             # Общие расходы по аренде имущества.
-            'all_property_lease_costs': self.avg_property_lease_value * self.property_area_math,
-            
+            'all_property_lease_costs': (
+                self.avg_property_lease_value *
+                self.property_area_math
+            ),
             # Стоимость кв.м. покупки.
             'avg_property_purchase_value': self.avg_property_purchase_value,
             # Общая стоимость по покупке.
@@ -391,7 +396,7 @@ class ReportContextDataClass:
             'avg_property_tax': self.avg_property_tax_math,
             # Общие расходы по покупке имущества.
             'all_property_purchase_costs': (
-                self.avg_property_purchase_value * 
+                self.avg_property_purchase_value *
                 self.property_area_math +
                 self.avg_property_tax_math
             ),
@@ -401,7 +406,10 @@ class ReportContextDataClass:
             # Общая стоимость по аренде.
             'avg_land_lease_costs': self.avg_land_lease_costs,
             # Общие расходы по аренде земли.
-            'all_land_lease_costs': self.avg_land_lease_value * self.avg_land_area_math,
+            'all_land_lease_costs': (
+                self.avg_land_lease_value *
+                self.avg_land_area_math
+            ),
 
             # Стоимость кв.м. покупки земли.
             'avg_land_purchase_value': self.avg_land_purchase_value,

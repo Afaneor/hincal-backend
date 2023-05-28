@@ -1,15 +1,35 @@
-# Start
+# Hincal - Handy investment calculation
 
-To start up the app you can run native with:
+## Серверная часть решения задачи хакатона "Лидеры цифровой трансформации"
+## Связанные репозитории
+* [Клиентская часть](https://github.com/Afaneor/hincal-frontend)
+
+## Сборка
+Убедитесь, что у вас установлен python версии 3.9 или выше
+
+Установка пакетного менеджера poetry (Linux-based)
 ```shell
-python app/main.py
+curl -sSL https://install.python-poetry.org | python3 -
 ```
-or docker way:
-
+Установка пакетного менеджера poetry (Windows Powershell)
 ```shell
-docker-compose up -d
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
 ```
-
-# TODO
-* Add we-make-services linters
-* Tests
+Установка зависимостей
+```shell
+poetry install
+```
+Запуск проекта (применение миграций, фикстур, и локальный запуск)
+```python3
+python manage.py migrate
+python manage.py loaddata hincal
+python manage.py loaddata supports
+python manage.py load_business_indicators
+python manage.py create_areas
+python manage.py createsuperuser
+python manage.py runserver
+```
+Сборка docker контейнера (ваш сервер, скорее всего не на ARM, поэтому явно указываем архитектуру)
+```shell
+docker build -t backend -f docker/django/Dockerfile --target production_build .
+```

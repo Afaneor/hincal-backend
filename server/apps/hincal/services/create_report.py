@@ -563,7 +563,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
         """Общий размер заработной платы."""
         self.all_salary = (
             self.avg_number_of_staff *
-            self.sector.average_salary_of_staff.get(self.sector.slug) *
+            self.get_correct_data_for_sector(property_name='average_salary_of_staff') *
             self.MONTH
         )
         return self.all_salary

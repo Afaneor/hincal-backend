@@ -40,7 +40,7 @@ class RenderDocx(AbstractRender):
         """Рендеринг документа."""
         document = DocxTemplate(template_full_path)
         document.render(context)
-        document.save(f'{settings.BASE_DIR}/media/{file_name}.docx')
+        document.save(f'{settings.MEDIA_ROOT}/{file_name}.docx')
 
         # https://pspdfkit.com/api/pdf-generator-api
         instructions = {'parts': [{'file': 'document'}]}
@@ -49,23 +49,23 @@ class RenderDocx(AbstractRender):
             'POST',
             'https://api.pspdfkit.com/build',
             headers={'Authorization': f'Bearer {settings.PSPDFKIT_API_SECRET_KEY}'},
-            files={'document': open(f'{settings.BASE_DIR}/media/{file_name}.docx', 'rb')},
+            files={'document': open(f'{settings.MEDIA_ROOT}/{file_name}.docx', 'rb')},
             data={'instructions': json.dumps(instructions)},
             stream=True,
         )
 
         if response.ok:
-            with open(f'{settings.BASE_DIR}/media/{file_name}.pdf', 'wb') as fd:
+            with open(f'{settings.MEDIA_ROOT}/{file_name}.pdf', 'wb') as fd:
                 for chunk in response.iter_content(chunk_size=8096):
                     fd.write(chunk)
         else:
             # Если не доступно, то отправляем docx.
-            with open(f'{settings.BASE_DIR}/media/{file_name}.docx', 'rb') as file:
+            with open(f'{settings.MEDIA_ROOT}/{file_name}.docx', 'rb') as file:
                 buffer = io.BytesIO(file.read())
                 buffer.seek(0)
                 return buffer
         # Если доступно, то отправляем pdf.
-        with open(f'{settings.BASE_DIR}/media/{file_name}.pdf', 'rb') as file:
+        with open(f'{settings.MEDIA_ROOT}/{file_name}.pdf', 'rb') as file:
             buffer = io.BytesIO(file.read())
             buffer.seek(0)
             return buffer

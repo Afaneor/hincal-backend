@@ -29,6 +29,7 @@ _base_settings = (
     'components/hincal.py',
     'components/email.py',
     'components/celery.py',
+    'components/sentry.py',
     'components/cors.py',
     # Select the right env:
     'environments/{0}.py'.format(_ENV),

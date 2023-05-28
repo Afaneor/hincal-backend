@@ -127,7 +127,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
         # Если выбран подсектор, то ищем совпадения и по сектору и
         # по подсектору. Иначе ищем по всем доступным.
         if sub_sector := self.data.get('sub_sector'):
-            return models.Q(business__sub_sector__in=sub_sector)
+            return models.Q(business__sub_sector=sub_sector)
         return models.Q()
 
     def get_filter_with_correct_staff(self) -> models.Q:

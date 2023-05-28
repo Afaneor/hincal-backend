@@ -303,9 +303,9 @@ class ReportContextDataClass:
             'type_tax_system':
                 get_correct_data(self.business, 'type_tax_system'),
             # Примерное количество земли. кв.м.
-            'land_area': get_correct_data(indicator, 'land_area'),
+            'business_land_area': get_correct_data(indicator, 'land_area'),
             # Примерное количество имущества, кв.м.
-            'building_area': get_correct_data(indicator, 'building_area'),
+            'business_property_area': get_correct_data(indicator, 'property_area'),
 
             # Стандартные слова. Для каждой страницы из отчета
             'page_1': TextForReport.PAGE_ONE,
@@ -341,44 +341,47 @@ class ReportContextDataClass:
             # Все затраты на оборудование.
             'equipment_costs_math': self.equipment_costs,
             # Все затраты на налоги.
-            'all_tax_costs_math': self.all_services_costs_math,
+            'all_tax_costs_math': self.all_tax_costs_math,
             # Все затраты на сервисы. Бух учет и т.д.
             'all_services_costs_math': self.all_services_costs_math,
 
             # 4 Страница. Анализ расходов на персонал.
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ЗАТРАТ НА ПЕРСОНАЛ НА ОСНОВЕ БД.
             # Затраты на зп за год.
-            'avg_salary_of_staff_bi': self.all_staff_costs_bi,
+            'avg_salary_of_staff_bi': self.avg_salary_of_staff_bi,
             # Затраты на НДФЛ.
-            'avg_personal_income_tax_bi': self.all_lp_lease_costs_bi,
+            'avg_personal_income_tax_bi': self.avg_personal_income_tax_bi,
             # Затраты на отчисления по ПФР.
-            'avg_staff_pension_contributions_costs_bi': self.equipment_costs,
+            'avg_staff_pension_contributions_costs_bi':
+                self.avg_staff_pension_contributions_costs_bi,
             # Затраты на отчисления по ОМС.
-            'avg_staff_medical_contributions_costs_bi': self.all_tax_costs_bi,
+            'avg_staff_medical_contributions_costs_bi':
+                self.avg_staff_medical_contributions_costs_bi,
             # Затраты на отчисления по нетрудоспособности.
             'avg_staff_disability_contributions_costs_bi':
-                self.all_services_costs_bi,
+                self.avg_staff_disability_contributions_costs_bi,
 
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ЗАТРАТ НА ПЕРСОНАЛ НА ОСНОВЕ МАТЕМАТИКИ.
             # Затраты на зп за год.
-            'avg_salary_of_staff_math': self.all_staff_costs_math,
+            'avg_salary_of_staff_math': self.avg_salary_of_staff_math,
             # Затраты на НДФЛ.
-            'avg_personal_income_tax_math': self.all_lp_lease_costs_math,
+            'avg_personal_income_tax_math': self.avg_personal_income_tax_math,
             # Затраты на отчисления по ПФР.
-            'avg_staff_pension_contributions_costs_math': self.equipment_costs,
+            'avg_staff_pension_contributions_costs_math':
+                self.avg_staff_pension_contributions_costs_math,
             # Затраты на отчисления по ОМС.
             'avg_staff_medical_contributions_costs_math':
-                self.all_services_costs_math,
+                self.avg_staff_medical_contributions_costs_math,
             # Затраты на отчисления по нетрудоспособности.
             'avg_staff_disability_contributions_costs_math':
-                self.all_services_costs_math,
+                self.avg_staff_disability_contributions_costs_math,
 
             # 5 Страница. Сравнение цен имущества в аренду и в покупку.
             # Диапазон площади.
             # Диапазон площади имущества кв.м.
-            'property_range': self.property_area_math,
+            'property_area': self.property_area_math,
             # Диапазон площади земли кв.м.
-            'land_range': f"{self.initial_data.get('from_land_area')} - {self.initial_data.get('to_land_area')}",
+            'land_area': self.avg_land_area_math,
 
             # Стоимость кв.м. аренды имущества.
             'avg_property_lease_value': self.avg_property_lease_value,

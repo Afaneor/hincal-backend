@@ -135,7 +135,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
         Если персонала не передан, то ищем с любыми значениями.
         """
-        from_staff = self.data.get('from_staff', None)
+        from_staff = self.data.get('from_staff', 1)
         to_staff = self.data.get('to_staff', from_staff)
 
         if from_staff and to_staff:
@@ -471,7 +471,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
             # Рассчитанные показатели на основе простой математике.
             avg_number_of_staff_math=self.avg_number_of_staff,
-            avg_salary_of_staff_math=self.sector.average_salary_of_staff.get(self.sector.slug),
+            avg_salary_of_staff_math=self.sector.average_salary_of_staff.get(self.sector.slug) * self.MONTH,
             all_salary=self.get_all_salary(),
             avg_personal_income_tax_math=self.get_avg_personal_income_tax(),
 

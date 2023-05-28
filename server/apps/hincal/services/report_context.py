@@ -245,7 +245,7 @@ class ReportContextDataClass:
                 avg_land_lease_costs += territorial_location.avg_land_lease_costs
                 avg_land_purchase_costs += territorial_location.avg_land_purchase_costs
         else:
-            len_territorial_locations = 0
+            len_territorial_locations = 1
             avg_property_lease_costs += self.archive.avg_property_lease_costs
             avg_property_purchase_costs += self.archive.avg_property_purchase_costs
             avg_land_lease_costs += self.archive.avg_land_lease_costs

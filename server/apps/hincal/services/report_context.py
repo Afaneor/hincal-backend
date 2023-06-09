@@ -4,6 +4,8 @@ from typing import Union
 
 from server.apps.hincal.models import Archive, Business
 from server.apps.hincal.services.enums import TypeTaxSystem, TextForReport
+from server.apps.hincal.services.offers_and_wishes_for_report import \
+    add_offers_and_wishes_in_context
 
 
 def get_correct_data(entity, property_name):
@@ -407,13 +409,13 @@ class ReportContextDataClass:
             'avg_personal_income_tax_bi':
                 correct_float(self.avg_personal_income_tax_bi),
             # Затраты на отчисления по ПФР.
-            'avg_staff_pension_contributions_costs_bi':
+            'avg_staff_pc_costs_bi':
                 correct_float(self.avg_staff_pension_contributions_costs_bi),
             # Затраты на отчисления по ОМС.
-            'avg_staff_medical_contributions_costs_bi':
+            'avg_staff_mc_costs_bi':
                 correct_float(self.avg_staff_medical_contributions_costs_bi),
             # Затраты на отчисления по нетрудоспособности.
-            'avg_staff_disability_contributions_costs_bi':
+            'avg_staff_dc_costs_bi':
                 correct_float(self.avg_staff_disability_contributions_costs_bi),
 
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ЗАТРАТ НА ПЕРСОНАЛ НА ОСНОВЕ МАТЕМАТИКИ.
@@ -424,13 +426,13 @@ class ReportContextDataClass:
             'avg_personal_income_tax_math':
                 correct_float(self.avg_personal_income_tax_math),
             # Затраты на отчисления по ПФР.
-            'avg_staff_pension_contributions_costs_math':
+            'avg_staff_pc_costs_math':
                 correct_float(self.avg_staff_pension_contributions_costs_math),
             # Затраты на отчисления по ОМС.
-            'avg_staff_medical_contributions_costs_math':
+            'avg_staff_mc_costs_math':
                 correct_float(self.avg_staff_medical_contributions_costs_math),
             # Затраты на отчисления по нетрудоспособности.
-            'avg_staff_disability_contributions_costs_math':
+            'avg_staff_dc_costs_math':
                 correct_float(
                     self.avg_staff_disability_contributions_costs_math),
 
@@ -507,7 +509,7 @@ class ReportContextDataClass:
             'others_costs':
                 (
                     self.others_costs_str +
-                    '\r\n' +
+                    '\a' +
                     f'Общие расходы составили: {self.others_costs} тыс. руб.'
                 ),
             # Информация по оборудованию.
@@ -518,5 +520,5 @@ class ReportContextDataClass:
 
             'avg_other_taxes_bi':
                 correct_float(self.avg_other_taxes_bi),
-            'avg_other_taxes_math ': 'Нет данных',
+            'avg_other_taxes_math': 'Нет данных',
         }

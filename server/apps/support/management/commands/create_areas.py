@@ -25,15 +25,15 @@ class Command(BaseCommand):
         # Формируем объекты Area.
         for technopark_item in technopark_items:
             territorial_location = TerritorialLocation.objects.get(
-                shot_name__iexact=technopark_item.find('div', class_='fs-14 mb-1').find('b').next_sibling.replace('\r\n', '').strip(),
+                shot_name__iexact=technopark_item.find('div', class_='fs-14 mb-1').find('b').next_sibling.replace('\n', '').strip(),
             )
             areas.append(
                 Area(
                     preview_image=f"{base_url}{technopark_item.find('img').attrs.get('data-src').strip()}",
                     title=technopark_item.find('h3').contents[0].replace('\\', '').strip(),
-                    text=technopark_item.find('div', class_='fs-14 mt-1').find('b').next_sibling.replace('\r\n', '').replace('&NoBreak;', '').strip(),
+                    text=technopark_item.find('div', class_='fs-14 mt-1').find('b').next_sibling.replace('\n', '').replace('&NoBreak;', '').strip(),
                     territorial_location=territorial_location,
-                    address=technopark_item.find('div', class_='fs-14 mt-1 mb-1').find('b').next_sibling.replace('\r\n', '').strip(),
+                    address=technopark_item.find('div', class_='fs-14 mt-1 mb-1').find('b').next_sibling.replace('\n', '').strip(),
                     site=f"{base_url}{technopark_item.attrs.get('href').strip()}",
                 )
             )

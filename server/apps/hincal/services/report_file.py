@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 import requests
 from django.conf import settings
 
-from docxtpl import DocxTemplate
+from docxtpl import DocxTemplate, Listing
 from server.apps.hincal.models import Report
 
 

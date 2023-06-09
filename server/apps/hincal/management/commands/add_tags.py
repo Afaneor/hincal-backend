@@ -5,11 +5,12 @@ from django.core.management.base import BaseCommand
 from django.db.models import Max
 
 from server.apps.blog.models import Post
-from server.apps.hincal.models import Sector, Equipment
+from server.apps.hincal.models import Sector, Equipment, TerritorialLocation
 from server.apps.support.models import Area, Offer, Support
 
 
 def random_sector(count: int) -> List[str]:
+    """Случайный тег сектора."""
     max_id = Sector.objects.all().aggregate(max_id=Max('id'))['max_id']
     sector_tags = []
 
@@ -22,6 +23,20 @@ def random_sector(count: int) -> List[str]:
     return sector_tags
 
 
+def random_territorial_location(count: int) -> List[str]:
+    """Случайный тег территории."""
+    max_id = TerritorialLocation.objects.all().aggregate(max_id=Max('id'))['max_id']
+    territorial_location_tags = []
+
+    while len(territorial_location_tags) != count:
+        pk = random.randint(1, max_id)
+        territorial_location = TerritorialLocation.objects.filter(pk=pk).first()
+        if territorial_location:
+            territorial_location_tags.append(territorial_location.slug)
+
+    return territorial_location_tags
+
+
 class Command(BaseCommand):
     """Добавление тегов."""
 
@@ -32,22 +47,35 @@ class Command(BaseCommand):
         for area in Area.objects.all():
             area.tags.add(
                 area.territorial_location.slug,
-                *random_sector(2),
+                *random_sector(15),
+                *random_territorial_location(4),
             )
         print('Добавлены теги для Area')
 
         for offer in Offer.objects.all():
-            offer.tags.add(*random_sector(3))
+            offer.tags.add(
+                *random_sector(15),
+                *random_territorial_location(4),
+            )
         print('Добавлены теги для Offer')
 
         for support in Support.objects.all():
-            support.tags.add(*random_sector(3))
+            support.tags.add(
+                *random_sector(15),
+                *random_territorial_location(4),
+            )
         print('Добавлены теги для Support')
 
         for post in Post.objects.all():
-            post.tags.add(*random_sector(3))
+            post.tags.add(
+                *random_sector(15),
+                *random_territorial_location(4),
+            )
         print('Добавлены теги для Post')
 
         for equipment in Equipment.objects.all():
-            equipment.tags.add(*random_sector(3))
+            equipment.tags.add(
+                *random_sector(15),
+                *random_territorial_location(4),
+            )
         print('Добавлены теги для Equipment')

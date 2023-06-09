@@ -106,7 +106,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
     def create_tags(self) -> None:
         """Прикрепление тегов к отчету."""
         if self.territorial_locations:
-            territorial_location = self.territorial_locations[0].slug,
+            territorial_location = self.territorial_locations[0].slug
         else:
             territorial_location = 'Общая информация'
 
@@ -221,7 +221,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 name = init_property.get('name')
                 self.property_area += cost
                 self.type_capital_construction += (
-                    f'{getattr(PropertyType, name.upper(), name).label}: {name} кв. м\r\n'
+                    f'{getattr(PropertyType, name.upper(), name).label}: {name} кв. м.\a'
                 )
             # Средняя кадастровая стоимость на имущество.
             self.avg_property_cadastral_value = self.get_value_by_territorial_locations(
@@ -477,14 +477,14 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
         for en_index, equipment in enumerate(equipments):
             if en_index < 5:
-                self.data_by_equipments_costs += f'{equipment.name}: {equipment.cost} тыс. руб.\r\n'
+                self.data_by_equipments_costs += f'{equipment.name}: {equipment.cost} тыс. руб.\a'
             self.equipments += equipment.cost
-        self.data_by_equipments_costs += f'Общая сумма оборудования: {self.equipments} тыс. руб.\r\n\r\n'
+        self.data_by_equipments_costs += f'Общая сумма оборудования: {self.equipments} тыс. руб.\a'
 
         if flag == 'auto':
             self.data_by_equipments_costs += (
                 'Выше приведен список примерного оборудования и его ' +
-                'стоимости для вашей отрасли, согласно имеющейся информации\r\n\r\n'
+                'стоимости для вашей отрасли, согласно имеющейся информации\a'
             )
 
         return self.equipments
@@ -628,5 +628,5 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 name = other.get('name')
                 cost = other.get('cost')
                 others_costs += cost
-                self.others_costs_str += f'{name}: {cost} тыс. руб.\r\n'
+                self.others_costs_str += f'{name}: {cost} тыс. руб.\a'
         return others_costs

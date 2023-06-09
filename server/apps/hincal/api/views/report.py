@@ -85,10 +85,7 @@ class ReportViewSet(RetrieveListDeleteViewSet):
         """Обогащаем context необходимымы данными."""
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        add_offers_and_wishes_in_context(
-            report=instance,
-            data=serializer.data,
-        )
+        add_offers_and_wishes_in_context(report=instance)
         return Response(serializer.data)
 
     @action(
@@ -128,10 +125,13 @@ class ReportViewSet(RetrieveListDeleteViewSet):
 
         Доступно: любому пользователю.
         """
+        instance = self.get_object()
         if request.user.is_authenticated:
+            add_offers_and_wishes_in_context(report=instance)
+
             report_file = ReportFile(
                 document_format='docx',
-                report=self.get_object(),
+                report=instance,
             )
 
             return FileResponse(

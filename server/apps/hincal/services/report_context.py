@@ -113,7 +113,7 @@ class ReportContextDataClass:
         # Все расходы: з.п. сотрудников + НДФЛ +страховые взносы +
         # налог на прибыль, землю, имущество, транспорт, другие налоги,
         # патентную систему, бухгалтерию, оборудование, регистрацию.
-        self.all_possible_costs_bi = (
+        self.all_possible_costs_bi = (+
             self.avg_salary_of_staff_bi +
             self.avg_personal_income_tax_bi +
             self.avg_staff_pension_contributions_costs_bi +
@@ -239,7 +239,7 @@ class ReportContextDataClass:
 
             # Все расходы на землю и имущество: налог на землю,
             # налог на имущество.
-            self.all_lp_tax_costs_math = (
+            self.c = (
                 self.avg_property_tax_math +
                 self.avg_land_tax_math
             )
@@ -520,5 +520,9 @@ class ReportContextDataClass:
 
             'avg_other_taxes_bi':
                 correct_float(self.avg_other_taxes_bi),
-            'avg_other_taxes_math': 'Нет данных',
+            'avg_other_taxes_math': 0.0,
+            'avg_income_tax_math':
+                correct_float(self.avg_income_tax_math),
+            'avg_income_tax_bi':
+                correct_float(self.avg_income_tax_bi),
         }

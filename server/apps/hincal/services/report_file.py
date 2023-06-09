@@ -48,25 +48,30 @@ class RenderDocx(AbstractRender):
         response = requests.request(
             'POST',
             'https://api.pspdfkit.com/build',
-            headers={'Authorization': f'Bearer {settings.PSPDFKIT_API_SECRET_KEY}'},
-            files={'document': open(f'{settings.MEDIA_ROOT}/{file_name}.docx', 'rb')},
+            headers={
+                'Authorization': f'Bearer {settings.PSPDFKIT_API_SECRET_KEY}',
+            },
+            files={
+                'document':
+                    open(f'{settings.MEDIA_ROOT}/{file_name}.docx', 'rb'),
+            },
             data={'instructions': json.dumps(instructions)},
             stream=True,
         )
 
         if response.ok:
-            with open(f'{settings.MEDIA_ROOT}/{file_name}.pdf', 'wb') as fd:
-                for chunk in response.iter_content(chunk_size=8096):
-                    fd.write(chunk)
+            with open(f'{settings.MEDIA_ROOT}/{file_name}.pdf', 'wb') as report:
+                for chunk in response.iter_content(chunk_size=8096):  # noqa: WPS432, E501
+                    report.write(chunk)
         else:
             # Если не доступно, то отправляем docx.
-            with open(f'{settings.MEDIA_ROOT}/{file_name}.docx', 'rb') as file:
-                buffer = io.BytesIO(file.read())
+            with open(f'{settings.MEDIA_ROOT}/{file_name}.docx', 'rb') as report:  # noqa: E501
+                buffer = io.BytesIO(report.read())
                 buffer.seek(0)
                 return buffer
         # Если доступно, то отправляем pdf.
-        with open(f'{settings.MEDIA_ROOT}/{file_name}.pdf', 'rb') as file:
-            buffer = io.BytesIO(file.read())
+        with open(f'{settings.MEDIA_ROOT}/{file_name}.pdf', 'rb') as report:
+            buffer = io.BytesIO(report.read())
             buffer.seek(0)
             return buffer
 

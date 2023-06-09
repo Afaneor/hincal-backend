@@ -1,6 +1,5 @@
 from django.db import models
 
-
 from server.apps.hincal.models import Business, Report
 from server.apps.user.models import User
 
@@ -17,7 +16,7 @@ def get_all_statistics():
         number_of_reports=models.Count('pk'),
     )
     popular_reports = Report.objects.values(
-        sector_name=models.F('sector__name')
+        sector_name=models.F('sector__name'),
     ).annotate(
         count=models.Count('pk'),
     )
@@ -40,17 +39,17 @@ def get_all_statistics():
 
 def get_user_statistics(user: User):
     """Получить статистику по пользователю."""
-
     reports = Report.objects.filter(user=user).aggregate(
         average_investment_amount_bi=models.Avg('total_investment_amount_bi'),
         average_investment_amount_math=models.Avg(
-            'total_investment_amount_math'),
+            'total_investment_amount_math',
+        ),
         total_investment_amount_bi=models.Sum('total_investment_amount_bi'),
         total_investment_amount_math=models.Sum('total_investment_amount_math'),
         number_of_reports=models.Count('pk'),
     )
     popular_reports = Report.objects.values(
-        sector_name=models.F('sector__name')
+        sector_name=models.F('sector__name'),
     ).annotate(
         count=models.Count('pk'),
     )

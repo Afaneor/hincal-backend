@@ -49,31 +49,31 @@ def create_chat_gpt(self, sector: str, report_id: int) -> None:
             (len(answer_split) == 7 and en_index == 1) or
             (len(answer_split) in [12, 13] and en_index == 1)
         ):
-            chat_gpt_page_1 = answer[2:] + '\n * Сгенерировано ChatGPT'
+            chat_gpt_page_1 = answer[2:] + '\r\n * Сгенерировано ChatGPT'
         elif (
             answer[0] == 2 or
             (len(answer_split) == 7 and en_index == 2) or
             (len(answer_split) in [12, 13] and en_index == 3)
         ):
-            chat_gpt_page_2 = answer[2:] + '\n * Сгенерировано ChatGPT'
+            chat_gpt_page_2 = answer[2:] + '\r\n * Сгенерировано ChatGPT'
         elif (
             answer[0] == 3 or
             (len(answer_split) == 7 and en_index == 3) or
             (len(answer_split) in [12, 13] and en_index == 5)
         ):
-            chat_gpt_page_3 = answer[2:] + '\n * Сгенерировано ChatGPT'
+            chat_gpt_page_3 = answer[2:] + '\r\n * Сгенерировано ChatGPT'
         elif (
             answer[0] == 4 or
             (len(answer_split) == 7 and en_index == 4) or
             (len(answer_split) in [12, 13] and en_index == 7)
         ):
-            chat_gpt_page_4 = answer[2:] + '\n * Сгенерировано ChatGPT'
+            chat_gpt_page_4 = answer[2:] + '\r\n * Сгенерировано ChatGPT'
         elif (
             answer[0] == 5 or
             (len(answer_split) == 7 and en_index == 5) or
             (len(answer_split) in [12, 13] and en_index == 9)
         ):
-            chat_gpt_page_5 = answer[2:] + '\n * Сгенерировано ChatGPT'
+            chat_gpt_page_5 = answer[2:] + '\r\n * Сгенерировано ChatGPT'
         elif (
             answer[0] == 6 or
             (len(answer_split) == 7 and en_index == 6) or

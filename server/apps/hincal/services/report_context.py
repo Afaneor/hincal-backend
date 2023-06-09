@@ -1,5 +1,6 @@
 import datetime
 from dataclasses import dataclass
+from typing import Union
 
 from server.apps.hincal.models import Archive, Business
 from server.apps.hincal.services.enums import TypeTaxSystem, TextForReport
@@ -10,6 +11,17 @@ def get_correct_data(entity, property_name):
     if value := getattr(entity, property_name, None):
         return value
     return 'Данные не предоставлены'
+
+
+def correct_float(value) -> Union[float, str]:
+    """Корректно предоставляем информацию по расчетам в отчет."""
+    if isinstance(value, float) and value and value > 0:
+        return float('{:.3f}'.format(value))
+
+    if isinstance(value, str) and value:
+        return value
+
+    return 'Нет данных'
 
 
 @dataclass()
@@ -71,8 +83,10 @@ class ReportContextDataClass:
     # Прочие расходы
     others_costs: float = 0
     others_costs_str: str = ''
+    # Тип налоговой системы.
+    type_tax_system: str = ''
 
-    def __post_init__(self):
+    def __post_init__(self):  # noqa: WPS231
         """Рассчитываем недостающие показатели."""
         # СТРАНИЦА 4.
         # Отчисления в ПФР согласно данным из БД.
@@ -123,7 +137,7 @@ class ReportContextDataClass:
         )
         # Все расходы на землю и имущество: налог на землю, налог на имущество,
         # налог на транспорт.
-        self.all_lp_lease_costs_bi = (
+        self.all_lp_tax_costs_bi = (
             self.avg_property_tax_bi +
             self.avg_land_tax_bi +
             self.avg_transport_tax_bi
@@ -167,38 +181,73 @@ class ReportContextDataClass:
         # Расчет налога на прибыль.
         if self.avg_patent_tax_math:
             self.avg_income_tax_math = self.avg_patent_tax_math
-        elif self.business and self.business.type_tax_system == TypeTaxSystem.OSN:
+        elif self.business and self.business.type_tax_system == TypeTaxSystem.OSN:  # noqa: E501
             self.avg_income_tax_math = (
                 self.avg_possible_income_math *
                 self.archive.osn_tax_rate
             )
-        elif self.business and self.business.type_tax_system == TypeTaxSystem.YSN:
+        elif self.business and self.business.type_tax_system == TypeTaxSystem.YSN:  # noqa: E501
             self.avg_income_tax_math = (
                 self.avg_possible_income_math *
                 self.archive.ysn_tax_rate
             )
-        elif self.business is None:
+        else:
             self.avg_income_tax_math = (
                 self.avg_possible_income_math *
                 self.archive.osn_tax_rate
             )
-        else:
-            self.avg_income_tax_math = 0.0
 
-        self.all_possible_costs_math = (
-            self.avg_salary_of_staff_math +
-            self.avg_personal_income_tax_math +
-            self.avg_staff_pension_contributions_costs_math +
-            self.avg_staff_medical_contributions_costs_math +
-            self.avg_staff_disability_contributions_costs_math +
-            self.avg_income_tax_math +
-            self.avg_property_tax_math +
-            self.avg_land_tax_math +
-            self.equipment_costs +
-            self.accounting_costs +
-            self.registration_costs +
-            self.others_costs
-        )
+        if self.type_tax_system == TypeTaxSystem.PATENT:
+            self.all_possible_costs_math = (
+                self.avg_salary_of_staff_math +
+                self.avg_personal_income_tax_math +
+                self.avg_staff_pension_contributions_costs_math +
+                self.avg_staff_medical_contributions_costs_math +
+                self.avg_staff_disability_contributions_costs_math +
+                self.avg_income_tax_math +
+                self.avg_land_tax_math +
+                self.equipment_costs +
+                self.accounting_costs +
+                self.registration_costs +
+                self.others_costs
+            )
+            # Расходы на землю.
+            self.all_lp_tax_costs_math = self.avg_land_tax_math
+            # Все расходы на налоги.
+            self.all_tax_costs_math = (
+                self.avg_personal_income_tax_math +
+                self.avg_income_tax_math +
+                self.avg_land_tax_math
+            )
+        else:
+            self.all_possible_costs_math = (
+                self.avg_salary_of_staff_math +
+                self.avg_personal_income_tax_math +
+                self.avg_staff_pension_contributions_costs_math +
+                self.avg_staff_medical_contributions_costs_math +
+                self.avg_staff_disability_contributions_costs_math +
+                self.avg_income_tax_math +
+                self.avg_property_tax_math +
+                self.avg_land_tax_math +
+                self.equipment_costs +
+                self.accounting_costs +
+                self.registration_costs +
+                self.others_costs
+            )
+
+            # Все расходы на землю и имущество: налог на землю,
+            # налог на имущество.
+            self.all_lp_tax_costs_math = (
+                self.avg_property_tax_math +
+                self.avg_land_tax_math
+            )
+            # Все расходы на налоги.
+            self.all_tax_costs_math = (
+                self.avg_personal_income_tax_math +
+                self.avg_income_tax_math +
+                self.avg_property_tax_math +
+                self.avg_land_tax_math
+            )
 
         # Все расходы на сотрудника: з.п. сотрудников + НДФЛ + страховые взносы
         self.all_staff_costs_math = (
@@ -207,18 +256,6 @@ class ReportContextDataClass:
             self.avg_staff_pension_contributions_costs_math +
             self.avg_staff_medical_contributions_costs_math +
             self.avg_staff_disability_contributions_costs_math
-        )
-        # Все расходы на землю и имущество: налог на землю, налог на имущество.
-        self.all_lp_lease_costs_math = (
-            self.avg_property_tax_math +
-            self.avg_land_tax_math
-        )
-        # Все расходы на налоги.
-        self.all_tax_costs_math = (
-            self.avg_personal_income_tax_math +
-            self.avg_income_tax_math +
-            self.avg_property_tax_math +
-            self.avg_land_tax_math
         )
 
         # Все расходы на сервисы.
@@ -240,14 +277,14 @@ class ReportContextDataClass:
         if territorial_locations:
             len_territorial_locations = len(territorial_locations)
             for territorial_location in territorial_locations:
-                avg_property_lease_costs += territorial_location.avg_property_lease_costs
-                avg_property_purchase_costs += territorial_location.avg_property_purchase_costs
-                avg_land_lease_costs += territorial_location.avg_land_lease_costs
-                avg_land_purchase_costs += territorial_location.avg_land_purchase_costs
+                avg_property_lease_costs += territorial_location.avg_property_lease_costs  # noqa: E501
+                avg_property_purchase_costs += territorial_location.avg_property_purchase_costs  # noqa: E501
+                avg_land_lease_costs += territorial_location.avg_land_lease_costs  # noqa: E501
+                avg_land_purchase_costs += territorial_location.avg_land_purchase_costs  # noqa: E501
         else:
             len_territorial_locations = 1
             avg_property_lease_costs += self.archive.avg_property_lease_costs
-            avg_property_purchase_costs += self.archive.avg_property_purchase_costs
+            avg_property_purchase_costs += self.archive.avg_property_purchase_costs  # noqa: E501
             avg_land_lease_costs += self.archive.avg_land_lease_costs
             avg_land_purchase_costs += self.archive.avg_land_purchase_costs
 
@@ -290,12 +327,15 @@ class ReportContextDataClass:
             # ИНФОРМАЦИЯ О ВАШЕЙ ОРГАНИЗАЦИИ, ЕСЛИ ЗАПРОС СДЕЛАЛ АВТОРИЗОВАННЫЙ
             # ПОЛЬЗОВАТЕЛЬ, КОТОРЫЙ ИМЕЕТ КОМПАНИЮ
             # Название сектора.
-            'sector': get_correct_data(self.business, 'sector'),
+            'sector':
+                get_correct_data(self.business, 'sector'),
             # Правовая форма (ООО, ИП).
-            'full_opf': get_correct_data(self.business, 'full_opf'),
+            'full_opf':
+                get_correct_data(self.business, 'full_opf'),
             # Количество сотрудников.
             'number_of_staff':
-                get_correct_data(indicator, 'average_number_of_staff'),
+                correct_float(
+                    get_correct_data(indicator, 'average_number_of_staff')),
             # Расположение.
             'territorial_location':
                 get_correct_data(self.business, 'territorial_location'),
@@ -303,9 +343,10 @@ class ReportContextDataClass:
             'type_tax_system':
                 get_correct_data(self.business, 'type_tax_system'),
             # Примерное количество земли. кв.м.
-            'business_land_area': get_correct_data(indicator, 'land_area'),
-            # Примерное количество имущества, кв.м.
-            'business_property_area': get_correct_data(indicator, 'property_area'),
+            'business_land_area':
+                correct_float(get_correct_data(indicator, 'land_area')),
+            'business_property_area':
+                correct_float(get_correct_data(indicator, 'property_area')),
 
             # Стандартные слова. Для каждой страницы из отчета
             'page_1': TextForReport.PAGE_ONE,
@@ -318,126 +359,164 @@ class ReportContextDataClass:
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ВОЗМОЖНЫХ ЗАТРАТ НА ОСНОВЕ БД. ДАННЫЕ ЗАТРАТЫ
             # РАСЧИТыВАЮТСЯ НА ОСНОВЕ ДАННЫХ ИЗ БД.
             # Все затраты.
-            'all_possible_costs_bi': self.all_possible_costs_bi,
+            'all_possible_costs_bi':
+                correct_float(self.all_possible_costs_bi),
             # Все затраты на персонал.
-            'all_staff_costs_bi': self.all_staff_costs_bi,
+            'all_staff_costs_bi':
+                correct_float(self.all_staff_costs_bi),
             # Все затраты на землю и имущество.
-            'all_lp_lease_costs_bi': self.all_lp_lease_costs_bi,
+            'all_lp_tax_costs_bi':
+                correct_float(self.all_lp_tax_costs_bi),
             # Все затраты на оборудование.
-            'equipment_costs_bi': self.equipment_costs,
+            'equipment_costs_bi':
+                correct_float(self.equipment_costs),
             # Все затраты на налоги.
-            'all_tax_costs_bi': self.all_tax_costs_bi,
+            'all_tax_costs_bi':
+                correct_float(self.all_tax_costs_bi),
             # Все затраты на сервисы. Бух учет и т.д.
-            'all_services_costs_bi': self.all_services_costs_bi,
+            'all_services_costs_bi':
+                correct_float(self.all_services_costs_bi),
 
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ВОЗМОЖНЫХ ЗАТРАТ НА ОСНОВЕ МАТЕМАТИКИ.
             # ПРСОТО СЛОЖЕНИЕ, ВЫЧИТАНИЕ, УМНОЖЕНИЕ
             # Все затраты.
-            'all_possible_costs_math': self.all_possible_costs_math,
+            'all_possible_costs_math':
+                correct_float(self.all_possible_costs_math),
             # Все затраты на персонал.
-            'all_staff_costs_math': self.all_staff_costs_math,
+            'all_staff_costs_math':
+                correct_float(self.all_staff_costs_math),
             # Все затраты на землю и имущество.
-            'all_lp_lease_costs_math': self.all_lp_lease_costs_math,
+            'all_lp_tax_costs_math':
+                correct_float(self.all_lp_tax_costs_math),
             # Все затраты на оборудование.
-            'equipment_costs_math': self.equipment_costs,
+            'equipment_costs_math':
+                correct_float(self.equipment_costs),
             # Все затраты на налоги.
-            'all_tax_costs_math': self.all_tax_costs_math,
+            'all_tax_costs_math':
+                correct_float(self.all_tax_costs_math),
             # Все затраты на сервисы. Бух учет и т.д.
-            'all_services_costs_math': self.all_services_costs_math,
+            'all_services_costs_math':
+                correct_float(self.all_services_costs_math),
 
             # 4 Страница. Анализ расходов на персонал.
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ЗАТРАТ НА ПЕРСОНАЛ НА ОСНОВЕ БД.
             # Затраты на зп за год.
-            'avg_salary_of_staff_bi': self.avg_salary_of_staff_bi,
+            'avg_salary_of_staff_bi':
+                correct_float(self.avg_salary_of_staff_bi),
             # Затраты на НДФЛ.
-            'avg_personal_income_tax_bi': self.avg_personal_income_tax_bi,
+            'avg_personal_income_tax_bi':
+                correct_float(self.avg_personal_income_tax_bi),
             # Затраты на отчисления по ПФР.
             'avg_staff_pension_contributions_costs_bi':
-                self.avg_staff_pension_contributions_costs_bi,
+                correct_float(self.avg_staff_pension_contributions_costs_bi),
             # Затраты на отчисления по ОМС.
             'avg_staff_medical_contributions_costs_bi':
-                self.avg_staff_medical_contributions_costs_bi,
+                correct_float(self.avg_staff_medical_contributions_costs_bi),
             # Затраты на отчисления по нетрудоспособности.
             'avg_staff_disability_contributions_costs_bi':
-                self.avg_staff_disability_contributions_costs_bi,
+                correct_float(self.avg_staff_disability_contributions_costs_bi),
 
             # ИТОГОВЫЕ ЗНАЧЕНИЯ ЗАТРАТ НА ПЕРСОНАЛ НА ОСНОВЕ МАТЕМАТИКИ.
             # Затраты на зп за год.
-            'avg_salary_of_staff_math': self.avg_salary_of_staff_math,
+            'avg_salary_of_staff_math':
+                correct_float(self.avg_salary_of_staff_math),
             # Затраты на НДФЛ.
-            'avg_personal_income_tax_math': self.avg_personal_income_tax_math,
+            'avg_personal_income_tax_math':
+                correct_float(self.avg_personal_income_tax_math),
             # Затраты на отчисления по ПФР.
             'avg_staff_pension_contributions_costs_math':
-                self.avg_staff_pension_contributions_costs_math,
+                correct_float(self.avg_staff_pension_contributions_costs_math),
             # Затраты на отчисления по ОМС.
             'avg_staff_medical_contributions_costs_math':
-                self.avg_staff_medical_contributions_costs_math,
+                correct_float(self.avg_staff_medical_contributions_costs_math),
             # Затраты на отчисления по нетрудоспособности.
             'avg_staff_disability_contributions_costs_math':
-                self.avg_staff_disability_contributions_costs_math,
+                correct_float(
+                    self.avg_staff_disability_contributions_costs_math),
 
             # 5 Страница. Сравнение цен имущества в аренду и в покупку.
             # Диапазон площади.
             # Диапазон площади имущества кв.м.
-            'property_area': self.property_area_math,
+            'property_area': correct_float(self.property_area_math),
             # Диапазон площади земли кв.м.
-            'land_area': self.avg_land_area_math,
+            'land_area': correct_float(self.avg_land_area_math),
 
             # Стоимость кв.м. аренды имущества.
-            'avg_property_lease_value': self.avg_property_lease_value,
+            'avg_property_lease_value':
+                correct_float(self.avg_property_lease_value),
             # Общая стоимость по аренде.
-            'avg_property_lease_costs': self.avg_property_lease_costs,
+            'avg_property_lease_costs':
+                correct_float(self.avg_property_lease_costs),
             # Общие расходы по аренде имущества.
-            'all_property_lease_costs': (
-                self.avg_property_lease_value *
-                self.property_area_math
-            ),
+            'all_property_lease_costs':
+                correct_float(
+                    self.avg_property_lease_value * self.property_area_math),
             # Стоимость кв.м. покупки.
-            'avg_property_purchase_value': self.avg_property_purchase_value,
+            'avg_property_purchase_value':
+                correct_float(self.avg_property_purchase_value),
             # Общая стоимость по покупке.
-            'avg_property_purchase_costs': self.avg_property_purchase_costs,
+            'avg_property_purchase_costs':
+                correct_float(self.avg_property_purchase_costs),
             # Налог на недвижимость.
-            'avg_property_tax': self.avg_property_tax_math,
+            'avg_property_tax':
+                correct_float(self.avg_property_tax_math)
+                if self.type_tax_system != TypeTaxSystem.PATENT
+                else 'Налог по данной системе налогооблажения не уплачивается',
             # Общие расходы по покупке имущества.
-            'all_property_purchase_costs': (
-                self.avg_property_purchase_value *
-                self.property_area_math +
-                self.avg_property_tax_math
-            ),
+            'all_property_purchase_costs':
+                correct_float(
+                    (
+                        self.avg_property_purchase_value *
+                        self.property_area_math +
+                        self.avg_property_tax_math
+                    ),
+                ),
 
             # Стоимость кв.м. аренды земли.
-            'avg_land_lease_value': self.avg_land_lease_value,
+            'avg_land_lease_value':
+                correct_float(self.avg_land_lease_value),
             # Общая стоимость по аренде.
-            'avg_land_lease_costs': self.avg_land_lease_costs,
+            'avg_land_lease_costs':
+                correct_float(self.avg_land_lease_costs),
             # Общие расходы по аренде земли.
-            'all_land_lease_costs': (
-                self.avg_land_lease_value *
-                self.avg_land_area_math
-            ),
+            'all_land_lease_costs':
+                correct_float(
+                    self.avg_land_lease_value * self.avg_land_area_math),
 
             # Стоимость кв.м. покупки земли.
-            'avg_land_purchase_value': self.avg_land_purchase_value,
+            'avg_land_purchase_value':
+                correct_float(self.avg_land_purchase_value),
             # Общая стоимость по покупке.
-            'avg_land_purchase_costs': self.avg_land_purchase_costs,
+            'avg_land_purchase_costs':
+                correct_float(self.avg_land_purchase_costs),
             # Налог на землю.
-            'avg_land_tax': self.avg_land_tax_math,
+            'avg_land_tax':
+                correct_float(self.avg_land_tax_math),
             # Общие расходы по покупке земли.
-            'all_land_purchase_costs': (
-                self.avg_land_purchase_value *
-                self.avg_land_area_math +
-                self.avg_land_tax_math
-            ),
+            'all_land_purchase_costs':
+                correct_float(
+                    (
+                        self.avg_land_purchase_value *
+                        self.avg_land_area_math +
+                        self.avg_land_tax_math
+                    ),
+                ),
 
             # 6 Страница. Возможные неучитываемые расходы.
             # Другие расходы.
-            'others_costs': (
-                self.others_costs_str +
-                '\n' +
-                f'Общие расходы составили: {self.others_costs} тыс. руб.'
-            ),
+            'others_costs':
+                (
+                    self.others_costs_str +
+                    '\r\n' +
+                    f'Общие расходы составили: {self.others_costs} тыс. руб.'
+                ),
             # Информация по оборудованию.
             'equipments': self.data_by_equipments_costs,
 
             # 7 Страница. Предложения по бизнесу (исходя из сферы).
             'offers_and_wishes': '',
+
+            'avg_other_taxes_bi':
+                correct_float(self.avg_other_taxes_bi),
+            'avg_other_taxes_math ': 'Нет данных',
         }

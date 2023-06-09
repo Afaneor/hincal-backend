@@ -46,7 +46,7 @@ class Archive(AbstractBaseModel):
     )
     personal_income_rate = models.FloatField(
         _('Размер НДФЛ'),
-        default=0.013,
+        default=0.13,
     )
     pension_contributions_rate = models.FloatField(
         _('Размер ставки для пенсионных отчислений'),
@@ -60,12 +60,12 @@ class Archive(AbstractBaseModel):
         _('Размер ставки для по нетрудоспособности'),
         default=0.029,
     )
-    lower_tax_margin_error = models.FloatField(
-        _('Нижний уровень погрешности для поиска записей по налогам'),
+    lower_margin_error = models.FloatField(
+        _('Нижний уровень погрешности для поиска записей'),
         default=0.85,
     )
-    upper_tax_margin_error = models.FloatField(
-        _('Верхний уровень погрешности для поиска записей по налогам'),
+    upper_margin_error = models.FloatField(
+        _('Верхний уровень погрешности для поиска записей'),
         default=1.15,
     )
     cost_accounting = models.JSONField(

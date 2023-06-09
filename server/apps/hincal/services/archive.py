@@ -124,7 +124,6 @@ class CostAccounting:
                 'upper': 25,
             },
         },
-
     }
 
 

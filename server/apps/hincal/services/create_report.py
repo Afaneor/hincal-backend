@@ -9,9 +9,9 @@ from server.apps.hincal.api.serializers import (
 )
 from server.apps.hincal.models import (
     Archive,
+    Business,
     BusinessIndicator,
     Equipment,
-    Business,
     Report,
 )
 from server.apps.hincal.tasks import create_chat_gpt
@@ -25,18 +25,12 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
     _archive: Archive = None
 
-    # Верхний и нижний уровни погрешности. Уменьшаем или увеличиваем
-    # переданные показатели.
-    LOWER_MARGIN_ERROR = 0.85
-    UPPER_MARGIN_ERROR = 1.15
     # Количеством месяцев в году, необходимо для некоторых расчетов
     MONTH = 12
 
     # Переменные, которые будут получены в ходе расчетов:
     # Среднее количество работников.
     avg_number_of_staff: float = 0.0
-    # Средний размер заработной платы по отраслям.
-    avg_salary_of_staff: float = 0.0
     # Общий фонд заработной платы всех сотрудников.
     all_salary: float = 0.0
     # Средний размер площади земельного участка.
@@ -97,7 +91,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                     'report_id': self.report.id,
                 },
             )
-        except Exception:
+        except Exception:  # noqa: S110
             pass  # noqa: WPS420
 
     @property
@@ -111,9 +105,15 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
     def create_tags(self) -> None:
         """Прикрепление тегов к отчету."""
+        if self.territorial_locations:
+            territorial_location = self.territorial_locations[0].slug,
+        else:
+            territorial_location = 'Общая информация'
+
         self.report.tags.add(
             self.sector.name,
             *self.sector.tags.values_list('name', flat=True),
+            territorial_location,
         )
 
         self.report.save()
@@ -149,8 +149,8 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
         if from_staff and to_staff:
             self.avg_number_of_staff = (from_staff + to_staff) / 2
             return models.Q(
-                models.Q(average_number_of_staff__gte=self.data.get('from_staff', 1) * self.LOWER_MARGIN_ERROR) &
-                models.Q(average_number_of_staff__lte=self.data.get('to_staff',1) * self.UPPER_MARGIN_ERROR)
+                models.Q(average_number_of_staff__gte=self.data.get('from_staff', 1) * self.archive.lower_margin_error) &
+                models.Q(average_number_of_staff__lte=self.data.get('to_staff', 1) * self.archive.upper_margin_error),
             )
         return models.Q()
 
@@ -203,8 +203,8 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
             )
 
             return models.Q(
-                models.Q(land_tax__gte=self.avg_land_tax * self.archive.lower_tax_margin_error) &
-                models.Q(land_tax__lte=self.avg_land_tax * self.archive.upper_tax_margin_error),
+                models.Q(land_tax__gte=self.avg_land_tax * self.archive.lower_margin_error) &
+                models.Q(land_tax__lte=self.avg_land_tax * self.archive.upper_margin_error),
             )
 
         return models.Q()
@@ -221,7 +221,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 name = init_property.get('name')
                 self.property_area += cost
                 self.type_capital_construction += (
-                    f'{getattr(PropertyType, name.upper(), name).label}: {name} кв. м\n'
+                    f'{getattr(PropertyType, name.upper(), name).label}: {name} кв. м\r\n'
                 )
             # Средняя кадастровая стоимость на имущество.
             self.avg_property_cadastral_value = self.get_value_by_territorial_locations(
@@ -240,8 +240,8 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
             )
 
             return models.Q(
-                models.Q(property_tax__gte=self.avg_property_tax_math * self.archive.lower_tax_margin_error) &
-                models.Q(property_tax__lte=self.avg_property_tax_math * self.archive.upper_tax_margin_error),
+                models.Q(property_tax__gte=self.avg_property_tax_math * self.archive.lower_margin_error) &
+                models.Q(property_tax__lte=self.avg_property_tax_math * self.archive.upper_margin_error),
             )
 
         return models.Q()
@@ -283,17 +283,18 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 ),
             )
         ):
-            return (
-                business_indicators,
-                [
-                    'sector',
-                    'sub_sector',
-                    'staff',
-                    'land_area',
-                    'property_area',
-                    'location',
-                ],
-            )
+            if business_indicators.count() >= 5:
+                return (
+                    business_indicators,
+                    [
+                        'sector',
+                        'sub_sector',
+                        'staff',
+                        'land_area',
+                        'property_area',
+                        'location',
+                    ],
+                )
 
         if (
             business_indicators := BusinessIndicator.objects.filter(
@@ -307,10 +308,17 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 ),
             )
         ):
-            return (
-                business_indicators,
-                ['sector', 'sub_sector', 'staff', 'land_area', 'property_area'],
-            )
+            if business_indicators.count() >= 5:
+                return (
+                    business_indicators,
+                    [
+                        'sector',
+                        'sub_sector',
+                        'staff',
+                        'land_area',
+                        'property_area',
+                    ],
+                )
 
         if (
             business_indicators := BusinessIndicator.objects.filter(
@@ -323,10 +331,16 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 ),
             )
         ):
-            return (
-                business_indicators,
-                ['sector', 'sub_sector', 'staff', 'land_area'],
-            )
+            if business_indicators.count() >= 5:
+                return (
+                    business_indicators,
+                    [
+                        'sector',
+                        'sub_sector',
+                        'staff',
+                        'land_area',
+                    ],
+                )
 
         if (
             business_indicators := BusinessIndicator.objects.filter(
@@ -338,10 +352,15 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 ),
             )
         ):
-            return (
-                business_indicators,
-                ['sector', 'sub_sector', 'staff'],
-            )
+            if business_indicators.count() >= 5:
+                return (
+                    business_indicators,
+                    [
+                        'sector',
+                        'sub_sector',
+                        'staff',
+                    ],
+                )
 
         if (
             business_indicators := BusinessIndicator.objects.filter(
@@ -352,10 +371,14 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 ),
             )
         ):
-            return (
-                business_indicators,
-                ['sector', 'sub_sector'],
-            )
+            if business_indicators.count() >= 5:
+                return (
+                    business_indicators,
+                    [
+                        'sector',
+                        'sub_sector',
+                    ],
+                )
 
         if business_indicators := BusinessIndicator.objects.filter(
             models.Q(
@@ -454,19 +477,19 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
         for en_index, equipment in enumerate(equipments):
             if en_index < 5:
-                self.data_by_equipments_costs += f'{equipment.name}: {equipment.cost} тыс. руб.\n'
+                self.data_by_equipments_costs += f'{equipment.name}: {equipment.cost} тыс. руб.\r\n'
             self.equipments += equipment.cost
-        self.data_by_equipments_costs += f'Общая сумма оборудования: {self.equipments} тыс. руб.\n\n'
+        self.data_by_equipments_costs += f'Общая сумма оборудования: {self.equipments} тыс. руб.\r\n\r\n'
 
         if flag == 'auto':
             self.data_by_equipments_costs += (
                 'Выше приведен список примерного оборудования и его ' +
-                'стоимости для вашей отрасли, согласно имеющейся информации\n\n'
+                'стоимости для вашей отрасли, согласно имеющейся информации\r\n\r\n'
             )
 
         return self.equipments
 
-    def formation_report(self):
+    def formation_report(self):  # noqa: WPS231
         """Формирование контекста."""
         business_indicators, filters_key = self.get_business_indicators()
         avg_business_indicator = business_indicators.aggregate(
@@ -506,16 +529,19 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
             all_salary=self.get_all_salary(),
             avg_personal_income_tax_math=self.get_avg_personal_income_tax(),
 
+            # Налоги по земле.
             avg_land_area_math=self.avg_land_area,
             avg_land_cadastral_value_math=self.avg_land_cadastral_value,
             avg_land_tax_math=self.avg_land_tax,
 
+            # Налоги по имуществу.
             property_area_math=self.property_area,
             avg_property_cadastral_value_math=self.avg_property_cadastral_value,
             avg_property_tax_math=self.avg_property_tax_math,
             avg_capital_construction_costs_math=self.avg_capital_construction_costs_math,
             type_capital_construction=self.type_capital_construction,
 
+            # Расходы при патентной системе.
             avg_patent_tax_math=self.avg_patent_tax,
             avg_possible_income_math=self.avg_possible_income,
 
@@ -526,6 +552,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
             registration_costs=self.get_registration_costs(),
             others_costs=self.get_others_costs(),
             others_costs_str=self.others_costs_str,
+            type_tax_system=self.data.get('type_tax_system'),
 
             archive=self.archive,
         )
@@ -601,5 +628,5 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
                 name = other.get('name')
                 cost = other.get('cost')
                 others_costs += cost
-                self.others_costs_str += f'{name}: {cost} тыс. руб\n'
+                self.others_costs_str += f'{name}: {cost} тыс. руб.\r\n'
         return others_costs

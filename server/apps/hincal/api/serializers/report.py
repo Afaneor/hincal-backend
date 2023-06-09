@@ -144,7 +144,10 @@ class CreateReportSerializer(serializers.Serializer):
         """Валидация типа системы налогооблажения."""
         if type_tax_system not in TypeTaxSystem.values:
             raise ValidationError(
-                {'type_tax_system': [_('Некорректная система налогооблажения')]},
+                {
+                    'type_tax_system':
+                        [_('Некорректная система налогооблажения')],
+                },
             )
         return type_tax_system
 
@@ -157,7 +160,15 @@ class CreateReportSerializer(serializers.Serializer):
         type_tax_system = attrs.get('type_tax_system')
         if type_business == TypeBusiness.LEGAL and type_tax_system == TypeTaxSystem.PATENT:
             raise ValidationError(
-                {'type_tax_system': [_('У юридического лица нет патентной системы налогооблажения')]},
+                {
+                    'type_tax_system':
+                        [
+                            _(
+                                'У юридического лица нет патентной ' +
+                                'системы налогооблажения',
+                            ),
+                        ],
+                },
             )
         # Проверка диапазона по сотрудникам.
         attrs = check_range(

@@ -2,7 +2,6 @@
 
 from django.conf import settings
 from django.db import migrations, models
-import django.db.models.deletion
 import taggit.managers
 
 
@@ -22,7 +21,7 @@ class Migration(migrations.Migration):
             name='user',
             field=models.ForeignKey(
                 null=True,
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=models.deletion.CASCADE,
                 related_name='reports',
                 to=settings.AUTH_USER_MODEL,
                 verbose_name='Пользователь',
@@ -44,7 +43,7 @@ class Migration(migrations.Migration):
             name='business',
             field=models.ForeignKey(
                 null=True,
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=models.deletion.CASCADE,
                 related_name='business_indicators',
                 to='hincal.business',
                 verbose_name='Бизнес',
@@ -54,7 +53,7 @@ class Migration(migrations.Migration):
             model_name='business',
             name='sector',
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=models.deletion.CASCADE,
                 related_name='businesses',
                 to='hincal.sector',
                 verbose_name='Отрасль хозяйственной деятельности',
@@ -64,7 +63,7 @@ class Migration(migrations.Migration):
             model_name='business',
             name='sub_sector',
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=models.deletion.CASCADE,
                 related_name='business',
                 to='hincal.subsector',
                 verbose_name='Подотрасль хозяйственной деятельности',
@@ -76,7 +75,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 blank=True,
                 null=True,
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=models.deletion.CASCADE,
                 related_name='businesses',
                 to='hincal.territoriallocation',
                 verbose_name='Территориальное положение бизнеса',
@@ -87,7 +86,7 @@ class Migration(migrations.Migration):
             name='user',
             field=models.ForeignKey(
                 null=True,
-                on_delete=django.db.models.deletion.CASCADE,
+                on_delete=models.deletion.CASCADE,
                 related_name='businesses',
                 to=settings.AUTH_USER_MODEL,
                 verbose_name='Пользователь',
@@ -104,14 +103,14 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name='businessindicator',
             constraint=models.UniqueConstraint(
-                fields=('year', 'business'), name='unique_year_for_business'
+                fields=('year', 'business'), name='unique_year_for_business',
             ),
         ),
         migrations.AddConstraint(
             model_name='business',
             constraint=models.CheckConstraint(
                 check=models.Q(
-                    ('type__in', ['legal', 'individual', 'physical', ''])
+                    ('type__in', ['legal', 'individual', 'physical', '']),
                 ),
                 name='type_valid',
             ),
@@ -120,7 +119,7 @@ class Migration(migrations.Migration):
             model_name='business',
             constraint=models.CheckConstraint(
                 check=models.Q(
-                    ('type_tax_system__in', ['osn', 'ysn', 'patent'])
+                    ('type_tax_system__in', ['osn', 'ysn', 'patent']),
                 ),
                 name='type_tax_system_valid',
             ),

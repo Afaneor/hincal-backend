@@ -349,7 +349,6 @@
     full_name: Восточный
     slug: wao
     avg_land_cadastral_value: 15.49236
-    avg_property_cadastral_value: 15.49236
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -359,7 +358,6 @@
     full_name: Западный
     slug: zao
     avg_land_cadastral_value: 11.70322
-    avg_property_cadastral_value: 11.70322
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -369,7 +367,6 @@
     full_name: Зеленоградский
     slug: zelao
     avg_land_cadastral_value: 4.1115
-    avg_property_cadastral_value: 4.1115
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -379,7 +376,6 @@
     full_name: Новомосковский
     slug: nao
     avg_land_cadastral_value: 5.33394
-    avg_property_cadastral_value: 5.33394
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -389,7 +385,6 @@
     full_name: Северный
     slug: sao
     avg_land_cadastral_value: 20.53299
-    avg_property_cadastral_value: 20.53299
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -399,7 +394,6 @@
     full_name: Северо-Восточный
     slug: swao
     avg_land_cadastral_value: 19.48533
-    avg_property_cadastral_value: 19.48533
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -409,7 +403,6 @@
     full_name: Северо-Западный
     slug: szao
     avg_land_cadastral_value: 19.96159
-    avg_property_cadastral_value: 19.96159
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -418,8 +411,7 @@
     shot_name: ТАО
     full_name: Троицкий
     slug: tao
-    avg_land_cadastral_value: 28.9051
-    avg_property_cadastral_value: 28.9051
+    avg_land_cadastral_value: 2.89051
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -429,7 +421,6 @@
     full_name: Центральный
     slug: cao
     avg_land_cadastral_value: 63.27479
-    avg_property_cadastral_value: 63.27479
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -439,7 +430,6 @@
     full_name: Южный
     slug: yuao
     avg_land_cadastral_value: 13.51037
-    avg_property_cadastral_value: 13.51037
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -449,7 +439,6 @@
     full_name: Юго-Восточный
     slug: yuwao
     avg_land_cadastral_value: 14.08697
-    avg_property_cadastral_value: 14.08697
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -459,7 +448,6 @@
     full_name: Юго-Западный
     slug: yuzao
     avg_land_cadastral_value: 16.4231
-    avg_property_cadastral_value: 16.4231
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.territoriallocation
@@ -469,7 +457,6 @@
     full_name: Другое
     slug: other
     avg_land_cadastral_value: 17.23389
-    avg_property_cadastral_value: 17.23389
     created_at: 2023-01-01 10:00:00
     updated_at: 2023-01-01 10:00:00
 - model: hincal.equipment

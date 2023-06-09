@@ -8,10 +8,10 @@ def inn_sum_helper(internal_value: str) -> str:
     """Вспомогательная функция для проверки ИНН."""
     index = (3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8)
     pairs = zip(
-        index[11 - len(internal_value):],
+        index[11 - len(internal_value):],  # noqa: WPS432
         [int(number) for number in internal_value],
     )
-    return str(sum([k * v for k, v in pairs]) % 11 % 10)
+    return str(sum([k * v for k, v in pairs]) % 11 % 10)  # noqa: WPS432, WPS111, WPS221, E501
 
 
 def inn_validator(value_to_check: str) -> None:

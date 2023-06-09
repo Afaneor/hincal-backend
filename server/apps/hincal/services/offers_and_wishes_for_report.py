@@ -33,8 +33,8 @@ def add_offers_and_wishes_in_context(report: Report) -> None:
             f'Партнерское предложение № {en_index + 1}:\a' +
             f"Название: {offer.title}\a" +
             f"Процентная ставка: {offer.interest_rate}\a" +
-            f"Срок займа{offer.loan_term}\a" +
-            f"amount{offer.amount}\a" +
+            f"Срок займа: {offer.loan_term}\a" +
+            f"Сумма займа: {offer.amount}\a" +
             f"Подробнее: {offer.site}\a"
         )
 

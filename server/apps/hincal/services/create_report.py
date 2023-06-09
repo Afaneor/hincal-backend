@@ -16,7 +16,10 @@ from server.apps.hincal.models import (
 )
 from server.apps.hincal.tasks import create_chat_gpt
 from server.apps.hincal.services.enums import PropertyType, TypeBusiness
-from server.apps.hincal.services.report_context import ReportContextDataClass
+from server.apps.hincal.services.report_context import (
+    ReportContextDataClass,
+    correct_float,
+)
 from server.apps.user.models import User
 
 
@@ -84,6 +87,8 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
             user__isnull=False,
         ).first()
         self.report = Report.objects.create(user=self.user)
+        self.type_business = self.data.get('type_business') if self.data.get('type_business') else 'other'
+
         try:
             create_chat_gpt.apply_async(
                 kwargs={
@@ -143,14 +148,14 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
         Если персонала не передан, то ищем с любыми значениями.
         """
-        from_staff = self.data.get('from_staff', 1)
-        to_staff = self.data.get('to_staff', from_staff)
+        from_staff = self.data.get('from_staff') if self.data.get('from_staff') else 1
+        to_staff = self.data.get('to_staff') if self.data.get('to_staff') else 1
 
         if from_staff and to_staff:
             self.avg_number_of_staff = (from_staff + to_staff) / 2
             return models.Q(
-                models.Q(average_number_of_staff__gte=self.data.get('from_staff', 1) * self.archive.lower_margin_error) &
-                models.Q(average_number_of_staff__lte=self.data.get('to_staff', 1) * self.archive.upper_margin_error),
+                models.Q(average_number_of_staff__gte=from_staff * self.archive.lower_margin_error) &
+                models.Q(average_number_of_staff__lte=to_staff * self.archive.upper_margin_error),
             )
         return models.Q()
 
@@ -183,8 +188,8 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
 
     def get_filter_with_correct_land_area(self) -> models.Q:
         """Получение фильтра с корректной площадью земельного участка."""
-        from_land_area = self.data.get('from_land_area', None)
-        to_land_area = self.data.get('to_land_area', from_land_area)
+        from_land_area = self.data.get('from_land_area') if self.data.get('from_land_area') else None
+        to_land_area = self.data.get('to_land_area') if self.data.get('from_land_area') else from_land_area
         # Если не передан размер земли, то ищем по всем доступным. Поскольку
         # данных по земли нет, то переводим размер земли в размер налога
         # на землю.
@@ -420,7 +425,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
         """Получить расходны на регистрации."""
         if self.data.get('need_registration'):
             self.avg_registration_costs = self.archive.registration_costs.get(
-                self.data.get('type_business', 'other'),
+                self.type_business,
                 0.0,
             )
 
@@ -432,12 +437,12 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
         """Получить расходны на ведение бухгалтерского учета."""
         if self.data.get('need_accounting'):
             accounting_costs = self.archive.cost_accounting.get(
-                self.data.get('type_business', 'other'),
+                self.type_business,
                 {},
             )
             # Получаем словарь с верхней и нижней границей.
             accounting_costs_range = accounting_costs.get(
-                self.data.get('type_tax_system', 'other'),
+                self.type_business,
             )
             # Получаем средний размер расходов на ведение бухгалтерского учета.
             self.avg_accounting_costs = (
@@ -455,7 +460,7 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
         """Получение стоимости оборудования."""
         equipments = Equipment.objects.filter(
             id__in=[
-                equipment.id for equipment in self.data.get('equipments', [])
+                equipment.id for equipment in self.data.get('equipments')
             ],
         )
 
@@ -479,9 +484,15 @@ class ReportWithContext(object):  # noqa: WPS214, WPS230
             if en_index < 5:
                 self.data_by_equipments_costs += f'{equipment.name}: {equipment.cost} тыс. руб.\a'
             self.equipments += equipment.cost
-        self.data_by_equipments_costs += f'Общая сумма оборудования: {self.equipments} тыс. руб.\a'
+        if self.equipments:
+            self.data_by_equipments_costs += (
+                'Общая сумма оборудования: ' +
+                f'{correct_float(self.equipments)} тыс. руб.\a'
+            )
+        else:
+            self.data_by_equipments_costs += 'Нет данных\a'
 
-        if flag == 'auto':
+        if flag == 'auto' and equipments:
             self.data_by_equipments_costs += (
                 'Выше приведен список примерного оборудования и его ' +
                 'стоимости для вашей отрасли, согласно имеющейся информации\a'

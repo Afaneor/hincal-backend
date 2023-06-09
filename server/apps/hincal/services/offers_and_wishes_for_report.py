@@ -12,12 +12,13 @@ def add_offers_and_wishes_in_context(report: Report) -> None:
     areas = ''
     supports = ''
     offers = ''
+    offers_and_wishes= ''
     for en_index, area in enumerate(Area.objects.filter(tags__in=report.tags.all())[0:2]):  # noqa: E501
         areas += (
             f'Площадка № {en_index + 1}:\a' +
             f"Название: {area.title}\a" +
             f"Адрес: {area.address}\a" +
-            f"Подробнее: {area.site}\a"
+            f"Подробнее: {area.site}\a\a"
         )
 
     for en_index, support in enumerate(Support.objects.filter(tags__in=report.tags.all(), is_actual=True)[0:2]):  # noqa: E501
@@ -25,7 +26,7 @@ def add_offers_and_wishes_in_context(report: Report) -> None:
             f'Мера поддержки № {en_index + 1}:\a' +
             f"Название: {support.title}\a" +
             f"Сумма субсидий: {support.amount}\a" +
-            f"Подробнее: {support.site}\a"
+            f"Подробнее: {support.site}\a\a"
         )
 
     for en_index, offer in enumerate(Offer.objects.filter(tags__in=report.tags.all())[0:2]):  # noqa: E501
@@ -35,20 +36,25 @@ def add_offers_and_wishes_in_context(report: Report) -> None:
             f"Процентная ставка: {offer.interest_rate}\a" +
             f"Срок займа: {offer.loan_term}\a" +
             f"Сумма займа: {offer.amount}\a" +
-            f"Подробнее: {offer.site}\a"
+            f"Подробнее: {offer.site}\a\a"
         )
-
+    if areas:
+        offers_and_wishes += (
+            'Площадки для создания промышленного предприятия:\a' +
+            areas + '\a\a'
+        )
+    if supports:
+        offers_and_wishes += (
+            'Меры по поддержке промышленных предприятий:\a' +
+            supports + '\a\a'
+        )
+    if offers:
+        offers_and_wishes += (
+            'Партнерские предложения по инвестированию:\a' +
+            offers + '\a\a'
+        )
     report_context.get('context_for_file').update(
-        {
-            'offers_and_wishes': (
-                'Площадки для создания промышленного предприятия:\a' +
-                areas + '\a\a' +
-                'Меры по поддержке промышленных предприятий:\a' +
-                supports + '\a\a' +
-                'Партнерские предложения по инвестированию:\a' +
-                offers + '\a\a'
-            ),
-        },
+        {'offers_and_wishes': offers_and_wishes},
     )
 
     report.context = report_context
